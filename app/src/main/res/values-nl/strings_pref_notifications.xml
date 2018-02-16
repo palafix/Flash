@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name = "notification_frequency">Meldings frequentie</string>
+    <string name = "no_notifications">Geen meldingen</string>
+    <string name = "notification_keywords">Trefwoorden</string>
+    <string name = "notification_keywords_desc">Waarschuwt niet wanneer Meldingen een van deze Teksten bevat.</string>
+    <string name = "add_keyword">Trefwoord toevoegen</string>
+    <string name = "hint_keyword">Type een trefwoord en druk op +</string>
+    <string name = "empty_keyword">Leeg trefwoord</string>
+    <string name = "notification_general"> Schakel algemene meldingen in </string>
+    <string name = "notification_general_desc"> Ontvang algemene meldingen voor uw huidige account. </string>
+    <string name = "notification_general_all_accounts">Melden van alle accounts</string>
+    <string name = "notification_general_all_accounts_desc">Ontvang meldingen voor elk account dat is ingelogd. Als u dit uitschakelt, worden alleen meldingen van het momenteel geselecteerde account opgehaald.</string>
+    <string name = "notification_messages">Berichtmeldingen inschakelen</string>
+    <string name = "notification_messages_desc">Ontvang meldingen voor uw huidige account</string>
+    <string name = "notification_messages_all_accounts">Meld berichten van alle accounts</string>
+    <string name = "notification_messages_all_accounts_desc">Ontvang direct meldingen van alle accounts</string>
+    <string name = "notification_fetch_now">Meldingen nu ophalen</string>
+    <string name = "notification_fetch_now_desc">Activeer de Meldingen-ophaler één keer.</string>
+    <string name = "notification_fetch_success">Meldingen ophalen …</string>
+    <string name = "notification_fetch_fail">Kon Meldingen niet ophalen</string>
+    <string name = "notification_sound">​​Meldings geluid</string>
+
+    <string name = "notification_ringtone">Meldings beltoon</string>
+    <string name = "message_ringtone">Bericht beltoon</string>
+    <string name = "select_ringtone">Selecteer beltoon</string>
+
+    <string name = "notification_vibrate">Melding trillen</string>
+    <string name = "notification_lights">Meldings lampjes</string>
+
+</resources>

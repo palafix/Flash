@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name = "share_link">Link delen</string>
+     <string name = "debug_link">Debug Link</string>
+     <string name = "debug_link_desc">Als een link niet goed wordt geladen, kunt u mij een e-mail sturen zodat ik kan helpen om deze te debuggen. Als u op OK klikt, opent u een e-mailverzoek</string>
+     <string name = "open_link">Link openen</string>
+     <string name = "copy_link">Link kopiëren</string>
+     <string name = "copy_text">Tekst kopiëren</string>
+    
+</resources>

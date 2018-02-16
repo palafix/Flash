@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/overlay_main_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".activities.WebOverlayActivity">
+
+    <RelativeLayout
+        android:id="@+id/mainContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <include
+            layout="@layout/view_overlay_toolbar" />
+
+        <include
+            layout="@layout/view_content_web"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize" />
+
+    </RelativeLayout>
+
+    <FrameLayout
+
+        android:id="@+id/fullscreenContainer"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
+
+    </FrameLayout>
+
+    <!--<nl.arnhem.flash.views.FlashRefreshView-->
+    <!--android:id="@+id/overlay_flash_refresh_view"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_marginTop="?attr/actionBarSize">-->
+
+    <!--<nl.arnhem.flash.views.FlashWebView-->
+    <!--android:id="@+id/overlay_flash_web_view"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent" />-->
+
+    <!--</nl.arnhem.flash.views.FlashRefreshView>-->
+
+</android.support.design.widget.CoordinatorLayout>

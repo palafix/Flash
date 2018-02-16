@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <string name = "null_url_overlay">Lege URL die aan overlay is gegeven; verlaten </string>
+     <string name = "bad_image_overlay">De url kon niet correct worden geladen. Wilt u het verzenden voor foutopsporing? </string>
+     <string name = "invalid_share_url">Ongeldige URL voor delen </string>
+     <string name = "invalid_share_url_desc">U hebt een tekstblok gedeeld dat geen URL is. De tekst is gekopieerd naar je klembord, dus je kunt het zelf handmatig delen. </string>
+     <string name = "no_download_manager">Geen downloadmanager </string>
+     <string name = "no_download_manager_desc">De downloadmanager is niet ingeschakeld. Wilt u dit inschakelen om downloads toe te staan? </string>
+</resources>

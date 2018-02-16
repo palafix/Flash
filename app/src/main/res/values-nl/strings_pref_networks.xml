@@ -1,0 +1,4 @@
+<resources>
+<string name = "network_media_on_metered">Schakel afbeeldingen op gemeten netwerk uit.</string>
+     <string name = "network_media_on_metered_desc">Als een gemeten netwerk wordt gedetecteerd, stopt Flash automatisch met het laden van alle afbeeldingen en video\'s.</string>
+</resources>

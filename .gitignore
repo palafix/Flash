@@ -1,0 +1,13 @@
+*.iml
+.gradle
+/priv.properties
+/local.properties
+/crowdin.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+*.min.css
+.sass-cache/
+/projectFilesBackup

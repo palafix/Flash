@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name = "fancy_animations">Mooie animaties</string>
+    <string name = "fancy_animations_desc">Webviews weergeven met behulp van rimpels en animate-overgangen</string>
+    <string name = "overlay_swipe">Overlays inschakelen</string>
+    <string name = "overlay_swipe_desc">Als u op de meeste koppelingen drukt, wordt deze in een nieuwe overlay geopend, zodat u gemakkelijk naar de oorspronkelijke pagina terug kunt vegen. Houd er rekening mee dat dit resulteert in iets langere belasting, omdat de hele pagina opnieuw wordt geladen.</string>
+    <string name = "overlay_full_screen_swipe">Overlay Volledig scherm Swipe to Dismiss</string>
+    <string name = "overlay_full_screen_swipe_desc">Veeg naar rechts vanaf een willekeurige plaats op het overlappende web om de browser te sluiten. Indien uitgeschakeld, zal alleen vegen vanaf de linkerrand het verplaatsen.</string>
+    <string name = "open_links_in_default">Koppelingen openen in de standaardtoepassing</string>
+    <string name = "open_links_in_default_desc">Open indien mogelijk koppelingen in de standaardapp in plaats van via de weboverlay</string>
+    <string name = "viewpager_swipe">Viewpager Swipe</string>
+    <string name = "viewpager_swipe_desc">Vegen tussen de pagina\'s in de hoofdweergave toestaan ​​om van tab te wisselen. Standaard wordt het vegen automatisch gestopt wanneer u lang op een item drukt, zoals de soortgelijke knop. Als u dit uitschakelt, wordt het vegen van pagina's helemaal voorkomen.</string>
+    <string name = "search_bar">Zoekbalk</string>
+    <string name = "search_bar_desc">Activeer de zoekbalk in plaats van een zoek-overlay</string>
+    <string name = "force_message_bottom">Forceer bericht onderaan</string>
+    <string name = "force_message_bottom_desc">Activeer een scrol naar de onderkant van de pagina wanneer u een berichtenthread laadt, in plaats van de pagina te laden zoals deze is.</string>
+    <string name="enable_pip">Schakel video speler in/uit</string>
+    <string name="enable_pip_desc">Schakel in voor video speler of uit voor facebook default</string>
+    <string name = "exit_confirmation">Bevestiging afsluiten</string>
+    <string name = "exit_confirmation_desc">Bevestigingsvenster weergeven voordat de app wordt afgesloten</string>
+    <string name = "analytics">Analytics</string>
+    <string name = "analytics_desc">Anonieme analyses inschakelen om de app te helpen verbeteren. Er wordt nooit persoonlijke informatie getoond.</string>
+
+</resources>

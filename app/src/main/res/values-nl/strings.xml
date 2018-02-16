@@ -1,0 +1,85 @@
+<resources>
+
+
+    <string name="google">Google</string>
+
+    <string name="more">Foto\'s &amp; meer </string>
+    <string name="trending">Trending</string>
+    <string name="faved">Favoriete</string>
+    <string name="favorites">Favorieten</string>
+    <string name="friends1">Vrienden</string>
+    <string name="albums">Albums + uploaden</string>
+    <string name="reminders">Evenementen, Herinneringen &amp; Verjaardagen</string>
+    <string name="savenotes">Opgeslagen &amp; Notities</string>
+
+    <string name="appversion">App Versie</string>
+
+    <string name="video_beta">Video instellingen kunnen niet werken</string>
+    <string name="video_settings">Video Instellingen</string>
+    <string name="pokes">Porren</string>
+
+    <string name="feed">Nieuwsoverzicht </string>
+    <string name="most_recent">Meest recent </string>
+    <string name="top_stories">Topverhalen </string>
+    <string name="profile">Profiel </string>
+
+    <string name="bookmarks">Bladwijzers </string>
+    <string name="add_bookmark">Bladwijzers toevoegen</string>
+    <string name="added">Heb (</string>
+    <string name="added_string">) in Favoriete geplaats.</string>
+    <string name="deleted">Favoriete verwijderen?</string>
+    <string name ="deleted_dia">Weet u zeker dat u (</string>
+    <string name ="deleted_dia_2">) wilt verwijderen van uw favorieten? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="refresh_bookmark">Bladwijzers vernieuwen</string>
+    <string name="bookmark_beta">(Beta)</string>
+
+    <string name="events">Evenementen </string>
+    <string name="friends">Vrienden </string>
+    <string name="messages">Berichten </string>
+    <string name="notifications">Meldingen </string>
+    <string name="activity_log">Activiteitenlogboek </string>
+    <string name="pages">Pagina\'s </string>
+    <string name="groups">Groepen </string>
+    <string name="saved">Opgeslagen </string>
+    <string name="birthdays">Verjaardagen </string>
+    <string name="chat">Chat </string>
+    <string name="photos">Foto\'s </string>
+    <string name="notes">Notitie </string>
+    <string name="on_this_day">Op deze dag </string>
+
+    <string name="loading_account">Alles klaar maken … </string>
+    <string name="welcome">Welkom %s</string>
+    <string name="select_facebook_account">Selecteer Facebook-account </string>
+    <string name="account_not_found">​​Huidige account staat niet in de database </string>
+
+    <string name="flash_requests">Flash verzoeken</string>
+    <string name="flash_notifications">Flash Meldingen </string>
+    <string name="requires_custom_theme">Aangepast thema vereist </string>
+
+    <string name="subject">Onderwerpen </string>
+    <string name="share">Delen </string>
+
+    <string name="web_overlay_swipe_hint">Veeg naar rechts om terug te gaan naar het vorige venster. </string>
+    <string name="profile_picture">Profielafbeelding </string>
+
+    <string name="new_message">Nieuw bericht </string>
+    <string name="no_text">Geen tekst </string>
+
+    <string name="show_all_results">Toon alle resultaten </string>
+
+    <string name="flash_description">Flash is een volledig thema, volledig functioneel alternatief voor de officiële Facebook-app,
+    helemaal opnieuw door Allan Wang/Frost-for-Facebook gemaakt en met trots open source. </string>
+
+    <string name="faq_title">Flash FAQ </string>
+
+    <string name="html_extraction_error">Er is een fout opgetreden in de html-extractie. </string>
+    <string name="html_extraction_cancelled">De aanvraag is geannuleerd. </string>
+    <string name="html_extraction_timeout">Het verzoek is verlopen. </string>
+    <string name="file_chooser_not_found">​​Bestandskiezer niet gevonden </string>
+
+    <string name="top_bar">TapBar Boven.</string>
+    <string name="bottom_bar">TapBar Beneden. </string>
+
+    <string name="tab_customizer_instructions">Sleep de bovenstaande pictogrammen en zet ze neer om ze aan de Navigatie Balk toe te voegen als er ruimte is.</string>
+
+</resources>

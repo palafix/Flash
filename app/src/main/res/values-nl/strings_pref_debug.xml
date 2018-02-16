@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name = "debug_toast_enabled">Foutopsporingsgedeelte is ingeschakeld! Ga terug naar de instellingen.</string>
+
+     <string name = "debug_disclaimer_info">Hoewel de meeste privécontent automatisch wordt verwijderd in het rapport, kan sommige gevoelige informatie nog steeds zichtbaar zijn.
+         \nRaadpleeg het foutopsporingsrapport voordat u het verzendt.
+         \n\nKlik op een van de onderstaande opties om een e-mailantwoord voor te bereiden met de webpagina-gegevens.
+    </string>
+
+     <string name = "debug_incomplete">Onvolledig rapport</string>
+
+    <string name = "debug_web">Foutopsporing van het web </string>
+    <string name = "debug_web_desc">Navigeer naar de pagina met een probleem en verzend de bronnen voor foutopsporing. </string>
+
+    <string name = "parsing_data">Parsing Data </string>
+
+    <string name = "debug_parsers">Parsers fout opsporen </string>
+    <string name = "debug_parsers_desc">Start een van de beschikbare parsers om de antwoordgegevens te debuggen </string>
+</resources>

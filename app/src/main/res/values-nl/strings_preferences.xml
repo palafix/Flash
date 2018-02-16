@@ -1,0 +1,35 @@
+<resources>
+<string name = "appearance">Uiterlijk</string>
+    <string name = "appearance_desc">Thema, Items om weer te geven, etc</string>
+
+    <string name = "notifications_desc">Frequentie, filters, beltonen, etc</string>
+
+    <string name = "newsfeed">Nieuwsoverzicht</string>
+    <string name = "newsfeed_desc">Definieer welke items in de nieuwsfeed verschijnen</string>
+
+    <string name = "behaviour">Gedrag</string>
+    <string name = "behaviour_desc">Definieer hoe de app in bepaalde instellingen reageert</string>
+
+    <string name = "network">Netwerk</string>
+    <string name = "network_desc">Definieer opties die van invloed zijn op gemeten netwerken</string>
+
+    <string name = "experimental">Experimenteel</string>
+    <string name = "experimental_desc">Vroegtijdige toegang tot mogelijk onstabiele functies inschakelen</string>
+
+    <string name = "get_pro">Krijg Flash Pro</string>
+    <string name = "get_pro_desc">Koop of herstel Pro en ontgrendel het volledige potentieel van Flash! Omvat adblockers, aangepaste thema\'s, volledige configuraties en nog veel meer!</string>
+
+    <string name = "get_update">Update Flash</string>
+    <string name = "get_update_desc">Klik hier om te controleren of er een update beschikbaar is.</string>
+
+    <string name = "about_flash">Over Flash voor Facebook</string>
+    <string name = "about_flash_desc">Versie, Dankbetuigingen en veelgestelde vragen</string>
+
+    <string name = "help_translate">Help Vertalen</string>
+    <string name = "help_translate_desc">Flash/Frost is vertaald door crowdin. Draag bij als u het in uw taal wilt!</string>
+
+    <string name = "debug_flash">Flash Debugger</string>
+    <string name = "debug_flash_desc">Stuur html-gegevens om te helpen bij foutopsporing.</string>
+
+    <string name = "replay_intro">Herhaal Introduction</string>
+</resources>

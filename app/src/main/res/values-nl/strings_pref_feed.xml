@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string name = "newsfeed_sort">Nieuwsoverzicht volgorde</string>
+    <string name = "newsfeed_sort_desc">Bepaalt de volgorde waarin de berichten worden getoond</string>
+    <string name = "aggressive_recents">Filter Recents</string>
+    <string name = "aggressive_recents_desc">Filter extra oude berichten uit Facebook\'s oorspronkelijke meest Recent-Nieuwsoverzicht. Schakel dit uit als uw Nieuwsoverzicht leeg is.</string>
+    <string name = "composer">Status wat ben je aan het doen?</string>
+    <string name = "composer_desc">Toon status in de Nieuwsoverzicht</string>
+
+    <string name = "pro_features">Pro-functies</string>
+    <string name = "suggested_friends">Voorgestelde vrienden</string>
+    <string name = "suggested_friends_desc">Toon "Mensen die je kent" in de feed</string>
+    <string name = "suggested_groups">Aanbevolen groepen</string>
+    <string name = "suggested_groups_desc">Toon "Aanbevolen groepen" in de feed</string>
+    <string name = "facebook_ads">Facebook advertenties</string>
+    <string name = "facebook_ads_desc">Toon wel of geen Facebook-advertenties</string>
+
+</resources>

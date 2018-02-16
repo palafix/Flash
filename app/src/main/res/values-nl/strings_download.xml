@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <string name = "pick_image">Kies afbeelding </string>
+     <string name = "download">Download </string>
+     <string name = "downloading">Downloaden … </string>
+     <string name = "image_download_success">Afbeelding gedownload </string>
+     <string name = "image_download_fail">Afbeelding kan niet worden gedownload </string>
+     <string name = "image_share_failed">Afbeelding delen mislukt </string>
+
+     <string name = "downloading_video">Video downloaden </string>
+     <string name = "downloaded_video">Video gedownload </string>
+     <string name = "downloading_file">Bestand downloaden </string>
+     <string name = "downloaded_file">Bestand gedownload </string>
+</resources>

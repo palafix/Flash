@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name = "experimental_disclaimer">Disclaimer</string>
+    <string name = "experimental_disclaimer_info">Experimentele functies zijn mogelijk onstabiel en komen mogelijk nooit in productie. Gebruik op eigen risico, stuur feedback en voel je vrij om ze uit te schakelen als ze niet goed werken.</string>
+    <string name = "experimental_by_default">Experimenteel per standaard</string>
+    <string name = "experimental_by_default_desc">Risicogevoelig of wil je gewoon helpen met debuggen? Als u dit aanvinkt, worden toekomstige experimentele functies standaard.</string>
+
+    <string name = "verbose_logging">Uitgebreide registratie</string>
+    <string name = "verbose_logging_desc">Schakel uitgebreide logboekregistratie in om te helpen bij crashrapporten. Logging wordt pas verzonden als er een fout is opgetreden, dus herhaal het probleem om de ontwikkelaar hiervan op de hoogte te stellen. Dit wordt automatisch uitgeschakeld als de app opnieuw wordt opgestart.</string>
+    <string name = "restart_flash">Herstart Flash</string>
+    <string name = "restart_flash_desc">Crashlytics verzendt alleen logboeken wanneer er een crash optreedt of als er fouten worden gevonden en de app opnieuw wordt opgestart. Als u hier klikt, wordt de app opnieuw gestart en worden alle problemen die momenteel worden gevonden, verwijderd.</string>
+</resources>

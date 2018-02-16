@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name = "theme_customization">Thema aanpassen </string>
+
+    <string name="theme_default">Default</string>
+    <string name="theme_gray">Grijs</string>
+    <string name="theme_dark">Donker</string>
+    <string name="theme_amoled">Amoled</string>
+    <string name="theme_glass">Glas</string>
+
+    <string name="theme_custom">Custom</string>
+
+    <string name = "theme">Thema </string>
+    <string name = "text_color">Tekst kleur </string>
+    <string name = "accent_color">Accent kleur </string>
+    <string name = "background_color">Achtergrond kleur </string>
+    <string name = "header_color">AppBar kleur </string>
+
+    <string name = "icon_color">Pictogram kleur </string>
+    <string name="topbar_color">TopBar kleur</string>
+
+    <string name= "noti_color">Achtergrond kleur van Meldingen</string>
+    <string name = "global_customization">Gehele aanpassing </string>
+    <string name = "main_activity_layout">HoofdLayout Tab </string>
+    <string name=  "main_activity_layout_desc">HoofdLayout instellen</string>
+    <string name = "set_main_activity_layout">HoofdLayout instellen </string>
+    <string name = "rounded_icons">Afgeronde iconen </string>
+    <string name = "rounded_icons_desc">Profielfoto\'s en pictogrammen voor groepsgesprekken zijn afgerond </string>
+    <string name = "tint_nav">Tint navigatiebalk </string>
+    <string name = "tint_nav_desc">De navigatiebalk heeft dezelfde kleur als de kop </string>
+    <string name = "web_text_scaling">Web-tekstschaling </string>
+    <string name = "web_text_scaling_desc">Tekstschaalvoorbeeld; Druk lang op de percentagetekst om te resetten. </string>
+    <string name=  "main_tabs">Tabbladen aanpassen</string>
+    <string name=  "main_tabs_desc">Pas aan welke tabbladen u in uw tabbar ziet</string>
+</resources>

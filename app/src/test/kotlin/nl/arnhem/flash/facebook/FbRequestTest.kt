@@ -1,0 +1,73 @@
+package nl.arnhem.flash.facebook
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import nl.arnhem.flash.facebook.requests.getAuth
+import nl.arnhem.flash.facebook.requests.getFullSizedImage
+import nl.arnhem.flash.facebook.requests.getMenuData
+import nl.arnhem.flash.facebook.requests.markNotificationRead
+import nl.arnhem.flash.internal.AUTH
+import nl.arnhem.flash.internal.COOKIE
+import nl.arnhem.flash.internal.USER_ID
+import nl.arnhem.flash.internal.authDependent
+import okhttp3.Call
+import org.junit.BeforeClass
+import org.junit.Test
+import kotlin.test.*
+
+/**
+ * Created by Allan Wang on 21/12/17.
+ */
+class FbRequestTest {
+
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun before() {
+            authDependent()
+        }
+    }
+
+    /**
+     * Used to emulate [executeForNoError]
+     * Must be consistent with that method
+     */
+    private fun Call.assertNoError() {
+        val data = execute().body()?.string() ?: fail("Content was null")
+        println("Call response: $data")
+        assertTrue(data.isNotEmpty(), "Content was empty")
+        assertFalse(data.contains("error"), "Content had error")
+    }
+
+    @Test
+    fun auth() {
+        val auth = COOKIE.getAuth()
+        assertNotNull(auth)
+        assertEquals(USER_ID, auth.userId)
+        assertEquals(COOKIE, auth.cookie)
+        println("Test auth: ${auth.fb_dtsg}")
+    }
+
+    @Test
+    fun markNotification() {
+        val notifId = 1514443903880
+        AUTH.markNotificationRead(notifId).call.assertNoError()
+    }
+
+    @Test
+    fun fullSizeImage() {
+        val fbid = 10155966932992838L // google's current cover photo
+        val url = AUTH.getFullSizedImage(fbid).invoke()
+        println(url)
+        assertTrue(url?.startsWith("https://scontent") == true)
+    }
+
+    @Test
+    fun testMenu() {
+        val data = AUTH.getMenuData().invoke()
+        assertNotNull(data)
+        println(ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data!!))
+        assertTrue(data.footer.hasContent, "Footer may be badly parsed")
+        val items = data.flatMapValid()
+        assertTrue(items.size > 15, "Something may be badly parsed")
+    }
+}
