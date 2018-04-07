@@ -1,3 +1,5 @@
+@file:Suppress("KDocUnresolvedReference")
+
 package nl.arnhem.flash.services
 
 import android.app.Notification
@@ -9,19 +11,17 @@ import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.BaseBundle
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import ca.allanwang.kau.utils.color
 import ca.allanwang.kau.utils.dpToPx
 import ca.allanwang.kau.utils.string
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.transition.Transition
-import nl.arnhem.flash.BuildConfig
 import nl.arnhem.flash.R
 import nl.arnhem.flash.activities.FlashWebActivity
 import nl.arnhem.flash.dbflow.CookieModel
@@ -39,7 +39,6 @@ import nl.arnhem.flash.utils.ARG_USER_ID
 import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.flashAnswersCustom
-import org.jetbrains.anko.runOnUiThread
 import java.util.*
 
 /**
@@ -47,56 +46,75 @@ import java.util.*
  *
  * Logic for build notifications, scheduling notifications, and showing notifications
  */
+const val NOTIF_CHANNEL_GENERAL = "general"
+const val NOTIF_CHANNEL_MESSAGES = "messages"
+
 fun setupNotificationChannels(c: Context) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
     val manager = c.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val mainChannel = NotificationChannel(BuildConfig.APPLICATION_ID, c.getString(R.string.flash_name), NotificationManager.IMPORTANCE_DEFAULT)
-    mainChannel.lightColor = c.color(R.color.facebook_blue)
-    mainChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-    manager.createNotificationChannel(mainChannel)
+    val appName = c.string(R.string.flash_name)
+    val msg = c.string(R.string.messages)
+    manager.notificationChannels
+            .filter { it.id != NOTIF_CHANNEL_GENERAL && it.id != NOTIF_CHANNEL_MESSAGES }
+            .forEach { manager.deleteNotificationChannel(it.id) }
+    manager.createNotificationChannel(NOTIF_CHANNEL_GENERAL, appName)
+    manager.createNotificationChannel(NOTIF_CHANNEL_MESSAGES, "$appName: $msg")
+    L.d { "Created notification channels: ${manager.notificationChannels.size} channels, ${manager.notificationChannelGroups.size} groups" }
 }
 
-inline val Context.flashNotification: NotificationCompat.Builder
-    get() = NotificationCompat.Builder(this, BuildConfig.APPLICATION_ID).apply {
-        setSmallIcon(R.drawable.flash_f_24)
-        setAutoCancel(true)
-        setStyle(NotificationCompat.BigTextStyle())
-        color = color(R.color.flash_notification_accent)
-    }
-
-fun NotificationCompat.Builder.withDefaults(ringtone: String = Prefs.notificationRingtone) = apply {
-    var defaults = 0
-    if (Prefs.notificationVibrate) defaults = defaults or Notification.DEFAULT_VIBRATE
-    if (Prefs.notificationSound) {
-        if (ringtone.isNotBlank()) setSound(Uri.parse(ringtone))
-        else defaults = defaults or Notification.DEFAULT_SOUND
-    }
-    if (Prefs.notificationLights) defaults = defaults or Notification.DEFAULT_LIGHTS
-    setDefaults(defaults)
+@RequiresApi(Build.VERSION_CODES.O)
+private fun NotificationManager.createNotificationChannel(id: String, name: String): NotificationChannel {
+    val channel = NotificationChannel(id,
+            name, NotificationManager.IMPORTANCE_DEFAULT)
+    channel.enableLights(true)
+    channel.lightColor = Prefs.accentColor
+    channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+    createNotificationChannel(channel)
+    return channel
 }
+
+fun Context.flashNotification(id: String) =
+        NotificationCompat.Builder(this, id)
+                .apply {
+                    setSmallIcon(R.drawable.flash_f_24)
+                    setAutoCancel(true).priority = NotificationManager.IMPORTANCE_HIGH
+                    setOnlyAlertOnce(true)
+                    setStyle(NotificationCompat.BigTextStyle())
+                    color = color(R.color.flash_notification_icon)
+                }
 
 /**
- * Created by Allan Wang on 2017-07-08.
- *
- * Custom target to set the content view and update a given notification
- * 40dp is the size of the right avatar
+ * Dictates whether a notification should have sound/vibration/lights or not
+ * Delegates to channels if Android O and up
+ * Otherwise uses our provided preferences
  */
-class FlashNotificationTarget(val context: Context,
-                              val notifId: Int,
-                              val notifTag: String,
-                              val builder: NotificationCompat.Builder
-) : SimpleTarget<Bitmap>(40.dpToPx, 40.dpToPx) {
-
-    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-        builder.setLargeIcon(resource)
-        NotificationManagerCompat.from(context).notify(notifTag, notifId, builder.build())
+fun NotificationCompat.Builder.setFlashAlert(enable: Boolean, ringtone: String): NotificationCompat.Builder {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        setGroupAlertBehavior(
+                if (enable) Notification.GROUP_ALERT_CHILDREN
+                else Notification.GROUP_ALERT_SUMMARY)
+    } else if (!enable) {
+        setDefaults(0)
+    } else {
+        var defaults = 0
+        if (Prefs.notificationVibrate) defaults = defaults or Notification.DEFAULT_VIBRATE
+        if (Prefs.notificationSound) {
+            if (ringtone.isNotBlank()) setSound(Uri.parse(ringtone))
+            else defaults = defaults or Notification.DEFAULT_SOUND
+        }
+        if (Prefs.notificationLights) defaults = defaults or Notification.DEFAULT_LIGHTS
+        setDefaults(defaults)
     }
+    return this
 }
+
+private val _40_DP = 40.dpToPx
 
 /**
  * Enum to handle notification creations
  */
 enum class NotificationType(
+        private val channelId: String,
         private val overlayContext: OverlayContext,
         private val fbItem: FbItem,
         private val parser: FlashParser<ParseNotification>,
@@ -104,7 +122,8 @@ enum class NotificationType(
         private val putTime: (notif: NotificationModel, time: Long) -> NotificationModel,
         private val ringtone: () -> String) {
 
-    GENERAL(OverlayContext.NOTIFICATION,
+    GENERAL(NOTIF_CHANNEL_GENERAL,
+            OverlayContext.NOTIFICATION,
             FbItem.NOTIFICATIONS,
             NotifParser,
             NotificationModel::epoch,
@@ -115,7 +134,8 @@ enum class NotificationType(
                 FlashRunnable.prepareMarkNotificationRead(content.id, cookie)
     },
 
-    MESSAGE(OverlayContext.MESSAGE,
+    MESSAGE(NOTIF_CHANNEL_MESSAGES,
+            OverlayContext.MESSAGE,
             FbItem.MESSAGES,
             MessageParser,
             NotificationModel::epochIm,
@@ -141,41 +161,62 @@ enum class NotificationType(
      * Get unread data from designated parser
      * Display notifications for those after old epoch
      * Save new epoch
+     *
+     * Returns the number of notifications generated,
+     * or -1 if an error occurred
      */
-    fun fetch(context: Context, data: CookieModel) {
+    fun fetch(context: Context, data: CookieModel): Int {
         val response = parser.parse(data.cookie)
-                ?: return L.v { "$name notification data not found" }
-        val notifs = response.data.getUnreadNotifications(data).filter {
+        if (response == null) {
+            L.v { "$name notification data not found" }
+            return -1
+        }
+        val notifContents = response.data.getUnreadNotifications(data).filter {
             val text = it.text
             Prefs.notificationKeywords.none { text.contains(it, true) }
         }
-        if (notifs.isEmpty()) return
-        var notifCount = 0
+        if (notifContents.isEmpty()) return 0
         val userId = data.id
         val prevNotifTime = lastNotificationTime(userId)
         val prevLatestEpoch = getTime(prevNotifTime)
         L.v { "Notif $name prev epoch $prevLatestEpoch" }
         var newLatestEpoch = prevLatestEpoch
-        notifs.forEach { notif ->
+        val notifs = mutableListOf<FlashNotification>()
+        notifContents.forEach { notif ->
             L.v { "Notif timestamp ${notif.timestamp}" }
             if (notif.timestamp <= prevLatestEpoch) return@forEach
-            createNotification(context, notif, notifCount == 0)
+            notifs.add(createNotification(context, notif))
             if (notif.timestamp > newLatestEpoch)
                 newLatestEpoch = notif.timestamp
-            notifCount++
         }
         if (newLatestEpoch > prevLatestEpoch)
             putTime(prevNotifTime, newLatestEpoch).save()
         L.d { "Notif $name new epoch ${getTime(lastNotificationTime(userId))}" }
-        summaryNotification(context, userId, notifCount)
+        flashAnswersCustom("Notifications", "Type" to name, "Count" to notifs.size)
+        if (notifs.size > 1)
+            summaryNotification(context, userId, notifs.size).notify(context)
+        val ringtone = ringtone()
+        notifs.forEachIndexed { i, notif ->
+            notif.withAlert(i < 2, ringtone).notify(context)
+        }
+        return notifs.size
+    }
+
+    fun debugNotification(context: Context, data: CookieModel) {
+        val content = NotificationContent(data,
+                System.currentTimeMillis(),
+                "https://github.com/Palafix/Flash",
+                "Debug Notif",
+                "Test 123",
+                System.currentTimeMillis() / 1000,
+                "https://www.iconexperience.com/_img/v_collection_png/256x256/shadow/dog.png")
+        createNotification(context, content).notify(context)
     }
 
     /**
      * Create and submit a new notification with the given [content]
-     * If [withDefaults] is set, it will also add the appropriate sound, vibration, and light
-     * Note that when we have multiple notifications coming in at once, we don't want to have defaults for all of them
      */
-    private fun createNotification(context: Context, content: NotificationContent, withDefaults: Boolean) {
+    private fun createNotification(context: Context, content: NotificationContent): FlashNotification {
         with(content) {
             val intent = Intent(context, FlashWebActivity::class.java)
             intent.data = Uri.parse(href)
@@ -185,56 +226,62 @@ enum class NotificationType(
 
             val group = "${groupPrefix}_${data.id}"
             val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-            val notifBuilder = context.flashNotification
+            val notifBuilder = context.flashNotification(channelId)
                     .setContentTitle(title ?: context.string(R.string.flash_name))
                     .setContentText(text)
                     .setContentIntent(pendingIntent)
                     .setCategory(Notification.CATEGORY_SOCIAL)
                     .setSubText(data.name)
                     .setGroup(group)
-
-            if (withDefaults)
-                notifBuilder.withDefaults(ringtone())
-
+                    .setPriority(NotificationManager.IMPORTANCE_HIGH)
             if (timestamp != -1L) notifBuilder.setWhen(timestamp * 1000)
             L.v { "Notif load $content" }
-            NotificationManagerCompat.from(context).notify(group, notifId, notifBuilder.build())
 
             if (profileUrl != null) {
-                context.runOnUiThread {
-                    //todo verify if context is valid?
-                    GlideApp.with(context)
+                try {
+                    val profileImg = GlideApp.with(context)
                             .asBitmap()
                             .load(profileUrl)
                             .transform(FlashGlide.circleCrop)
-                            .into(FlashNotificationTarget(context, notifId, group, notifBuilder))
+                            .submit(_40_DP, _40_DP)
+                            .get()
+                    notifBuilder.setLargeIcon(profileImg)
+                } catch (e: Exception) {
+                    L.e { "Failed to get image $profileUrl" }
                 }
             }
+
+            return FlashNotification(group, notifId, notifBuilder)
         }
     }
+
 
     /**
      * Create a summary notification to wrap the previous ones
      * This will always produce sound, vibration, and lights based on preferences
      * and will only show if we have at least 2 notifications
      */
-    private fun summaryNotification(context: Context, userId: Long, count: Int) {
-        flashAnswersCustom("Notifications", "Type" to name, "Count" to count)
-        if (count <= 1) return
+    private fun summaryNotification(context: Context, userId: Long, count: Int): FlashNotification {
         val intent = Intent(context, FlashWebActivity::class.java)
         intent.data = Uri.parse(fbItem.url)
         intent.putExtra(ARG_USER_ID, userId)
+        val group = "${groupPrefix}_$userId"
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val notifBuilder = context.flashNotification.withDefaults(ringtone())
+        val notifBuilder = context.flashNotification(channelId)
                 .setContentTitle(context.string(R.string.flash_name))
                 .setContentText("$count ${context.string(fbItem.titleId)}")
-                .setGroup("${groupPrefix}_$userId")
+                .setGroup(group)
                 .setGroupSummary(true)
                 .setContentIntent(pendingIntent)
                 .setCategory(Notification.CATEGORY_SOCIAL)
 
-        NotificationManagerCompat.from(context).notify("${groupPrefix}_$userId", userId.toInt(), notifBuilder.build())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notifBuilder.setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+        }
+
+        return FlashNotification(group, 1, notifBuilder)
     }
+
 }
 
 /**
@@ -243,13 +290,38 @@ enum class NotificationType(
 data class NotificationContent(val data: CookieModel,
                                val id: Long,
                                val href: String,
-                               val title: String? = null, // defaults to Flash title
+                               val title: String? = null, // defaults to flash title
                                val text: String,
                                val timestamp: Long,
                                val profileUrl: String?) {
 
     val notifId = Math.abs(id.toInt())
 
+}
+
+/**
+ * Wrapper for a complete notification builder and identifier
+ * which can be immediately notified when given a [Context]
+ */
+data class FlashNotification(private val tag: String,
+                             private val id: Int,
+                             private val notif: NotificationCompat.Builder) {
+
+    fun withAlert(enable: Boolean, ringtone: String): FlashNotification {
+        notif.setFlashAlert(enable, ringtone)
+        return this
+    }
+
+    fun notify(context: Context) =
+            NotificationManagerCompat.from(context).notify(tag, id, notif.build())
+}
+
+const val NOTIFICATION_PARAM_ID = "notif_param_id"
+
+private fun JobInfo.Builder.setExtras(id: Int): JobInfo.Builder {
+    val bundle = PersistableBundle()
+    bundle.putInt(NOTIFICATION_PARAM_ID, id)
+    return setExtras(bundle)
 }
 
 const val NOTIFICATION_PERIODIC_JOB = 7
@@ -265,6 +337,7 @@ fun Context.scheduleNotifications(minutes: Long): Boolean {
     val serviceComponent = ComponentName(this, NotificationService::class.java)
     val builder = JobInfo.Builder(NOTIFICATION_PERIODIC_JOB, serviceComponent)
             .setPeriodic(minutes * 60000)
+            .setExtras(NOTIFICATION_PERIODIC_JOB)
             .setPersisted(true)
             .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY) //TODO add options
     val result = scheduler.schedule(builder.build())
@@ -285,6 +358,7 @@ fun Context.fetchNotifications(): Boolean {
     val serviceComponent = ComponentName(this, NotificationService::class.java)
     val builder = JobInfo.Builder(NOTIFICATION_JOB_NOW, serviceComponent)
             .setMinimumLatency(0L)
+            .setExtras(NOTIFICATION_JOB_NOW)
             .setOverrideDeadline(2000L)
             .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
     val result = scheduler.schedule(builder.build())

@@ -13,16 +13,21 @@
     <string name = "network">Netwerk</string>
     <string name = "network_desc">Definieer opties die van invloed zijn op gemeten netwerken</string>
 
-    <string name = "experimental">Experimenteel</string>
-    <string name = "experimental_desc">Vroegtijdige toegang tot mogelijk onstabiele functies inschakelen</string>
+    <string name = "experimental_desc">Anonieme analyses inschakelen om de app te helpen verbeteren.</string>
 
     <string name = "get_pro">Krijg Flash Pro</string>
     <string name = "get_pro_desc">Koop of herstel Pro en ontgrendel het volledige potentieel van Flash! Omvat adblockers, aangepaste thema\'s, volledige configuraties en nog veel meer!</string>
 
-    <string name = "get_update">Update Flash</string>
-    <string name = "get_update_desc">Klik hier om te controleren of er een update beschikbaar is.</string>
+    <string name = "why_pro">Waarom Flash Pro?</string>
 
-    <string name = "about_flash">Over Flash voor Facebook</string>
+    <string name = "get_update">Update Flash</string>
+    <string name="Auto_update">Update melding</string>
+    <string name="no_show_update">Uitschakelen</string>
+    <string name = "get_update_desc">Klik hier om te controleren of er een update beschikbaar is.</string>
+    <string name="Auto_update_desc">Aan voor AppUpdate-melding. Schakel uit als u geen AppUpdate-melding wilt ontvangen.</string>
+    <string name="no_Auto_update_desc">Schakel uit als u geen melding wilt ontvangen.</string>
+
+    <string name = "about_flash">Over Flash Social</string>
     <string name = "about_flash_desc">Versie, Dankbetuigingen en veelgestelde vragen</string>
 
     <string name = "help_translate">Help Vertalen</string>

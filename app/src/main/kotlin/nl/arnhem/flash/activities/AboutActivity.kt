@@ -60,7 +60,7 @@ class AboutActivity : AboutActivityBase(null, {
                 "Realm"
         )
 
-        val l = libs.prepareLibraries(this, include, null, false, true)
+        val l = libs.prepareLibraries(this, include, null, false, true, true)
 //        l.forEach { KL.d{"Lib ${it.definedName}"} }
         return l
     }
@@ -133,8 +133,8 @@ class AboutActivity : AboutActivityBase(null, {
                 val c = itemView.context
                 val size = c.dimenPixelSize(R.dimen.kau_avatar_bounds)
                 images = arrayOf<Pair<IIcon, () -> Unit>>(
-                        GoogleMaterial.Icon.gmd_star to { c.startPlayStoreLink(R.string.play_store_package_id) },
-                        CommunityMaterial.Icon.cmd_thumb_up to { c.startLink(R.string.frost_url) },
+                        GoogleMaterial.Icon.gmd_flash_on to { c.startPlayStoreLink(R.string.play_store_package_id) },
+                        GoogleMaterial.Icon.gmd_ac_unit to { c.startLink(R.string.frost_url) },
                         CommunityMaterial.Icon.cmd_github_circle to { c.startLink(R.string.github_url) },
                         CommunityMaterial.Icon.cmd_xda to { c.startLink(R.string.xda_url) }
                 ).mapIndexed { i, (icon, onClick) ->

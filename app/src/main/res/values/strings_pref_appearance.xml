@@ -31,6 +31,9 @@
     <string name="main_tabs">Main Activity Tabs</string>
     <string name="main_tabs_desc">Customize which tabs you\'ll see in your main activity</string>
 
+    <string name="enforce_black_media_bg">Enforce black media background</string>
+    <string name="enforce_black_media_bg_desc">Make media backgrounds black; default is the selected background above</string>
+
     <string name="rounded_icons">Rounded Icons</string>
     <string name="rounded_icons_desc">Profile photos and group conversation icons will be rounded</string>
 

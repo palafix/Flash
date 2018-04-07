@@ -27,8 +27,8 @@ if (withPlaySigning)
     }
 
 android {
-    compileSdkVersion kau.targetSdk
-    buildToolsVersion kau.buildTools
+        compileSdkVersion kau.targetSdk
+        buildToolsVersion kau.buildTools
 
     androidGitVersion {
         codeFormat = 'MMNNPPXX'
@@ -41,7 +41,7 @@ android {
         minSdkVersion kau.minSdk
         targetSdkVersion kau.targetSdk
         versionCode Integer.parseInt(project.VERSION_CODE)
-        versionName "1.0.8"
+        versionName "0.0.1"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -90,9 +90,16 @@ android {
 
         release {
             storeFile file('../files/flashkey.jks')
-            storePassword '!Wintermans1'
-            keyAlias 'palafix'
-            keyPassword '!Wintermans1'
+            storePassword ''
+            keyAlias ''
+            keyPassword ''
+        }
+
+        debug {
+            storeFile file("../files/debug.keystore")
+            storePassword "debugKey"
+            keyAlias "debugKey"
+            keyPassword "debugKey"
         }
 
         test {
@@ -109,6 +116,7 @@ android {
             shrinkResources false
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
+            signingConfig signingConfigs.debug
             resValue "string", "flash_name", "Flash Debug"
             resValue "string", "flash_web", "Flash Web Debug"
             ext.enableCrashlytics = false
@@ -187,7 +195,8 @@ dependencies {
 
     implementation "com.devbrackets.android:exomedia:${EXOMEDIA}"
 
-    implementation"com.mikepenz:fastadapter-extensions:${kau.fastAdapter}@aar"
+    implementation "com.mikepenz:fastadapter-extensions:${kau.fastAdapter}@aar"
+    implementation "com.mikepenz:actionitembadge:3.3.2@aar"
 
     implementation "com.github.bumptech.glide:okhttp3-integration:${kau.glide}"
     kapt "com.github.bumptech.glide:compiler:${kau.glide}"
@@ -233,6 +242,7 @@ dependencies {
     implementation "com.sothree.slidinguppanel:library:${SLIDING_PANEL}"
 
     //Reactive Libs
+    implementation "io.reactivex.rxjava2:rxjava:${RX_JAVA}"
     implementation "io.reactivex.rxjava2:rxkotlin:${RX_KOTLIN}"
     implementation "io.reactivex.rxjava2:rxandroid:${RX_ANDROID}"
     implementation "com.github.pwittchen:reactivenetwork-rx2:${RX_NETWORK}"
@@ -241,5 +251,7 @@ dependencies {
     //Realm Bookmarks
     implementation "io.realm:android-adapters:${REALM_BOOKMARKS}"
     //Updater
-    implementation "com.github.javiersantos:AppUpdater:2.6.4"
+    implementation "com.github.javiersantos:AppUpdater:${APP_UPDATER}"
+    //Chrome Tabs
+    implementation "com.android.support:customtabs:25.3.1"
 }

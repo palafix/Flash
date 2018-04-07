@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="flash_splash_background">@color/facebook_blue</color>
+    <color name="flash_splash_background">#03a9f4</color>
     <color name="facebook_blue">#3b5998</color>
     <color name="facebook_blue_dark">#2e4b86</color>
     <color name="flash_notification_accent">@color/facebook_blue</color>
+    <color name="flash_notification_icon">#03a9f4</color>
+    <color name="flash_notification_text">#03a9f4</color>
 </resources>

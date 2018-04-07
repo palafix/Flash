@@ -31,10 +31,10 @@ class MenuContentIItem(val data: MenuItem)
 
     class ViewHolder(itemView: View) : FastAdapter.ViewHolder<MenuContentIItem>(itemView) {
 
-        val frame: ViewGroup by bindView(R.id.item_frame)
+        private val frame: ViewGroup by bindView(R.id.item_frame)
         val icon: ImageView by bindView(R.id.item_icon)
         val content: TextView by bindView(R.id.item_content)
-        val badge: TextView by bindView(R.id.item_badge)
+        private val badge: TextView by bindView(R.id.item_badge)
 
         override fun bindView(item: MenuContentIItem, payloads: MutableList<Any>) {
             frame.background = createSimpleRippleDrawable(Prefs.textColor, Prefs.nativeBgColor)
@@ -49,10 +49,13 @@ class MenuContentIItem(val data: MenuItem)
             else
                 icon.gone()
             content.text = item.data.name
+            badge.text = item.data.badge
         }
 
         override fun unbindView(item: MenuContentIItem) {
-            badge.gone()
+            GlideApp.with(itemView).clear(icon)
+            content.text = null
+            badge.text = null
         }
     }
 }

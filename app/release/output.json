@@ -1,1 +1,1 @@
-[{"outputType":{"type":"APK"},"apkInfo":{"type":"MAIN","splits":[],"versionCode":8},"path":"Flash-release.apk","properties":{"packageId":"nl.arnhem.flash","split":"","minSdkVersion":"21"}}]
+[{"outputType":{"type":"APK"},"apkInfo":{"type":"MAIN","splits":[],"versionCode":1,"versionName":"0.0.1","enabled":true,"outputFile":"Flash-release.apk","fullName":"release","baseName":"release"},"path":"Flash-release.apk","properties":{}}]

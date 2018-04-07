@@ -42,7 +42,7 @@ enum class FbItem(
     SAVED(R.string.saved, GoogleMaterial.Icon.gmd_bookmark, "saved"),
     _SEARCH(R.string.search_menu_title, GoogleMaterial.Icon.gmd_search, "search/top"),
     SETTINGS(R.string.settings, GoogleMaterial.Icon.gmd_settings, "settings/"),
-	POKE(R.string.pokes, GoogleMaterial.Icon.gmd_thumb_up, "pokes"),
+    POKE(R.string.pokes, GoogleMaterial.Icon.gmd_thumb_up, "pokes"),
     ;
 
     val url = "$FB_URL_BASE$relativeUrl"
@@ -58,4 +58,5 @@ enum class FbItem(
 
     companion object : EnumCompanion<FbItem>("flash_arg_fb_item", values())
 }
+
 fun defaultTabs(): List<FbItem> = listOf(FbItem.FEED, FbItem.FRIENDS, FbItem.MESSAGES, FbItem.NOTIFICATIONS, FbItem.MENU)

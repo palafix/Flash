@@ -11,7 +11,8 @@ import ca.allanwang.kau.utils.fadeScaleTransition
 import ca.allanwang.kau.utils.setIcon
 import ca.allanwang.kau.utils.withArguments
 import com.mikepenz.iconics.typeface.IIcon
-import ca.allanwang.kau.utils.withArguments
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import nl.arnhem.flash.contracts.DynamicUiContract
 import nl.arnhem.flash.contracts.FlashContentParent
 import nl.arnhem.flash.contracts.MainActivityContract
@@ -19,8 +20,6 @@ import nl.arnhem.flash.contracts.MainFabContract
 import nl.arnhem.flash.enums.FeedSort
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.utils.*
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 
 /**
  * Created by Allan Wang on 2017-11-07.
@@ -124,8 +123,10 @@ abstract class BaseFragment : Fragment(), FragmentContract, DynamicUiContract {
                     }
                     position -> {
                         contract.setTitle(baseEnum.titleId)
-                        updateFab(contract)
-                        core?.active = true
+                        if (Prefs.HasFab) {
+                            updateFab(contract)
+                            core?.active = true
+                        }
                     }
                     -(position + 1) -> {
                         core?.active = false
@@ -151,6 +152,7 @@ abstract class BaseFragment : Fragment(), FragmentContract, DynamicUiContract {
         }
         setOnClickListener { click() }
     }
+
 
     override fun detachMainObservable() {
         activityDisposable?.dispose()

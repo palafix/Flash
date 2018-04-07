@@ -1,6 +1,6 @@
 package nl.arnhem.flash.settings
 
-import android.os.Build
+
 import ca.allanwang.kau.kpref.activity.KPrefAdapterBuilder
 import ca.allanwang.kau.kpref.activity.items.KPrefColorPicker
 import ca.allanwang.kau.kpref.activity.items.KPrefSeekbar
@@ -165,6 +165,12 @@ fun SettingsActivity.getAppearancePrefs(): KPrefAdapterBuilder.() -> Unit = {
         setFlashResult(REQUEST_NAV)
     }) {
         descRes = R.string.tint_nav_desc
+    }
+
+    checkbox(R.string.enforce_black_media_bg, Prefs::blackMediaBg, {
+        Prefs.blackMediaBg = it
+    }) {
+        descRes = R.string.enforce_black_media_bg_desc
     }
 
     header(R.string.pro_features)

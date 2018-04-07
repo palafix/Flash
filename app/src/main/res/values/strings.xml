@@ -16,7 +16,6 @@
     <string name="video_beta">Video Settings may not work</string>
     <string name="video_settings">Video Settings</string>
     <string name="pokes">Pokes</string>
-    <string name="fab">Fab</string>
 
     <string name="feed">News Feed</string>
     <string name="most_recent">Most Recent</string>
@@ -25,13 +24,16 @@
 
     <string name="bookmarks">Bookmarks</string>
     <string name="add_bookmark">Add Bookmark</string>
-    <string name="added">Added (</string>
-    <string name="added_string">) to Favorite</string>
+    <string name="remove_bookmark_desc">Are you sure you would like to remove all Bookmarks? This action cannot be undone.</string>
+    <string name="added">Added ("</string>
+    <string name="added_string">") to Favorite</string>
     <string name="deleted">Delete favorite?</string>
-    <string name="deleted_dia">Are you sure you would like to remove (</string>
-    <string name="deleted_dia_2">) from your favorites? This action cannot be undone.</string>
-    <string name="refresh_bookmark">Refresh bookmarks</string>
-    <string name="bookmark_beta">(Beta)</string>
+    <string name="deleted_dia">Are you sure you would like to remove ("</string>
+    <string name="deleted_dia_2">") from your favorites? This action cannot be undone.</string>
+    <string name="history">History</string>
+    <string name="remove_history">Remove history</string>
+    <string name="remove_history_desc">Are you sure you would like to remove all history? This action cannot be undone.</string>
+    <string name="removed_all_history">Removed all history</string>
 
     <string name="events">Events</string>
     <string name="friends">Friends</string>
@@ -71,7 +73,7 @@
 
 
     <string name="flash_description">Flash is a fully themable,
-        fully functional alternative to the official Facebook app, made from scratch by Allan Wang/Frost-for-Facebook and proudly open sourced.</string>
+        fully functional alternative to the official Facebook app, made from scratch by Allan Wang and proudly open sourced.</string>
 
     <string name="faq_title">Flash FAQ</string>
 
@@ -88,5 +90,6 @@
     <string name="options">Options</string>
     <string name="tab_customizer_instructions">Long press and drag to rearrange the top icons.</string>
 
+    <string name="no_new_notifications">No new notifications found</string>
 
 </resources>

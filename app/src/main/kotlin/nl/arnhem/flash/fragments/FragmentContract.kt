@@ -1,10 +1,9 @@
 package nl.arnhem.flash.fragments
 
 
-import nl.arnhem.flash.contracts.*
-import android.support.design.widget.FloatingActionButton
-import nl.arnhem.flash.views.FlashRecyclerView
 import io.reactivex.disposables.Disposable
+import nl.arnhem.flash.contracts.*
+import nl.arnhem.flash.views.FlashRecyclerView
 
 /**
  * Created by Allan Wang on 2017-11-07.
@@ -15,11 +14,11 @@ interface FragmentContract : FlashContentContainer {
     val content: FlashContentParent?
 
     /**
-        * Defines whether the fragment is valid in the viewpager
-       * Or if it needs to be recreated
-        * May be called from any thread to toggle status
-        */
-       var valid: Boolean
+     * Defines whether the fragment is valid in the viewpager
+     * Or if it needs to be recreated
+     * May be called from any thread to toggle status
+     */
+    var valid: Boolean
 
     /**
      * Helper to retrieve the core from [content]

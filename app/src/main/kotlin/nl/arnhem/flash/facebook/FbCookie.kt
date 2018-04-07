@@ -3,6 +3,9 @@ package nl.arnhem.flash.facebook
 import android.app.Activity
 import android.content.Context
 import android.webkit.CookieManager
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.subjects.SingleSubject
 import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.dbflow.loadFbCookie
 import nl.arnhem.flash.dbflow.removeCookie
@@ -11,9 +14,6 @@ import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.cookies
 import nl.arnhem.flash.utils.launchLogin
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.subjects.SingleSubject
 
 /**
  * Created by Allan Wang on 2017-05-30.
@@ -34,13 +34,13 @@ object FbCookie {
                 val cookies = cookie.split(";").map { Pair(it, SingleSubject.create<Boolean>()) }
                 cookies.forEach { (cookie, callback) -> setCookie(FB_URL_BASE, cookie, { callback.onSuccess(it) }) }
                 Observable.zip<Boolean, Unit>(cookies.map { (_, callback) -> callback.toObservable() }, {})
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                    callback?.invoke()
-                    L.d { "Cookies set" }
-                    L._d { cookie }
-                    flush()
-                }
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            callback?.invoke()
+                            L.d { "Cookies set" }
+                            L._d { cookie }
+                            flush()
+                        }
             }
         }
     }

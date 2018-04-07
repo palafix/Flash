@@ -4,23 +4,17 @@ package nl.arnhem.flash.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PointF
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.view.WindowManager
-import android.webkit.*
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.widget.FrameLayout
-import android.widget.Toast
-import ca.allanwang.kau.permissions.PERMISSION_ACCESS_FINE_LOCATION
-import ca.allanwang.kau.permissions.kauRequestPermissions
 import ca.allanwang.kau.swipe.kauSwipeOnCreate
 import ca.allanwang.kau.swipe.kauSwipeOnDestroy
 import ca.allanwang.kau.utils.*
@@ -28,24 +22,16 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.Subject
-import io.realm.OrderedRealmCollection
-import io.realm.Realm
-import io.realm.RealmResults
-import kotlinx.android.synthetic.main.activity_web_overlay.*
 import nl.arnhem.flash.R
 import nl.arnhem.flash.contracts.*
 import nl.arnhem.flash.enums.OverlayContext
 import nl.arnhem.flash.facebook.*
-import nl.arnhem.flash.model.BookmarkModel
 import nl.arnhem.flash.services.FlashRunnable
 import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.views.FlashContentWeb
 import nl.arnhem.flash.views.FlashVideoViewer
 import nl.arnhem.flash.views.FlashWebView
 import okhttp3.HttpUrl
-import kotlin.properties.Delegates
 
 /**
  * Created by Allan Wang on 2017-06-01.
@@ -64,7 +50,6 @@ class FlashWebActivity : WebOverlayActivityBase(false) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val requiresAction = !parseActionSend()
-        FlashPglAdBlock.init(this)
         super.onCreate(savedInstanceState)
         if (requiresAction) {
             /*
@@ -128,10 +113,6 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
         ActivityContract, FlashContentContainer,
         VideoViewHolder, FileChooserContract by FileChooserDelegate() {
 
-    var bundle: Bundle? = null
-    var realm: Realm by Delegates.notNull()
-    private lateinit var fullscreenView: View
-
     override val frameWrapper: FrameLayout by bindView(R.id.frame_wrapper)
     val toolbar: Toolbar by bindView(R.id.overlay_toolbar)
     val content: FlashContentWeb by bindView(R.id.flash_content_web)
@@ -166,19 +147,23 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
             return
         }
         setFrameContentView(R.layout.activity_web_overlay)
+        setFlashTheme(true)
         setSupportActionBar(toolbar)
-        Realm.init(this)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        statusBarColor = Prefs.headerColor.withAlpha(255).darken()
+        navigationBarColor = Prefs.headerColor.withAlpha(255)
+        toolbar.setBackgroundColor(Prefs.headerColor.withAlpha(255))
+        coordinator.setBackgroundColor(Prefs.bgColor.withAlpha(255))
+        toolbar.overflowIcon?.setTint(Prefs.iconColor)
+        toolbar.setTitleTextColor(Prefs.iconColor)
         toolbar.navigationIcon = GoogleMaterial.Icon.gmd_close.toDrawable(this, 16, Prefs.iconColor)
         toolbar.setNavigationOnClickListener { finishSlideOut() }
-        FlashPglAdBlock.init(this)
-        realm = Realm.getDefaultInstance()
         setFlashColors {
             toolbar(toolbar)
             themeWindow = false
         }
-        coordinator.setBackgroundColor(Prefs.bgColor.withAlpha(255))
+
         content.bind(this)
         content.titleObservable
                 .observeOn(AndroidSchedulers.mainThread())
@@ -190,7 +175,7 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
             if (userId != Prefs.userId) FbCookie.switchUser(userId) { reloadBase(true) }
             else reloadBase(true)
             if (Showcase.firstWebOverlay) {
-                coordinator.flashSnackbar(R.string.web_overlay_swipe_hint) {
+                coordinator.flashSnackbar(getString(R.string.web_overlay_swipe_hint)) {
                     duration = Snackbar.LENGTH_INDEFINITE
                     setAction(R.string.got_it) { _ -> this.dismiss() }
                 }
@@ -203,30 +188,17 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
             transitionSystemBars = false
         }
         with(web.settings) {
-            updateProgress()
             javaScriptEnabled = true
-            mediaPlaybackRequiresUserGesture = false
-            allowFileAccess = true
+            mediaPlaybackRequiresUserGesture = true
             textZoom = Prefs.webTextScaling
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-            }
             javaScriptCanOpenWindowsAutomatically = true
-            setGeolocationEnabled(true)
             allowFileAccess = true
-            setAppCacheEnabled(true)
-            domStorageEnabled = true
-            databaseEnabled = true
             web.isVerticalScrollBarEnabled = true
             setSupportZoom(true)
             displayZoomControls = false
             builtInZoomControls = true
-            saveFormData = true
             useWideViewPort = true
             loadWithOverviewMode = true
-            pluginState = WebSettings.PluginState.ON_DEMAND
-            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-            setRenderPriority(WebSettings.RenderPriority.HIGH)
         }
     }
 
@@ -252,19 +224,6 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
             return true
         } else (finishSlideOut())
         return true
-    }
-
-    /**
-     * Our theme for the overlay should be fully opaque
-     */
-    fun theme() {
-        val opaqueAccent = Prefs.headerColor.withAlpha(255)
-        statusBarColor = opaqueAccent.darken()
-        navigationBarColor = opaqueAccent
-        toolbar.setBackgroundColor(opaqueAccent)
-        toolbar.setTitleTextColor(Prefs.iconColor)
-        coordinator.setBackgroundColor(Prefs.bgColor.withAlpha(255))
-        toolbar.overflowIcon?.setTint(Prefs.iconColor)
     }
 
     override fun onResume() {
@@ -298,8 +257,7 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
         toolbar.tint(Prefs.iconColor)
         setMenuIcons(menu, Prefs.iconColor,
                 R.id.action_share to CommunityMaterial.Icon.cmd_share,
-                R.id.action_copy_link to GoogleMaterial.Icon.gmd_content_copy,
-                R.id.addbookmark to GoogleMaterial.Icon.gmd_bookmark_border)
+                R.id.action_copy_link to GoogleMaterial.Icon.gmd_content_copy)
         return true
     }
 
@@ -311,46 +269,8 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
         when (item.itemId) {
             R.id.action_copy_link -> copyToClipboard(web.currentUrl)
             R.id.action_share -> shareText(web.currentUrl)
-            R.id.addbookmark -> {
-                var flag = false
-                val bookmarkk = realm.where(BookmarkModel::class.java).findAll()
-                for (model in bookmarkk) {
-                    if (model.bookMark == web.url.toString()) {
-                        flag = true
-                        break
-                    }
-                    flag = false
-                }
-                when (item.itemId) {
-                    R.id.addbookmark -> {
-                        realm.executeTransaction {
-                            if (!flag) {
-                                item.icon = getDrawable(R.drawable.ic_bookmark)
-                                item.icon.setTint(Prefs.iconColor)
-                                val bookmark = realm.createObject(BookmarkModel::class.java)
-                                bookmark.bookMark = web.url.toString()
-                                bookmark.title = web.title.toString()
-                                Toast.makeText(baseContext, getString(R.string.added) + web.title + getString(R.string.added_string), Toast.LENGTH_LONG).show()
-                            } else {
-                                item.icon = getDrawable(R.drawable.ic_bookmark_border)
-                                item.icon.setTint(Prefs.iconColor)
-                                val results: RealmResults<BookmarkModel> = realm.where(BookmarkModel::class.java).equalTo("bookMark", web.url.toString()).findAll()
-                                results.deleteAllFromRealm()
-                            }
-                        }
-                        return true
-                    }
-                }
-            }
         }
         return false
-    }
-
-    /**
-     * Find the Bookmark
-     */
-    fun getBookmark(realm: Realm): OrderedRealmCollection<BookmarkModel> {
-        return realm.where(BookmarkModel::class.java).findAll()
     }
 
     /**
@@ -360,69 +280,8 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
      */
     override var videoViewer: FlashVideoViewer? = null
     override val lowerVideoPadding: PointF = PointF(0f, 0f)
-
-    /**
-     * Fullscreen Videos
-     */
-    private fun updateProgress() {
-        web.webChromeClient = object : WebChromeClient() {
-            val progress: Subject<Int> = web.parent.progressObservable
-            val title: BehaviorSubject<String> = web.parent.titleObservable
-            val activity = (web.context as? ActivityContract)
-            val context = web.context!!
-            override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
-                super.onShowCustomView(view, callback)
-                window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                        WindowManager.LayoutParams.FLAG_FULLSCREEN)
-                if (view is FrameLayout) {
-                    fullscreenView = view
-                    fullscreenContainer.addView(fullscreenView)
-                    fullscreenContainer.setBackgroundColor(Color.TRANSPARENT)
-                    fullscreenContainer.visibility = View.VISIBLE
-                    mainContainer.visibility = View.GONE
-                }
-            }
-
-            override fun onHideCustomView() {
-                super.onHideCustomView()
-                fullscreenContainer.removeView(fullscreenView)
-                fullscreenContainer.visibility = View.GONE
-                mainContainer.setBackgroundColor(Color.TRANSPARENT)
-                mainContainer.visibility = View.VISIBLE
-            }
-
-            override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-                L.v { "Chrome Console ${consoleMessage.lineNumber()}: ${consoleMessage.message()}" }
-                return true
-            }
-
-            override fun onReceivedTitle(view: WebView, title: String) {
-                super.onReceivedTitle(view, title)
-                if (title.startsWith("http") || this.title.value == title) return
-                this.title.onNext(title)
-            }
-
-            override fun onProgressChanged(view: WebView, newProgress: Int) {
-                super.onProgressChanged(view, newProgress)
-                progress.onNext(newProgress)
-            }
-
-            override fun onShowFileChooser(webView: WebView, filePathCallback: ValueCallback<Array<Uri>?>, fileChooserParams: FileChooserParams): Boolean {
-                activity?.openFileChooser(filePathCallback, fileChooserParams)
-                        ?: webView.flashSnackbar(R.string.file_chooser_not_found)
-                return activity != null
-            }
-
-            override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
-                L.i { "Requesting geolocation" }
-                context.kauRequestPermissions(PERMISSION_ACCESS_FINE_LOCATION) { granted, _ ->
-                    L.i { "Geolocation response received; ${if (granted) "granted" else "denied"}" }
-                    callback(origin, granted, true)
-                }
-            }
-        }
-    }
 }
+
 
 
 

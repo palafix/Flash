@@ -6,7 +6,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import ca.allanwang.kau.iitems.KauIItem
 import ca.allanwang.kau.ui.createSimpleRippleDrawable
-import ca.allanwang.kau.utils.*
+import ca.allanwang.kau.utils.bindView
+import ca.allanwang.kau.utils.gone
+import ca.allanwang.kau.utils.visible
+import ca.allanwang.kau.utils.withAlpha
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.commons.utils.DiffCallback
@@ -31,19 +34,19 @@ class NotificationIItem(val notification: FlashNotif, val cookie: String) : KauI
                     .withOnClickListener { v, _, item, position ->
                         val notif = item.notification
                         if (notif.unread) {
-                            FlashRunnable.markNotificationRead(v.context, notif.id, item.cookie)
+                            FlashRunnable.markNotificationRead(v!!.context, notif.id, item.cookie)
                             adapter.set(position, NotificationIItem(notif.copy(unread = false), item.cookie))
                         }
-                        v.context.launchWebOverlay(notif.url)
+                        v!!.context.launchWebOverlay(notif.url)
                         true
                     }
         }
 
         //todo see if necessary
         val DIFF: DiffCallback<NotificationIItem> by lazy(::Diff)
-        }
+    }
 
-private class Diff : DiffCallback<NotificationIItem> {
+    private class Diff : DiffCallback<NotificationIItem> {
 
         override fun areItemsTheSame(oldItem: NotificationIItem, newItem: NotificationIItem) =
                 oldItem.notification.id == newItem.notification.id
@@ -53,7 +56,7 @@ private class Diff : DiffCallback<NotificationIItem> {
 
         override fun getChangePayload(oldItem: NotificationIItem, oldItemPosition: Int, newItem: NotificationIItem, newItemPosition: Int): Any? {
             return newItem
-            }
+        }
     }
 
     class ViewHolder(itemView: View) : FastAdapter.ViewHolder<NotificationIItem>(itemView) {
@@ -73,7 +76,6 @@ private class Diff : DiffCallback<NotificationIItem> {
                     Prefs.nativeBgColor(notif.unread))
             content.setTextColor(Prefs.textColor)
             date.setTextColor(Prefs.textColor.withAlpha(150))
-
             val glide = glide
             glide.load(notif.img)
                     .transform(FlashGlide.roundCorner)
@@ -83,6 +85,7 @@ private class Diff : DiffCallback<NotificationIItem> {
 
             content.text = notif.content
             date.text = notif.timeString
+
         }
 
         override fun unbindView(item: NotificationIItem) {

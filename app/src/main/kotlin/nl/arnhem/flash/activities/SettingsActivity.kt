@@ -31,6 +31,7 @@ import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import nl.arnhem.flash.utils.iab.IabSettings
 
 
+@Suppress("DEPRECATED_IDENTITY_EQUALS")
 /**
  * Created by Allan Wang on 2017-06-06.
  **/
@@ -119,7 +120,7 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
 
         subItems(R.string.notifications, getNotificationPrefs()) {
             descRes = R.string.notifications_desc
-            iicon = GoogleMaterial.Icon.gmd_notifications
+            iicon = GoogleMaterial.Icon.gmd_notifications_none
         }
 
 //        subItems(R.string.network, getNetworkPrefs()) {
@@ -127,27 +128,7 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
 //            iicon = GoogleMaterial.Icon.gmd_network_cell
 //        }
 
-        plainText(R.string.about_flash) {
-            descRes = R.string.about_flash_desc
-            iicon = GoogleMaterial.Icon.gmd_info
-            onClick = {
-                startActivityForResult<AboutActivity>(9, bundleBuilder = {
-                    withSceneTransitionAnimation(this@SettingsActivity)
-                })
-            }
-        }
-        //plainText(R.string.help_translate) {
-        //    descRes = R.string.help_translate_desc
-        //    iicon = GoogleMaterial.Icon.gmd_translate
-        //    onClick = { startLink(R.string.translation_url) }
-        //}
-
-        plainText(R.string.replay_intro) {
-            iicon = GoogleMaterial.Icon.gmd_replay
-            onClick = { launchNewTask<IntroActivity>(cookies(), true) }
-        }
-
-        subItems(R.string.experimental, getExperimentalPrefs()) {
+        subItems(R.string.analytics, getExperimentalPrefs()) {
             descRes = R.string.experimental_desc
             iicon = CommunityMaterial.Icon.cmd_flask_outline
         }
@@ -163,6 +144,7 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
             iicon = GoogleMaterial.Icon.gmd_update
             onClick = {
                 AppUpdater(this@SettingsActivity)
+                        .setDisplay(Display.DIALOG)
                         .setTitleOnUpdateAvailable(R.string.found_update)
                         .setTitleOnUpdateNotAvailable(R.string.no_update)
                         .setContentOnUpdateNotAvailable(R.string.no_update_desc)
@@ -173,7 +155,6 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
                         .setUpdateFrom(UpdateFrom.JSON)
                         .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
                         .setIcon(R.drawable.flash_notify) // Notification icon
-                        .setDisplay(Display.DIALOG)
                         .showAppUpdated(true)
                         .start()
             }
@@ -183,15 +164,37 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
             checkbox(R.string.custom_pro, { Prefs.debugPro }, { Prefs.debugPro = it })
         }
 
+        plainText(R.string.why_pro) {
+            iicon = GoogleMaterial.Icon.gmd_help_outline
+            visible = { !IS_Flash_PRO }
+            onClick = {
+                flashWhyPro()
+            }
+        }
+
         plainText(R.string.get_pro) {
             descRes = R.string.get_pro_desc
-            iicon = GoogleMaterial.Icon.gmd_star
+            iicon = GoogleMaterial.Icon.gmd_star_border
             visible = { !IS_Flash_PRO }
             onClick = {
                 restorePurchases()
             }
         }
 
+        plainText(R.string.about_flash) {
+            descRes = R.string.about_flash_desc
+            iicon = GoogleMaterial.Icon.gmd_info_outline
+            onClick = {
+                startActivityForResult<AboutActivity>(9, bundleBuilder = {
+                    withSceneTransitionAnimation(this@SettingsActivity)
+                })
+            }
+        }
+
+        plainText(R.string.replay_intro) {
+            iicon = GoogleMaterial.Icon.gmd_replay
+            onClick = { launchNewTask<IntroActivity>(cookies(), true) }
+        }
     }
 
     fun KPrefItemBase.BaseContract<*>.dependsOnPro() {

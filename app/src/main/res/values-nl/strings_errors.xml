@@ -6,4 +6,6 @@
      <string name = "invalid_share_url_desc">U hebt een tekstblok gedeeld dat geen URL is. De tekst is gekopieerd naar je klembord, dus je kunt het zelf handmatig delen. </string>
      <string name = "no_download_manager">Geen downloadmanager </string>
      <string name = "no_download_manager_desc">De downloadmanager is niet ingeschakeld. Wilt u dit inschakelen om downloads toe te staan? </string>
+
+    <string name="error_notification">Er is een fout opgetreden bij het ophalen van meldingen</string>
 </resources>

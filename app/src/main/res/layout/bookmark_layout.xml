@@ -8,45 +8,44 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.BookMarkActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/favorites_height"
-        android:fitsSystemWindows="true">
+        android:layout_height="?attr/actionBarSize"
+        app:layout_scrollFlags="scroll|enterAlways|snap">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/book_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:layout_scrollFlags="scroll|enterAlways|snap"
-        app:popupTheme="@style/AppTheme.PopupOverlay" />
+        app:layout_scrollFlags="scroll|enterAlways|snap">
 
         <TextView
             android:id="@+id/textView"
-            android:text="@string/favorites"
+            android:text="@string/bookmarks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/favorites_text"
             android:layout_gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-            android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
-            tools:ignore="RelativeOverlap" />
+            android:layout_centerVertical="true"/>
 
+    </android.support.v7.widget.Toolbar>
 
-    </RelativeLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerbookmark"
         android:paddingTop="16dp"
         android:clipToPadding="false"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </LinearLayout>
 

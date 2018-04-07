@@ -19,6 +19,7 @@ import nl.arnhem.flash.R
 import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.flashDownload
+import nl.arnhem.flash.utils.flashSnackbar
 
 
 /**
@@ -33,6 +34,7 @@ class FlashVideoViewer @JvmOverloads constructor(
     val background: View by bindView(R.id.video_background)
     val video: FlashVideoView by bindView(R.id.video)
     private val restarter: ImageView by bindView(R.id.video_restart)
+
 
     companion object {
         /**
@@ -60,7 +62,11 @@ class FlashVideoViewer @JvmOverloads constructor(
     init {
         inflate(R.layout.view_video, true)
         alpha = 0f
-        background.setBackgroundColor(if (Prefs.bgColor.isColorDark) Prefs.bgColor.withMinAlpha(200) else Color.BLACK)
+        background.setBackgroundColor(
+                if (!Prefs.blackMediaBg && Prefs.bgColor.isColorDark)
+                    Prefs.bgColor.withMinAlpha(200)
+                else
+                    Color.BLACK)
         video.setViewerContract(this)
         video.pause()
         toolbar.inflateMenu(R.menu.menu_video)
@@ -71,7 +77,10 @@ class FlashVideoViewer @JvmOverloads constructor(
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_pip -> video.isExpanded = false
-                R.id.action_download -> context.flashDownload(video.videoUri)
+                R.id.action_download -> {
+                    context.flashDownload(video.videoUri)
+                    flashSnackbar(R.string.downloading)
+                }
             }
             true
         }

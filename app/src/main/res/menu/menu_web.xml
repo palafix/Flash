@@ -4,12 +4,6 @@
     tools:context="nl.arnhem.flash.activities.WebOverlayActivity">
 
     <item
-        android:id="@+id/addbookmark"
-        android:orderInCategory="100"
-        android:title="@string/add_bookmark"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_copy_link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,6 +15,6 @@
         android:id="@+id/action_share"
         android:orderInCategory="300"
         android:title="@string/kau_share"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>
 

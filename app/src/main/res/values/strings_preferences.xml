@@ -13,17 +13,21 @@
     <string name="network">Network</string>
     <string name="network_desc">Define options that affect metered networks</string>
 
-    <string name="experimental">Experimental</string>
-    <string name="experimental_desc">Enable early access to potentially unstable features</string>
+    <string name="experimental_desc">Enable anonymous analytics to help improve the app.</string>
 
     <string name="get_pro">Get Flash Pro</string>
     <string name="get_pro_desc">Purchase or restore pro and unlock the full potential of Flash! Includes ad blockers, custom themes, full configurations, and much more to come!</string>
 
+    <string name="why_pro">Why Flash Pro?</string>
+
     <string name="get_update">Update Flash</string>
+    <string name="Auto_update">Update notification</string>
+    <string name="no_show_update">Turn off</string>
     <string name="get_update_desc">Click here to check if there is a update available.</string>
+    <string name="Auto_update_desc">On for AppUpdate notification. Turn Off if you don\'t want to get a notification.</string>
+    <string name="no_Auto_update_desc">Turn Off if you don\'t want to get a notification.</string>
 
-
-    <string name="about_flash">About Flash for Facebook</string>
+    <string name="about_flash">About Flash Social</string>
     <string name="about_flash_desc">Version, Credits, and FAQs</string>
 
     <string name="help_translate">Help Translate</string>

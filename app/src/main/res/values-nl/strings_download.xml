@@ -11,4 +11,14 @@
      <string name = "downloaded_video">Video gedownload </string>
      <string name = "downloading_file">Bestand downloaden </string>
      <string name = "downloaded_file">Bestand gedownload </string>
+
+     <string name="download_image">Download afbeelding</string>
+     <string name="share_image">Deel afbeelding link</string>
+     <string name="copy_image">Kopieer website link</string>
+
+     <string name="download_video">Download video</string>
+
+     <string name="downloaded_compleet">Download Gereed…</string>
+     <string name="download_open">Open…</string>
+
 </resources>

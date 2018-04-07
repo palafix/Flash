@@ -3,8 +3,10 @@ package nl.arnhem.flash.web
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
+import nl.arnhem.flash.utils.AdRemoval
 import nl.arnhem.flash.utils.L
-import nl.arnhem.flash.utils.FlashPglAdBlock
+import nl.arnhem.flash.utils.Prefs
+import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import okhttp3.HttpUrl
 import java.io.ByteArrayInputStream
 
@@ -23,7 +25,9 @@ fun WebView.shouldFlashInterceptRequest(request: WebResourceRequest): WebResourc
     val host = httpUrl.host()
     val url = httpUrl.toString()
     if (host.contains("facebook") || host.contains("fbcdn")) return null
-    if (FlashPglAdBlock.isAdHost(host)) return blankResource
+    if (!Prefs.AdRemoval && IS_Flash_PRO) {
+        if (AdRemoval.isAdHost(host)) return blankResource
+    }
 //    if (!shouldLoadImages && !Prefs.loadMediaOnMeteredNetwork && request.isMedia) return blankResource
     L.v { "Intercept Request: $host $url" }
     return null

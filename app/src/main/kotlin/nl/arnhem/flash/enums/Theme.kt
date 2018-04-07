@@ -5,7 +5,6 @@ import android.support.annotation.StringRes
 import nl.arnhem.flash.R
 import nl.arnhem.flash.injectors.CssAssets
 import nl.arnhem.flash.injectors.InjectorContract
-import nl.arnhem.flash.injectors.JsActions
 import nl.arnhem.flash.utils.Prefs
 
 const val FACEBOOK_BLUE = 0xff3b5998.toInt()
@@ -33,7 +32,7 @@ enum class Theme(@StringRes val textRes: Int,
     GRAY(R.string.theme_gray,
             CssAssets.MATERIAL_GRAY,
             { Color.BLACK },
-            { Color.GRAY},
+            { Color.GRAY },
             { 0xfffafafa.toInt() },
             { FACEBOOK_BLACK },
             { Color.WHITE },

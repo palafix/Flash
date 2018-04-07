@@ -21,11 +21,19 @@
     <string name = "notification_fetch_fail">Kon Meldingen niet ophalen</string>
     <string name = "notification_sound">​​Meldings geluid</string>
 
+    <string name="notification_channel">Meldingskanalen aanpassen</string>
+    <string name="notification_channel_desc">Wijzig geluid, trillingen, prioriteit, enz</string>
+
     <string name = "notification_ringtone">Meldings beltoon</string>
     <string name = "message_ringtone">Bericht beltoon</string>
     <string name = "select_ringtone">Selecteer beltoon</string>
 
     <string name = "notification_vibrate">Melding trillen</string>
     <string name = "notification_lights">Meldings lampjes</string>
+
+    <string name="notification_headsup">Meldings stijl</string>
+    <string name="notification_headsup_desc">Schakel aan om Heads Up meldingen te krijgen, of uit voor normale meldingen</string>
+
+    <string name="no_new_notifications">Geen nieuwe meldingen gevonden</string>
 
 </resources>

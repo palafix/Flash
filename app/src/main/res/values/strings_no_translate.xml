@@ -5,14 +5,15 @@
     <string name="paypal" translatable="false">PayPal</string>
     <string name="play_store_package_id" translatable="false">nl.arnhem.flash</string>
     <string name="translation_url" translatable="false">https://crwd.in/frost-for-facebook</string>
-    <string name="github_url" translatable="false">https://github.com/Palafix/Flash-for-Facebook</string>
-    <string name="frost_url" translatable="false">https://play.google.com/store/apps/details?id=com.pitchedapps.frost</string>
+    <string name="github_url" translatable="false">https://github.com/palafix/Flash</string>
+    <string name="frost_url" translatable="false">https://github.com/AllanWang/Frost-for-Facebook</string>
     <string name="xda_url" translatable="false">https://forum.xda-developers.com/android/apps-games/app-frost-facebook-t3685896</string>
     <string name="debug_report" translatable="false">Debug Report</string>
-    <string name="flash_prefix" translatable="false">Flash for Facebook:</string>
+    <string name="flash_prefix" translatable="false">Flash Social:</string>
     <string name="feedback" translatable="false">Feedback</string>
     <string name="bug_report" translatable="false">Bug Report</string>
     <string name="theme_issue" translatable="false">Theme Issue</string>
     <string name="feature_request" translatable="false">Feature Request</string>
+    <string name="reset_notif_epoch" translatable="false">Reset Notif Epoch</string>
 
 </resources>

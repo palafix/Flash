@@ -2,12 +2,13 @@ package nl.arnhem.flash.web
 
 
 import android.webkit.JavascriptInterface
+import io.reactivex.subjects.Subject
 import nl.arnhem.flash.activities.MainActivity
+import nl.arnhem.flash.contracts.MainActivityContract
 import nl.arnhem.flash.contracts.VideoViewHolder
 import nl.arnhem.flash.facebook.FbCookie
 import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.views.FlashWebView
-import io.reactivex.subjects.Subject
 
 
 /**
@@ -64,6 +65,7 @@ class FlashJSI(val web: FlashWebView) {
     @JavascriptInterface
     fun longClick(start: Boolean) {
         activity?.viewPager?.enableSwipe = !start
+        web.parent.swipeEnabled = !start
     }
 
     /**
@@ -71,7 +73,11 @@ class FlashJSI(val web: FlashWebView) {
      */
     @JavascriptInterface
     fun disableSwipeRefresh(disable: Boolean) {
-        web.post { web.parent.swipeEnabled = !disable }
+        web.parent.swipeEnabled = !disable
+        if (disable) {
+            // locked onto an input field; ensure content is visible
+            (context as? MainActivityContract)?.collapseAppBar()
+        }
     }
 
     @JavascriptInterface
@@ -95,7 +101,7 @@ class FlashJSI(val web: FlashWebView) {
     @JavascriptInterface
     fun isReady() {
         refresh.onNext(false)
-        }
+    }
 
     @JavascriptInterface
     fun handleHtml(html: String?) {

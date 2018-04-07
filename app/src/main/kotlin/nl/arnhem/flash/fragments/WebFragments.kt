@@ -2,12 +2,12 @@ package nl.arnhem.flash.fragments
 
 import android.webkit.WebView
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
-import nl.arnhem.flash.contracts.MainFabContract
 import nl.arnhem.flash.R
+import nl.arnhem.flash.contracts.MainFabContract
 import nl.arnhem.flash.facebook.FbItem
-import nl.arnhem.flash.views.FlashWebView
 import nl.arnhem.flash.injectors.JsActions
 import nl.arnhem.flash.utils.L
+import nl.arnhem.flash.views.FlashWebView
 import nl.arnhem.flash.web.FlashWebViewClient
 import nl.arnhem.flash.web.FlashWebViewClientMenu
 
@@ -37,7 +37,7 @@ class WebFragment : BaseFragment() {
             return super.updateFab(contract)
         }
         if (baseEnum.isFeed) {
-            contract.showFab(GoogleMaterial.Icon.gmd_edit) {
+            contract.showFab(GoogleMaterial.Icon.gmd_flash_on) {
                 JsActions.CREATE_POST.inject(web)
             }
             L.e { "UPP" }

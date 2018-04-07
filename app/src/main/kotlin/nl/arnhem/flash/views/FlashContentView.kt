@@ -13,7 +13,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import nl.arnhem.flash.R
-import nl.arnhem.flash.contracts.MainActivityContract
 import nl.arnhem.flash.contracts.FlashContentContainer
 import nl.arnhem.flash.contracts.FlashContentCore
 import nl.arnhem.flash.contracts.FlashContentParent
@@ -60,14 +59,12 @@ abstract class FlashContentView<out T> @JvmOverloads constructor(
 
     protected abstract val layoutRes: Int
 
-    override var swipeEnabled: Boolean
-        get() = refresh.isEnabled
+    override var swipeEnabled = true
         set(value) {
-            refresh.isEnabled = value
-            if (!value) {
-                // locked onto an input field; ensure content is visible
-                (context as? MainActivityContract)?.collapseAppBar()
-            }
+            if (field == value)
+                return
+            field = value
+            refresh.post { refresh.isEnabled = value }
         }
 
     /**

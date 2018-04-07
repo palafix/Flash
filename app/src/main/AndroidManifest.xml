@@ -49,20 +49,36 @@
             android:theme="@style/FlashTheme.Overlay.Slide" />
 
         <activity
-            android:name=".activities.BookMarkActivity"
-            android:configChanges="orientation|screenSize|locale"
-            android:label="@string/bookmarks"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTop"
-            android:theme="@style/FlashTheme.Overlay.Slide"/>
-
-        <activity
             android:name=".activities.WebOverlayBasicActivity"
             android:configChanges="orientation|screenSize|locale"
             android:hardwareAccelerated="true"
             android:label="@string/flash_web"
             android:launchMode="singleTop"
             android:theme="@style/FlashTheme.Overlay.Slide" />
+
+        <activity
+            android:name=".activities.BookMarkActivity"
+            android:configChanges="orientation|screenSize|locale"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:theme="@style/FlashTheme.Overlay.Slide"/>
+
+        <activity
+            android:name=".activities.HistoryActivity"
+            android:configChanges="orientation|screenSize|locale"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:theme="@style/FlashTheme.Overlay.Slide"/>
+
+        <activity
+            android:name=".activities.CustomTabs"
+            android:configChanges="locale|orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:label="@string/flash_web"
+            android:launchMode="singleTop"
+            android:theme="@style/FlashTheme.Overlay.Slide"
+            android:windowSoftInputMode="adjustResize"/>
+
         <activity
             android:name=".activities.FlashWebActivity"
             android:autoRemoveFromRecents="true"

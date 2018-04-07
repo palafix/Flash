@@ -4,35 +4,58 @@
     <version title="v" />
     <item text="" />
     -->
+    <version title="v1.1.2" />
+    <item text="Fixed, login on external site\'s, crash the app" />
+    <item text="Fixed, Overlay redirection" />
+    <item text="Fixed, app crashes when remove a bookmark en then you click on it" />
+    <item text="Fixed, page was broken, now it\'s load fine" />
+    <item text="Changed download location, videos-images-documents. Destination is (Downloads/Flash/)" />
+    <item text="Add option to turn off/on AppUpdate notification. Go to App Settings/Notifications/Update notification" />
+    <item text="Add option to turn off/on Floating Action Button. Go to App Settings/Feed/Status FAB" />
+    <item text="Added search function to external site overlay" />
 
-    <version title="v1.0.8" />
+    <version title="v1.1.1" />
+    <item text="Change some app style" />
+    <item text="Added icons to timeline" />
+    <item text="Added CustomTabs like chrome" />
+    <item text="Long press in external site\'s to download image\'s" />
+    <item text="Remove ads in external site\'s. Disable it in the newsfeed settings (Needs Pro)" />
+
+    <version title="v1.1.0" />
+    <item text="Change FAB icon" />
+    <item text="Fixed accept Cookies in external websites" />
+    <item text="Bookmarks now works good." />
+    <item text="Added why (Flash Pro) in Settings." />
+    <item text="Fixed some typos." />
+
+    <version title="v1.0.9" />
     <item text="Again fixed theme\'s" />
     <item text="Added update checker" />
     <item text="Minor Bug Fixed" />
 
-    <version title="v1.0.7" />
+    <version title="v1.0.8" />
     <item text="Now it is possible to get full screen videos on external site\'s" />
     <item text="Minor Bug Fixed" />
 
-    <version title="v1.0.6" />
+    <version title="v1.0.7" />
     <item text="Fixed all theme\'s. Problem was, text under the toolbar in status update" />
 
-    <version title="v1.0.5" />
+    <version title="v1.0.6" />
     <item text="Added FloatingActionbutton, easy status update. (Allan Wang: Frost For Facebook)" />
 
-    <version title="v1.0.4" />
+    <version title="v1.0.5" />
     <item text="Fixed notification profile image\'s" />
 
-    <version title="v1.0.3" />
+    <version title="v1.0.4" />
     <item text="Fixed website\'s insane long url when open in Weboverlay. Now all link/website\'s should work/load properly" />
 
-    <version title="v1.0.2" />
+    <version title="v1.0.3" />
     <item text="Add option to disable pip (settings > behaviour)" />
 
-    <version title="v1.0.1" />
+    <version title="v1.0.2" />
     <item text="Update facebook theme " />
 
-    <version title="v1.0.0" />
+    <version title="v1.0.1" />
     <item text="Fix overlay, now you can zoom in websites and sites auto fit in screen" />
     <item text="Dumpert.nl fixed. Videos now work" />
     <item text="Bookmark looks better" />

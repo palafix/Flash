@@ -1,9 +1,9 @@
 package nl.arnhem.flash.contracts
 
 import android.view.View
-import nl.arnhem.flash.facebook.FbItem
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
+import nl.arnhem.flash.facebook.FbItem
 
 /**
  * Created by Allan Wang on 20/12/17.
@@ -55,6 +55,7 @@ interface FlashContentParent : DynamicUiContract {
 
     /**
      * Toggle state for allowing swipes
+     * Allowed on any thread
      */
     var swipeEnabled: Boolean
 

@@ -1,11 +1,11 @@
 package nl.arnhem.flash.injectors
 
 import android.webkit.WebView
-import nl.arnhem.flash.utils.L
-import nl.arnhem.flash.web.FlashWebViewClient
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.SingleSubject
+import nl.arnhem.flash.utils.L
+import nl.arnhem.flash.web.FlashWebViewClient
 import org.apache.commons.text.StringEscapeUtils
 import java.util.*
 
@@ -101,8 +101,7 @@ fun WebView.jsInject(vararg injectors: InjectorContract, callback: ((Int) -> Uni
 }
 
 fun FlashWebViewClient.jsInject(vararg injectors: InjectorContract,
-                                callback: ((Int) -> Unit)? = null)
-        = web.jsInject(*injectors, callback = callback)
+                                callback: ((Int) -> Unit)? = null) = web.jsInject(*injectors, callback = callback)
 
 /**
  * Wrapper class to convert a function into an injector

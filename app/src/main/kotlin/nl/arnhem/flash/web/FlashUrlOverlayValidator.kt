@@ -59,8 +59,13 @@ fun FlashWebView.requestWebOverlay(url: String): Boolean {
             context.launchWebOverlay(url)
             return true
         }
+        if (url.contains("filter_type=")) {
+            L.i { "return false switch" }
+            return false
+        }
         L.i { "return false switch" }
-        return false
+        context.launchWebOverlayBasic(url)
+        return true
     }
     L.v { "Request web overlay passed" }
     context.launchWebOverlay(url)
@@ -72,6 +77,11 @@ fun FlashWebView.requestWebOverlay(url: String): Boolean {
  */
 val messageWhitelist = setOf(FbItem.MESSAGES, FbItem.CHAT, FbItem.FEED_MOST_RECENT, FbItem.FEED_TOP_STORIES).map { it.url }.toSet()
 
-val String.shouldUseBasicAgent
-    get() = !contains("story.php") //we will use basic agent for anything that isn't a comment section
-//    get() = (messageWhitelist.any { contains(it) }) || this == FB_URL_BASE
+val String.shouldUseBasicAgent: Boolean
+    get() {
+        if (contains("story.php"))  // do not use basic for comment section
+            return false
+        if (contains("/events/"))   // do not use for events (namely the map)
+            return false
+        return true                 // use for everything else
+    }

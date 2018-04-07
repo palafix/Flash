@@ -1,4 +1,7 @@
+@file:Suppress("KDocUnresolvedReference")
+
 package nl.arnhem.flash.contracts
+
 
 import com.mikepenz.iconics.typeface.IIcon
 import io.reactivex.subjects.PublishSubject
@@ -13,7 +16,11 @@ interface MainActivityContract : ActivityContract, MainFabContract {
     val fragmentSubject: PublishSubject<Int>
     fun setTitle(res: Int)
     fun setTitle(text: CharSequence)
+    /**
+     * Available on all threads
+     */
     fun collapseAppBar()
+
     fun reloadFragment(fragment: BaseFragment)
 }
 

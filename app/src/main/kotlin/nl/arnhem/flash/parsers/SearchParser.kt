@@ -40,7 +40,7 @@ data class FlashSearches(val results: List<FlashSearch>) {
  *
  * Note that it's best to create search results from [create]
  */
-data class FlashSearch(val href: String, val title: String, val description: String?) {
+data class FlashSearch(val href: String, val title: String, private val description: String?) {
 
     fun toSearchItem() = SearchItem(href, title, description)
 

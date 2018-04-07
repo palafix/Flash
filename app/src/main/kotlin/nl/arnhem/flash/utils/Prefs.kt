@@ -43,7 +43,7 @@ object Prefs : KPref() {
 
     var exitConfirmation: Boolean by kpref("exit_confirmation", true)
 
-    var notificationFreq: Long by kpref("notification_freq", 60L)
+    var notificationFreq: Long by kpref("notification_freq", 15L)
 
     var versionCode: Int by kpref("version_code", -1)
 
@@ -64,9 +64,11 @@ object Prefs : KPref() {
         get() = t.accentColor
 
     inline val accentColorForWhite: Int
-        get() = if (accentColor.isColorVisibleOn(Color.WHITE)) accentColor
-        else if (textColor.isColorVisibleOn(Color.WHITE)) textColor
-        else FACEBOOK_BLUE
+        get() = when {
+            accentColor.isColorVisibleOn(Color.WHITE) -> accentColor
+            textColor.isColorVisibleOn(Color.WHITE) -> textColor
+            else -> FACEBOOK_BLUE
+        }
 
     inline val nativeBgColor: Int
         get() = Prefs.bgColor.withAlpha(30)
@@ -139,6 +141,14 @@ object Prefs : KPref() {
     var messageScrollToBottom: Boolean by kpref("message_scroll_to_bottom", true)
 
     var enablePip: Boolean by kpref("enable_pip", true)
+
+    var HasFab: Boolean by kpref("has_fab", true)
+
+    var AdRemoval: Boolean by kpref("ad_removal", true)
+
+    var AutoUpdate: Boolean by kpref("auto_update", true)
+
+    var blackMediaBg: Boolean by kpref("black_media_bg", false)
 
     /**
      * Cache like value to determine if user has or had pro

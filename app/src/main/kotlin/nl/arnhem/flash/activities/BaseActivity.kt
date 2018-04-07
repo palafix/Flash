@@ -27,6 +27,7 @@ abstract class BaseActivity : KauBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (this !is WebOverlayActivityBase) setFlashTheme()
+        if (this !is CustomTabs) setFlashTheme()
     }
 
 //

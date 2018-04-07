@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:clickable="false"
-    android:theme="@style/FlashTheme.Video">
+    android:theme="@style/FlashTheme.Video"
+    android:fitsSystemWindows="true">
 
     <View
         android:id="@+id/video_background"

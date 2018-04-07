@@ -4,11 +4,9 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebSettings
 import ca.allanwang.kau.utils.AnimHolder
 import nl.arnhem.flash.contracts.FlashContentContainer
 import nl.arnhem.flash.contracts.FlashContentCore
@@ -18,7 +16,6 @@ import nl.arnhem.flash.fragments.WebFragment
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.flashDownload
 import nl.arnhem.flash.web.*
-
 
 
 @Suppress("DEPRECATION")
@@ -48,13 +45,7 @@ class FlashWebView @JvmOverloads constructor(
             mediaPlaybackRequiresUserGesture = false
             allowFileAccess = true
             textZoom = Prefs.webTextScaling
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-            }
             javaScriptCanOpenWindowsAutomatically = true
-            setGeolocationEnabled(true)
-            allowFileAccess = true
-            setAppCacheEnabled(true)
             domStorageEnabled = true
             databaseEnabled = true
             isVerticalScrollBarEnabled = true
@@ -64,10 +55,6 @@ class FlashWebView @JvmOverloads constructor(
             saveFormData = true
             useWideViewPort = true
             loadWithOverviewMode = true
-            pluginState = WebSettings.PluginState.ON_DEMAND
-            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-            setRenderPriority(WebSettings.RenderPriority.HIGH)
-            textZoom = Prefs.webTextScaling
         }
         setLayerType(LAYER_TYPE_HARDWARE, null)
         // attempt to get custom client; otherwise fallback to original

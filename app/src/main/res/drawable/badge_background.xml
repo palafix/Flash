@@ -3,7 +3,7 @@
     <item android:id="@android:id/background">
         <shape>
             <corners android:radius="10dp" />
-            <solid android:color="@color/facebook_blue" />
+            <solid android:color="@color/md_green_A700" />
         </shape>
     </item>
 </layer-list>

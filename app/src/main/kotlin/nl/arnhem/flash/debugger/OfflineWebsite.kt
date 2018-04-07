@@ -291,8 +291,7 @@ class OfflineWebsite(private val url: String,
     private fun String.shorten() =
             if (length <= 10) this else substring(length - 10)
 
-    private fun Set<String>.clean()
-            = filter(String::isNotBlank).filter { it.startsWith("http") }
+    private fun Set<String>.clean() = filter(String::isNotBlank).filter { it.startsWith("http") }
 
     private fun reset() {
         cancelled = false

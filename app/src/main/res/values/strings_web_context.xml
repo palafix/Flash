@@ -11,5 +11,15 @@
     <string name="open_link">Open Link</string>
     <string name="copy_link">Copy Link</string>
     <string name="copy_text">Copy Text</string>
+    <string name="open_link_chrome">Open in external Browser</string>
+    <string name="chrome">Made possible by: Flash/Chrome</string>
+    <string name="private_info">Your connection to this site is private.</string>
+    <string name="none_private_info">Your connection to this site is not private.</string>
     <string name="debug_image_link_subject" translatable="false">Flash for Facebook: Image Link Debug</string>
+    <string name="google_search">Search on google or type a url</string>
+
+    <string name="suggest_url">http://suggestqueries.google.com/complete/search?hl=en&amp;ie=utf_8&amp;oe=utf_8&amp;output=toolbar&amp;q=%s</string>
+    <string name="suggest_button_label">Suggest</string>
+    <string name="input_text_hint">Keyword</string>
+    <string name="no_suggestions">No suggestions</string>
 </resources>

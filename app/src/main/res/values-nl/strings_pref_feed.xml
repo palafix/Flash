@@ -6,14 +6,22 @@
     <string name = "aggressive_recents">Filter Recents</string>
     <string name = "aggressive_recents_desc">Filter extra oude berichten uit Facebook\'s oorspronkelijke meest Recent-Nieuwsoverzicht. Schakel dit uit als uw Nieuwsoverzicht leeg is.</string>
     <string name = "composer">Status wat ben je aan het doen?</string>
-    <string name = "composer_desc">Toon status in de Nieuwsoverzicht</string>
+    <string name = "composer_desc">Toon/Verberg status in de Nieuwsoverzicht</string>
+
+    <string name="adremoval">Externe site advertenties</string>
+    <string name="adremoval_desc">Toon/Verberg advertenties in externe site\'s</string>
+
+    <string name="fab">Fab</string>
+
+    <string name="hide_fab">Status FAB</string>
+    <string name="hide_fab_desc">Toon/Verberg status FAB rechts onder</string>
 
     <string name = "pro_features">Pro-functies</string>
     <string name = "suggested_friends">Voorgestelde vrienden</string>
-    <string name = "suggested_friends_desc">Toon "Mensen die je kent" in de feed</string>
+    <string name = "suggested_friends_desc">Toon/Verberg "Mensen die je misschien kent" in het Nieuwsoverzicht</string>
     <string name = "suggested_groups">Aanbevolen groepen</string>
-    <string name = "suggested_groups_desc">Toon "Aanbevolen groepen" in de feed</string>
+    <string name = "suggested_groups_desc">Toon/Verberg "Aanbevolen groepen" in het Nieuwsoverzicht</string>
     <string name = "facebook_ads">Facebook advertenties</string>
-    <string name = "facebook_ads_desc">Toon wel of geen Facebook-advertenties</string>
+    <string name = "facebook_ads_desc">Toon/Verberg Facebook-advertenties in het Nieuwsoverzicht</string>
 
 </resources>

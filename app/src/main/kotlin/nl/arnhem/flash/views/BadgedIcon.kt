@@ -66,22 +66,22 @@ class BadgedIcon @JvmOverloads constructor(
         get() = badgeTextView.text.toString()
         set(String) {
             badgeTextView.gone()
-        val handler = Handler()
-        handler.postDelayed( {
-            val number = "1"
-                    if (badgeTextView.text == number) return@postDelayed
-                    badgeTextView.text = number
-                    if (number == "1") badgeTextView.visible()
-                    else badgeTextView.gone()
-                },300000)
-        handler.postDelayed( {
-            val number = "9+"
-                    if (badgeTextView.text == number) return@postDelayed
-                    badgeTextView.text = number
-                    if (number == "9+") badgeTextView.visible()
-                    else badgeTextView.gone()
-                },680000)
-    }
+            val handler = Handler()
+            handler.postDelayed({
+                val number = "1"
+                if (badgeTextView.text == number) return@postDelayed
+                badgeTextView.text = number
+                if (number == "1") badgeTextView.visible()
+                else badgeTextView.gone()
+            }, 300000)
+            handler.postDelayed({
+                val number = "9+"
+                if (badgeTextView.text == number) return@postDelayed
+                badgeTextView.text = number
+                if (number == "9+") badgeTextView.visible()
+                else badgeTextView.gone()
+            }, 680000)
+        }
 }
 
 

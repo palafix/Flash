@@ -23,7 +23,7 @@ import java.io.File
 
 /**
  * Created by Allan Wang on 05/01/18.
- */
+ **/
 class DebugActivity : KauBaseActivity() {
 
     private val toolbar: Toolbar by bindView(R.id.toolbar)

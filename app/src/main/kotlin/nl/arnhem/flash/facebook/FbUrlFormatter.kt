@@ -1,43 +1,35 @@
 package nl.arnhem.flash.facebook
 
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import nl.arnhem.flash.utils.L
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.*
-import java.util.regex.Pattern
 
 /**
-* Created by Allan Wang on 2017-07-07.
-*
-* Custom url builder so we can easily test it without the Android framework
-*/
+ * Created by Allan Wang on 2017-07-07.
+ *
+ * Custom url builder so we can easily test it without the Android framework
+ */
 inline val String.formattedFbUrl: String
     get() = FbUrlFormatter(this).toString()
 
 class FbUrlFormatter(url: String) {
     private val cleaned: String
     private val queries = mutableMapOf<String, String>()
+
+
     init {
         cleaned = cleanAndDecodeUrl(url)
     }
 
 
     // "clean" and decode an url, all in one
-    private fun cleanAndDecodeUrl(url:String):String {
+    private fun cleanAndDecodeUrl(url: String): String {
         if (url.isBlank()) return ""
         var cleanedUrl = url
         if (cleanedUrl.startsWith("#!")) cleanedUrl = cleanedUrl.substring(2)
         val urlRef = cleanedUrl
-        discardable.forEach { cleanedUrl = cleanedUrl.replace(("&h=.*").toRegex(), "").replace(("\\?acontext=.*").toRegex(), "") .replace(it, "", true) }
+        discardable.forEach { cleanedUrl = cleanedUrl.replace(("&h=.*").toRegex(), "").replace(("\\?acontext=.*").toRegex(), "").replace(it, "", true) }
         val changed = cleanedUrl != urlRef
         converter.forEach { (k, v) -> cleanedUrl = cleanedUrl.replace(k, v, true) }
         try {
@@ -104,14 +96,14 @@ class FbUrlFormatter(url: String) {
 
         val discardableQueries = arrayOf("ref", "refid")
 
-                val converter = listOf(
+        val converter = listOf(
                 "\\3C " to "%3C", "\\3E " to "%3E", "\\23 " to "%23", "\\25 " to "%25",
-        "\\7B " to "%7B", "\\7D " to "%7D", "\\7C " to "%7C", "\\5C " to "%5C",
-        "\\5E " to "%5E", "\\7E " to "%7E", "\\5B " to "%5B", "\\5D " to "%5D",
-        "\\60 " to "%60", "\\3B " to "%3B", "\\2F " to "%2F", "\\3F " to "%3F",
-        "\\3A " to "%3A", "\\40 " to "%40", "\\3D " to "%3D", "\\26 " to "%26",
-        "\\24 " to "%24", "\\2B " to "%2B", "\\22 " to "%22", "\\2C " to "%2C",
-        "\\20 " to "%20"
+                "\\7B " to "%7B", "\\7D " to "%7D", "\\7C " to "%7C", "\\5C " to "%5C",
+                "\\5E " to "%5E", "\\7E " to "%7E", "\\5B " to "%5B", "\\5D " to "%5D",
+                "\\60 " to "%60", "\\3B " to "%3B", "\\2F " to "%2F", "\\3F " to "%3F",
+                "\\3A " to "%3A", "\\40 " to "%40", "\\3D " to "%3D", "\\26 " to "%26",
+                "\\24 " to "%24", "\\2B " to "%2B", "\\22 " to "%22", "\\2C " to "%2C",
+                "\\20 " to "%20"
 
 
         )

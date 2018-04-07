@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<version title="English." />
+    <version title="This is what you get in Flash Pro." />
+    <item text="Unlocks - Custom theme" />
+    <item text="Unlocks - Customizable tabs" />
+    <item text="Unlocks - Disable hide people you may know in the feed." />
+	<item text="Unlocks - Disable facebook ads." />
+	<item text="Unlocks - Disable Suggested Groups in the feed." />
+	
+	<version title="Dutch." />
+    <version title="Dit is wat je krijgt in Flash Pro." />
+    <item text="Ontgrendeld - Custom thema" />
+    <item text="Ontgrendeld - Aanpasbare tabbladen" />
+    <item text="Ontgrendeld - Deactiveer verbergen mensen die u misschien kent in de nieuwsoverzicht." />
+	<item text="Ontgrendeld - Deactiveer Facebook-advertenties." />
+	<item text="Ontgrendeld - Deactiveer voorgestelde groepen in de nieuwsoverzicht." />
+	
+</resources>

@@ -1,7 +1,6 @@
 package nl.arnhem.flash.activities
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.ActivityOptions
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -9,10 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.PointF
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.support.annotation.StringRes
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.FloatingActionButton
@@ -22,7 +19,6 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -37,11 +33,11 @@ import co.zsmb.materialdrawerkt.builders.accountHeader
 import co.zsmb.materialdrawerkt.builders.drawer
 import co.zsmb.materialdrawerkt.draweritems.badge
 import co.zsmb.materialdrawerkt.draweritems.badgeable.primaryItem
-import co.zsmb.materialdrawerkt.draweritems.badgeable.secondaryItem
 import co.zsmb.materialdrawerkt.draweritems.divider
 import co.zsmb.materialdrawerkt.draweritems.profile.profile
 import co.zsmb.materialdrawerkt.draweritems.profile.profileSetting
 import co.zsmb.materialdrawerkt.draweritems.sectionHeader
+import co.zsmb.materialdrawerkt.draweritems.sectionItem
 import com.crashlytics.android.answers.ContentViewEvent
 import com.github.javiersantos.appupdater.AppUpdater
 import com.github.javiersantos.appupdater.enums.Display
@@ -82,7 +78,6 @@ import nl.arnhem.flash.views.FlashViewPager
 import java.util.*
 import kotlin.collections.set
 import kotlin.properties.Delegates
-import kotlin.reflect.KClass
 
 /**
  * Created by Allan Wang on 20/12/17.
@@ -155,13 +150,34 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         }
         setupDrawer(savedInstanceState)
         L.i { "Main started in ${System.currentTimeMillis() - start} ms" }
+
         initFab()
-        AppUpdater(this)
-                .setDisplay(Display.NOTIFICATION)
-                .setUpdateFrom(UpdateFrom.JSON)
-                .setIcon(R.drawable.flash_notify) // Notification icon
-                .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
-                .start()
+
+        if (Prefs.AutoUpdate) {
+            AppUpdater(this)
+                    .setDisplay(Display.DIALOG)
+                    .setTitleOnUpdateAvailable(R.string.found_update)
+                    .setTitleOnUpdateNotAvailable(R.string.no_update)
+                    .setContentOnUpdateNotAvailable(R.string.no_update_desc)
+                    .setButtonUpdate(R.string.update_now)
+                    .setButtonDismiss(R.string.cancel_update)
+                    .setButtonDoNotShowAgain(R.string.no_show_update)
+                    .setButtonDoNotShowAgainClickListener { _, _ ->
+                        materialDialogThemed {
+                            title(R.string.no_show_update)
+                            content(R.string.no_Auto_update_desc)
+                            positiveText(R.string.kau_yes)
+                            negativeText(R.string.kau_no)
+                            onPositive { _, _ -> refreshAll() }
+                            checkBoxPromptRes(R.string.kau_do_not_show_again, false, { _, _ -> Prefs.AutoUpdate = false })
+                        }
+                    }
+                    .setUpdateFrom(UpdateFrom.JSON)
+                    .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
+                    .setIcon(R.drawable.flash_notify) // Notification icon
+                    .showAppUpdated(true)
+                    .start()
+        }
     }
 
     /**
@@ -173,7 +189,6 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
     private var shouldShow = false
 
     private fun initFab() {
-        //if (hasFab && shouldShow && Prefs.enableFab) {
         hasFab = false
         shouldShow = false
         fab.backgroundTintList = ColorStateList.valueOf(Prefs.headerColor.withMinAlpha(200))
@@ -219,8 +234,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
 
     @SuppressLint("PrivateResource")
     private fun setupDrawer(savedInstanceState: Bundle?) {
-        val navBg = Prefs.bgColor.withMinAlpha(200).toLong()
-        val navHeader = Prefs.headerColor.withMinAlpha(175)
+        val navBg = Prefs.bgColor.withAlpha(255).darken().toLong()
         drawer = drawer {
             toolbar = this@BaseMainActivity.toolbar
             savedInstance = savedInstanceState
@@ -228,15 +242,15 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             translucentStatusBar = false
             sliderBackgroundColor = navBg
             drawerHeader = accountHeader {
-                backgroundDrawable = ColorDrawable(navHeader)
+                background = (R.drawable.flash_f_24)
                 customViewRes = R.layout.material_drawer_header
-                textColor = Prefs.iconColor.toLong()
+                textColor = Prefs.accentColor.toLong()
                 selectionSecondLineShown = false
                 cookies().forEach { (id, name) ->
                     profile(name = name ?: "") {
                         iconUrl = PROFILE_PICTURE_URL(id)
                         textColor = Prefs.textColor.toLong()
-                        selectedTextColor = Prefs.textColor.toLong()
+                        selectedTextColor = Prefs.accentColor.toLong()
                         selectedColor = 0x00000001.toLong()
                         identifier = id
                     }
@@ -289,7 +303,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             }
             drawerHeader.setActiveProfile(Prefs.userId)
 
-            sectionHeader(R.string.bookmark_beta) {
+            sectionItem {
                 divider = false
             }
             val drawerItem = primaryItem(R.string.bookmarks) {
@@ -316,22 +330,6 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                 }
             }
 
-            primaryItem(R.string.refresh_bookmark) {
-                iicon = GoogleMaterial.Icon.gmd_refresh
-                iconColor = Prefs.textColor.toLong()
-                textColor = Prefs.textColor.toLong()
-                selectedIconColor = Prefs.textColor.toLong()
-                selectedTextColor = Prefs.textColor.toLong()
-                selectedColor = 0x00000001.toLong()
-                identifier = -200L
-                onClick { _ ->
-                    drawerItem.withBadge(realm.where(BookmarkModel::class.java).findAll().size.toString())
-                    drawer.updateBadge(-999L, StringHolder(realm.where(BookmarkModel::class.java).findAll().size.toString()))
-                    drawer.updateItem(drawerItem)
-                    true
-                }
-            }
-
             sectionHeader(R.string.feed)
             primaryFlashItem(FbItem.FEED_MOST_RECENT)
             primaryFlashItem(FbItem.FEED_TOP_STORIES)
@@ -355,34 +353,28 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             primaryFlashItem(FbItem.NOTES)
 
             divider()
-            secondaryFlashItem(R.string.youtube)
-
-            divider()
-            primaryItem(R.string.settings) {
-                iicon = GoogleMaterial.Icon.gmd_settings
-                iconColor = Prefs.textColor.toLong()
-                textColor = Prefs.textColor.toLong()
-                selectedIconColor = Prefs.textColor.toLong()
-                selectedTextColor = Prefs.textColor.toLong()
-                selectedColor = 0x00000001.toLong()
-                identifier = 2
-                onClick(openActivity(SettingsActivity::class))
-            }
-            secondaryItem(R.string.appversion) {
-                badge(BuildConfig.VERSION_NAME) {
-                    textColor = Prefs.iconColor.toLong()
-                    color = Prefs.notiColor.toLong()
-                    cornersDp = 4
-                    paddingHorizontalDp = 25
-                }
+            primaryItem(R.string.appversion) {
                 iicon = GoogleMaterial.Icon.gmd_info_outline
                 iconColor = Prefs.textColor.toLong()
                 textColor = Prefs.textColor.toLong()
                 selectedIconColor = Prefs.textColor.toLong()
                 selectedTextColor = Prefs.textColor.toLong()
                 selectedColor = 0x00000001.toLong()
+                onClick { _ ->
+                    flashAnswers {
+                        logContentView(ContentViewEvent()
+                                .putContentType("drawer_item"))
+                    }
+                    verSion()
+                    false
+                }
+                badge(BuildConfig.VERSION_NAME) {
+                    textColor = Prefs.iconColor.toLong()
+                    color = Prefs.notiColor.toLong()
+                    cornersDp = 4
+                    paddingHorizontalDp = 25
+                }
             }
-
             onOpened {
                 drawerItem.badge?.let {
                     drawer.updateBadge(-999L, StringHolder(realm.where(BookmarkModel::class.java).findAll().size.toString()))
@@ -415,24 +407,6 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                         .putContentType("drawer_item"))
             }
             launchWebOverlay(item.url)
-            false
-        }
-    }
-
-    private fun Builder.secondaryFlashItem(@StringRes title: Int) = this.secondaryItem(title) {
-        iicon = GoogleMaterial.Icon.gmd_youtube_searched_for
-        iconColor = Prefs.textColor.toLong()
-        textColor = Prefs.textColor.toLong()
-        selectedIconColor = Prefs.textColor.toLong()
-        selectedTextColor = Prefs.textColor.toLong()
-        selectedColor = 0x00000001.toLong()
-        identifier = title.toLong()
-        onClick { _ ->
-            flashAnswers {
-                logContentView(ContentViewEvent()
-                        .putContentType("drawer_item"))
-            }
-            launchWebOverlay(url = YOUTUBE)
             false
         }
     }
@@ -565,7 +539,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
     }
 
     override fun collapseAppBar() {
-        appBar.setExpanded(false)
+        appBar.post { appBar.setExpanded(false) }
     }
 
     override fun backConsumer(): Boolean {
@@ -634,11 +608,6 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                     POSITION_UNCHANGED
                 else
                     POSITION_NONE
-    }
-
-    private fun <T : Activity> openActivity(activity: KClass<T>): (View?) -> Boolean = {
-        startActivity(Intent(this@BaseMainActivity, activity.java))
-        false
     }
 
     override val lowerVideoPadding: PointF

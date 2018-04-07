@@ -1,16 +1,20 @@
+@file:Suppress("KDocUnresolvedReference", "DEPRECATION")
+
 package nl.arnhem.flash.utils
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.ActivityOptions
+import android.app.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.support.annotation.StringRes
 import android.support.design.internal.SnackbarContentLayout
 import android.support.design.widget.Snackbar
+import android.support.v4.app.NotificationCompat
 import android.support.v4.content.FileProvider
 import android.support.v7.widget.Toolbar
 import android.view.View
@@ -25,13 +29,18 @@ import ca.allanwang.kau.xml.showChangelog
 import com.afollestad.materialdialogs.MaterialDialog
 import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.CustomEvent
+import com.github.javiersantos.appupdater.AppUpdater
+import com.github.javiersantos.appupdater.enums.Display
+import com.github.javiersantos.appupdater.enums.UpdateFrom
 import nl.arnhem.flash.BuildConfig
 import nl.arnhem.flash.R
 import nl.arnhem.flash.activities.*
 import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.facebook.*
 import nl.arnhem.flash.facebook.FbUrlFormatter.Companion.VIDEO_REDIRECT
+import nl.arnhem.flash.services.setFlashAlert
 import nl.arnhem.flash.utils.iab.IS_Flash_PRO
+import org.apache.commons.text.StringEscapeUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.File
@@ -40,13 +49,12 @@ import java.util.*
 
 /**
  * Created by Allan Wang on 2017-06-03.
- */
+ **/
 const val EXTRA_COOKIES = "extra_cookies"
 const val ARG_URL = "arg_url"
 const val ARG_USER_ID = "arg_user_id"
 const val ARG_IMAGE_URL = "arg_image_url"
 const val ARG_TEXT = "arg_text"
-const val YOUTUBE = "https://www.youtube.com/"
 
 inline fun <reified T : Activity> Context.launchNewTask(cookieList: ArrayList<CookieModel> = arrayListOf(), clearStack: Boolean = false) {
     startActivity<T>(clearStack, intentBuilder = {
@@ -73,10 +81,16 @@ private inline fun <reified T : WebOverlayActivityBase> Context.launchWebOverlay
     L.v { "Launch received: $url\nLaunch web overlay: $argUrl" }
     if (argUrl.isFacebookUrl && argUrl.contains("/logout.php"))
         FbCookie.logout(this)
-    else if (!(Prefs.linksInDefaultApp && resolveActivityForUri(Uri.parse(argUrl))))
-        startActivity<T>(false, intentBuilder = {
+    if (argUrl.isFacebookUrl)
+        startActivity<T>(intentBuilder = {
             putExtra(ARG_URL, argUrl)
         })
+    else if (!(Prefs.linksInDefaultApp && resolveActivityForUri(Uri.parse(argUrl)))) {
+        val intent = Intent(this, CustomTabs::class.java)
+        intent.data = Uri.parse(argUrl)
+        startActivity(intent)
+        return
+    }
 }
 
 fun Context.launchWebOverlay(url: String) = launchWebOverlayImpl<WebOverlayActivity>(url)
@@ -98,9 +112,54 @@ fun Context.launchImageActivity(imageUrl: String, text: String?) {
  * No Delete
  */
 fun Context.launchBookMarkOverlay() {
-    startActivity<BookMarkActivity>(intentBuilder = {
-        putExtras(fadeBundle())
-    })
+    val intent = Intent(this, BookMarkActivity::class.java)
+    startActivity(intent)
+    return
+}
+
+fun Context.launchHistoryOverlay() {
+    val intent = Intent(this, HistoryActivity::class.java)
+    startActivity(intent)
+    return
+}
+
+fun Context.onComplete(url: String): BroadcastReceiver? {
+    val onComplete: BroadcastReceiver
+    onComplete = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val pendingIntent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
+            val flashdownload = NotificationCompat.Builder(context)
+            flashdownload.setAutoCancel(true)
+                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+                    .setWhen(System.currentTimeMillis())
+                    .setProgress(100, 100, false)
+                    .setSmallIcon(R.drawable.flash_f_256)
+                    .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+                    .setTicker("{Thanks for using Flash Social}")
+                    .setContentTitle(string(R.string.flash_name))
+                    .setContentText(url)
+                    .setStyle(NotificationCompat.BigTextStyle())
+                    .setFlashAlert(Prefs.notificationVibrate, Prefs.notificationRingtone)
+                    .setSubText(string(R.string.downloaded_compleet))
+                    .setContentIntent(PendingIntent.getActivity(context, 0, pendingIntent, 0))
+                    .color = color(R.color.flash_notification_icon)
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.notify(1, flashdownload.build())
+        }
+    }
+    return onComplete
+}
+
+fun Context.verSion(): Boolean {
+    AppUpdater(this)
+            .setDisplay(Display.SNACKBAR)
+            .setUpdateFrom(UpdateFrom.JSON)
+            .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
+            .setIcon(R.drawable.flash_notify) // Notification icon
+            .showAppUpdated(true)
+            .start()
+    return true
 }
 
 fun Activity.launchTabCustomizerActivity() {
@@ -209,9 +268,13 @@ fun Throwable?.logFlashAnswers(text: String) {
     flashAnswersCustom("Errors", "text" to text, "message" to (this?.message ?: "NA"))
 }
 
-fun Activity.flashSnackbar(@StringRes text: Int, builder: Snackbar.() -> Unit = {}) = snackbar(text, Snackbar.LENGTH_LONG, flashSnackbar(builder))
+fun Activity.flashSnackbar(@StringRes string: Int, builder: Snackbar.() -> Unit = {}) = snackbar(string, Snackbar.LENGTH_LONG, flashSnackbar(builder))
 
-fun View.flashSnackbar(@StringRes text: Int, builder: Snackbar.() -> Unit = {}) = snackbar(text, Snackbar.LENGTH_LONG, flashSnackbar(builder))
+fun Activity.flashSnackbar(@StringRes string: String, builder: Snackbar.() -> Unit = {}) = snackbar(string, Snackbar.LENGTH_LONG, flashSnackbar(builder))
+
+fun View.flashSnackbar(@StringRes string: String, builder: Snackbar.() -> Unit = {}) = snackbar(string, Snackbar.LENGTH_LONG, flashSnackbar(builder))
+
+fun View.flashSnackbar(@StringRes string: Int, builder: Snackbar.() -> Unit = {}) = snackbar(string, Snackbar.LENGTH_LONG, flashSnackbar(builder))
 
 @SuppressLint("RestrictedApi")
 private inline fun flashSnackbar(crossinline builder: Snackbar.() -> Unit): Snackbar.() -> Unit = {
@@ -282,6 +345,7 @@ val dependentSet = setOf(
         "photoset_token",
         "direct_action_execute",
         "events/permalink",
+        "events/feed/watch",
         "messages/?pageNum",
         "sharer.php",
         "add_friend.php",
@@ -292,6 +356,7 @@ val dependentSet = setOf(
          * Editing images
          */
         "/confirmation/?",
+        "&p=",
         /*
          * Facebook messages have the following cases for the tid query
          * mid* or id* for newer threads, which can be launched in new windows
@@ -310,6 +375,13 @@ fun Context.flashChangelog() = showChangelog(R.xml.flash_changelog, Prefs.textCo
         neutralText(R.string.kau_rate)
         onNeutral { _, _ -> startPlayStoreLink(R.string.play_store_package_id) }
     }
+}
+
+/**
+ * Show Why Flash Pro
+ */
+fun Context.flashWhyPro() = showChangelog(R.xml.flash_why_pro, Prefs.textColor) {
+    theme()
 }
 
 fun Context.flashUriFromFile(file: File): Uri =
@@ -359,3 +431,8 @@ fun File.createFreshDir(): Boolean {
         return false
     return mkdirs()
 }
+
+fun String.unescapeHtml(): String =
+        StringEscapeUtils.unescapeXml(this)
+                .replace("\\u003C", "<")
+                .replace("\\\"", "\"")

@@ -15,8 +15,7 @@ interface VideoViewHolder : FrameWrapper, FlashVideoContainerContract {
 
     var videoViewer: FlashVideoViewer?
 
-    fun showVideo(url: String)
-            = showVideo(url, false)
+    fun showVideo(url: String) = showVideo(url, false)
 
     /**
      * Create new viewer and reuse existing one

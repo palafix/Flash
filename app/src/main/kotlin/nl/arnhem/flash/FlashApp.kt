@@ -29,7 +29,6 @@ import nl.arnhem.flash.glide.GlideApp
 import nl.arnhem.flash.services.scheduleNotifications
 import nl.arnhem.flash.services.setupNotificationChannels
 import nl.arnhem.flash.utils.L
-import nl.arnhem.flash.utils.FlashPglAdBlock
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.Showcase
 import java.net.SocketTimeoutException
@@ -77,16 +76,15 @@ class FlashApp : Application() {
         Prefs.verboseLogging = false
         L.i { "Begin Flash for Facebook" }
         FbCookie()
-        FlashPglAdBlock.init(this)
         if (Prefs.installDate == -1L) Prefs.installDate = System.currentTimeMillis()
         if (Prefs.identifier == -1) Prefs.identifier = Random().nextInt(Int.MAX_VALUE)
         Prefs.lastLaunch = System.currentTimeMillis()
 
         super.onCreate()
 
-        applicationContext.scheduleNotifications(Prefs.notificationFreq)
-
         setupNotificationChannels(applicationContext)
+
+        applicationContext.scheduleNotifications(Prefs.notificationFreq)
 
         /**
          * Drawer profile loading logic

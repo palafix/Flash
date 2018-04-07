@@ -23,25 +23,24 @@ enum class CssAssets(val folder: String = "themes") : InjectorContract {
         try {
             var content = it.assets.open("css/$folder/$file").bufferedReader().use { it.readText() }
             if (this == CUSTOM) {
-                val bt: String
-                if (Color.alpha(Prefs.bgColor) == 255) {
-                    bt = Prefs.bgColor.toRgbaString()
+                val bt: String = if (Color.alpha(Prefs.bgColor) == 255) {
+                    Prefs.bgColor.toRgbaString()
                 } else {
-                    bt = "transparent"
+                    "transparent"
                 }
-                    content = content
-                            .replace("\$T\$", Prefs.textColor.toRgbaString())
-                            .replace("\$TT\$", Prefs.textColor.colorToBackground(0.05f).toRgbaString())
-                            .replace("\$A\$", Prefs.accentColor.toRgbaString())
-                            .replace("\$B\$", Prefs.bgColor.toRgbaString())
-                            .replace("\$BT\$", bt)
-                            .replace("\$BBT\$", Prefs.bgColor.withAlpha(51).colorToForeground(0.35f).toRgbaString())
-                            .replace("\$O\$", Prefs.bgColor.withAlpha(255).toRgbaString())
-                            .replace("\$OO\$", Prefs.bgColor.withAlpha(255).colorToForeground(0.35f).toRgbaString())
-                            .replace("\$D\$", Prefs.textColor.adjustAlpha(0.3f).toRgbaString())
-                            .replace("\$BTR\$", Prefs.notiColor.toRgbaString())
-                            .replace("\$HDR\$", Prefs.notiColor.toRgbaString())
-                }
+                content = content
+                        .replace("\$T\$", Prefs.textColor.toRgbaString())
+                        .replace("\$TT\$", Prefs.textColor.colorToBackground(0.05f).toRgbaString())
+                        .replace("\$A\$", Prefs.accentColor.toRgbaString())
+                        .replace("\$B\$", Prefs.bgColor.toRgbaString())
+                        .replace("\$BT\$", bt)
+                        .replace("\$BBT\$", Prefs.bgColor.withAlpha(51).colorToForeground(0.35f).toRgbaString())
+                        .replace("\$O\$", Prefs.bgColor.withAlpha(255).toRgbaString())
+                        .replace("\$OO\$", Prefs.bgColor.withAlpha(255).colorToForeground(0.35f).toRgbaString())
+                        .replace("\$D\$", Prefs.textColor.adjustAlpha(0.3f).toRgbaString())
+                        .replace("\$BTR\$", Prefs.notiColor.toRgbaString())
+                        .replace("\$HDR\$", Prefs.notiColor.toRgbaString())
+            }
 
             JsBuilder().css(content).build()
         } catch (e: FileNotFoundException) {

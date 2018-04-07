@@ -20,6 +20,9 @@
     <string name = "icon_color">Pictogram kleur </string>
     <string name="topbar_color">TopBar kleur</string>
 
+    <string name="enforce_black_media_bg">Zwarte media-achtergrond afdwingen</string>
+    <string name="enforce_black_media_bg_desc">Maak media-achtergrond zwart; standaard is de geselecteerde achtergrond van de thema hierboven</string>
+
     <string name= "noti_color">Achtergrond kleur van Meldingen</string>
     <string name = "global_customization">Gehele aanpassing </string>
     <string name = "main_activity_layout">HoofdLayout Tab </string>

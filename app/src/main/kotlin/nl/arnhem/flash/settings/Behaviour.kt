@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATED_IDENTITY_EQUALS")
+
 package nl.arnhem.flash.settings
 
 import ca.allanwang.kau.kpref.activity.KPrefAdapterBuilder
@@ -5,12 +7,12 @@ import nl.arnhem.flash.R
 import nl.arnhem.flash.activities.SettingsActivity
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.REQUEST_REFRESH
+
 /**
  * Created by Allan Wang on 2017-06-30.
- */
-fun SettingsActivity.getBehaviourPrefs(): KPrefAdapterBuilder.() -> Unit = {
+ **/
 
-    header(R.string.pro_features)
+fun SettingsActivity.getBehaviourPrefs(): KPrefAdapterBuilder.() -> Unit = {
 
     checkbox(R.string.enable_pip, Prefs::enablePip, {
         Prefs.enablePip = it
@@ -18,8 +20,6 @@ fun SettingsActivity.getBehaviourPrefs(): KPrefAdapterBuilder.() -> Unit = {
     }) {
         descRes = R.string.enable_pip_desc
     }
-
-    header(R.string.global_customization)
 
     checkbox(R.string.fancy_animations, Prefs::animate, { Prefs.animate = it; animate = it }) {
         descRes = R.string.fancy_animations_desc
@@ -48,9 +48,4 @@ fun SettingsActivity.getBehaviourPrefs(): KPrefAdapterBuilder.() -> Unit = {
     checkbox(R.string.exit_confirmation, Prefs::exitConfirmation, { Prefs.exitConfirmation = it }) {
         descRes = R.string.exit_confirmation_desc
     }
-
-    checkbox(R.string.analytics, Prefs::analytics, { Prefs.analytics = it }) {
-        descRes = R.string.analytics_desc
-    }
-
 }

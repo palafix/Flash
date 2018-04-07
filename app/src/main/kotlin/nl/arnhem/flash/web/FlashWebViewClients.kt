@@ -15,6 +15,7 @@ import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import nl.arnhem.flash.views.FlashWebView
 import org.jetbrains.anko.withAlpha
 
+
 /**
  * Created by Allan Wang on 2017-05-31.
  *

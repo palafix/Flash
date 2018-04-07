@@ -14,7 +14,7 @@ enum class CssHider(vararg val items: String) : InjectorContract {
     ADS("article[data-xt*=sponsor]",
             "article[data-store*=sponsor]"),
     PEOPLE_YOU_MAY_KNOW("article._d2r"),
-    SUGGESTED_GROUPS(".scrollArea","._5yxv","._5yxt._5yxt","._55wo._5rgr._5gh8._5gh8._35au"),
+    SUGGESTED_GROUPS(".scrollArea", "._5yxv", "._5yxt._5yxt", "._55wo._5rgr._5gh8._5gh8._35au"),
     COMPOSER("#MComposer"),
     MESSENGER("._s15", "[data-testid=info_panel]", ".js_i"),
     NON_RECENT("article:not([data-store*=actor_name])")

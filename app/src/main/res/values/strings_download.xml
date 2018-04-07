@@ -12,5 +12,18 @@
     <string name="downloading_file">Downloading File</string>
     <string name="downloaded_file">File Downloaded</string>
 
+    <string name="download_video">Download video</string>
+
+    <string name="download_image">Download image</string>
+    <string name="share_image">Share image url</string>
+    <string name="copy_image">Copy website link</string>
+
+    <string name="downloaded_compleet">Download Completed…</string>
+    <string name="download_open">Open…</string>
+
+    <string name="flash_name_image">Flash Images</string>
+    <string name="flash_name_video">Flash Media</string>
+    <string name="flash_name_docu">Flash Documents</string>
+
     <string name="error_invalid_download">Invalid download attempt</string>
 </resources>

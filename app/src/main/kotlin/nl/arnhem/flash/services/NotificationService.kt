@@ -2,11 +2,11 @@ package nl.arnhem.flash.services
 
 import android.app.job.JobParameters
 import android.app.job.JobService
-import android.content.Context
 import android.support.v4.app.NotificationManagerCompat
 import ca.allanwang.kau.utils.string
 import nl.arnhem.flash.BuildConfig
 import nl.arnhem.flash.R
+import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.dbflow.loadFbCookiesSync
 import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.utils.Prefs
@@ -24,9 +24,9 @@ import java.util.concurrent.Future
  */
 class NotificationService : JobService() {
 
-    var future: Future<Unit>? = null
+    private var future: Future<Unit>? = null
 
-    val startTime = System.currentTimeMillis()
+    private val startTime = System.currentTimeMillis()
 
     override fun onStopJob(params: JobParameters?): Boolean {
         val time = System.currentTimeMillis() - startTime
@@ -59,18 +59,38 @@ class NotificationService : JobService() {
                     ?: return@doAsync L.eThrow("NotificationService had null weakRef to self")
             val currentId = Prefs.userId
             val cookies = loadFbCookiesSync()
+            val jobId = params?.extras?.getInt(NOTIFICATION_PARAM_ID, -1) ?: -1
+            var notifCount = 0
             cookies.forEach {
                 val current = it.id == currentId
                 if (Prefs.notificationsGeneral
                         && (current || Prefs.notificationAllAccounts))
-                    NotificationType.GENERAL.fetch(context, it)
+                    notifCount += fetch(jobId, NotificationType.GENERAL, it)
                 if (Prefs.notificationsInstantMessages
                         && (current || Prefs.notificationsImAllAccounts))
-                    NotificationType.MESSAGE.fetch(context, it)
+                    notifCount += fetch(jobId, NotificationType.MESSAGE, it)
             }
+
+            if (notifCount == 0 && jobId == NOTIFICATION_JOB_NOW)
+                generalNotification(665, R.string.no_new_notifications, BuildConfig.DEBUG)
+
             finish(params)
         }
         return true
+    }
+
+    /**
+     * Implemented fetch to also notify when an error occurs
+     * Also normalized the output to return the number of notifications received
+     */
+    private fun fetch(jobId: Int, type: NotificationType, cookie: CookieModel): Int {
+        val count = type.fetch(this, cookie)
+        if (count < 0) {
+            if (jobId == NOTIFICATION_JOB_NOW)
+                generalNotification(666, R.string.error_notification, BuildConfig.DEBUG)
+            return 0
+        }
+        return count
     }
 
     private fun logNotif(text: String): NotificationContent? {
@@ -78,12 +98,12 @@ class NotificationService : JobService() {
         return null
     }
 
-    private fun Context.debugNotification(text: String = string(R.string.kau_lorem_ipsum)) {
-        if (!BuildConfig.DEBUG) return
-        val notifBuilder = flashNotification.withDefaults()
+    private fun generalNotification(id: Int, textRes: Int, withDefaults: Boolean) {
+        val notifBuilder = flashNotification(NOTIF_CHANNEL_GENERAL)
+                .setFlashAlert(withDefaults, Prefs.notificationRingtone)
                 .setContentTitle(string(R.string.flash_name))
-                .setContentText(text)
-        NotificationManagerCompat.from(this).notify(999, notifBuilder.build())
+                .setContentText(string(textRes))
+        NotificationManagerCompat.from(this).notify(id, notifBuilder.build())
     }
 
 }

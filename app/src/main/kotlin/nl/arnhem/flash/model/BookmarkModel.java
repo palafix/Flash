@@ -1,16 +1,12 @@
 package nl.arnhem.flash.model;
 
-import android.app.FragmentManager;
-import android.graphics.pdf.PdfDocument;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import android.graphics.drawable.Icon;
+import android.media.Image;
 
 import io.realm.RealmObject;
 
 /**
- * Created by meeera on 6/10/17.
+ * Created by meeera on 6/10/17.Edited by Robin Bouwman for this app on 1/1/18
  **/
 
 public class BookmarkModel extends RealmObject {
@@ -18,6 +14,7 @@ public class BookmarkModel extends RealmObject {
     private String title;
     private String url;
     private String bookMark;
+    //public Icon favicon;
 
     public String getBookMark() {
         return bookMark;
@@ -42,4 +39,8 @@ public class BookmarkModel extends RealmObject {
     public String getTitle() {
         return title;
     }
+
+    //public Icon getFavicon() {return favicon;}
+
+    //public void setFavicon(Icon favicon) {this.favicon = favicon;}
 }

@@ -45,6 +45,6 @@ class SelectorActivity : BaseActivity() {
         setFlashColors {
             text(text)
             background(container)
-           }
+        }
     }
 }

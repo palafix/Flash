@@ -1,13 +1,19 @@
 package nl.arnhem.flash.activities
 
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.FloatingActionButton
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.webkit.URLUtil
 import android.widget.ProgressBar
 import android.widget.TextView
 import ca.allanwang.kau.internal.KauBaseActivity
@@ -20,12 +26,12 @@ import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.typeface.IIcon
+import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import nl.arnhem.flash.R
 import nl.arnhem.flash.facebook.FB_IMAGE_ID_MATCHER
 import nl.arnhem.flash.facebook.get
 import nl.arnhem.flash.facebook.requests.call
 import nl.arnhem.flash.utils.*
-import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import okhttp3.Request
 import org.jetbrains.anko.activityUiThreadWithContext
 import org.jetbrains.anko.doAsync
@@ -33,12 +39,10 @@ import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * Created by Allan Wang on 2017-07-15.
- */
+ **/
 class ImageActivity : KauBaseActivity() {
 
     val progress: ProgressBar by bindView(R.id.image_progress)
@@ -81,32 +85,36 @@ class ImageActivity : KauBaseActivity() {
         private const val IMAGE_FOLDER = "images"
         const val TIME_FORMAT = "yyyyMMdd_HHmmss"
         const val IMG_TAG = "Flash"
+        const val IMG_TAG2 = "Flash Images"
         private const val IMG_EXTENSION = ".png"
         private const val PURGE_TIME: Long = 10 * 60 * 1000 // 10 min block
         private val L = KauLoggerExtension("Image", nl.arnhem.flash.utils.L)
     }
 
-    val IMAGE_URL: String by lazy { intent.getStringExtra(ARG_IMAGE_URL).trim('"') }
+    val imageUrl: String by lazy { intent.getStringExtra(ARG_IMAGE_URL).trim('"') }
 
-    private val TEXT: String? by lazy { intent.getStringExtra(ARG_TEXT) }
+    private val imageText: String? by lazy { intent.getStringExtra(ARG_TEXT) }
 
     // a unique image identifier based on the id (if it exists), and its hash
-    private val IMAGE_HASH: String by lazy {
-        "${Math.abs(FB_IMAGE_ID_MATCHER.find(IMAGE_URL)[1]?.hashCode() ?: 0)}_${Math.abs(IMAGE_URL.hashCode())}"
+    private val imageHash: String by lazy {
+        "${Math.abs(FB_IMAGE_ID_MATCHER.find(imageUrl)[1]?.hashCode() ?: 0)}_${Math.abs(imageUrl.hashCode())}"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         intent?.extras ?: return finish()
         L.i { "Displaying image" }
-        L.v { "Displaying image $IMAGE_URL" }
-        val layout = if (!TEXT.isNullOrBlank()) R.layout.activity_image else R.layout.activity_image_textless
+        L.v { "Displaying image $imageUrl" }
+        val layout = if (!imageText.isNullOrBlank()) R.layout.activity_image else R.layout.activity_image_textless
         setContentView(layout)
-        container.setBackgroundColor(Prefs.bgColor.withMinAlpha(222))
-        caption?.setTextColor(Prefs.textColor)
-        caption?.setBackgroundColor(Prefs.bgColor.colorToForeground(0.2f).withAlpha(255))
-        caption?.text = TEXT
-        progress.tint(Prefs.accentColor)
+        container.setBackgroundColor(if (Prefs.blackMediaBg) Color.BLACK
+        else Prefs.bgColor.withMinAlpha(222))
+        caption?.setTextColor(if (Prefs.blackMediaBg) Color.WHITE else Prefs.textColor)
+        caption?.setBackgroundColor((if (Prefs.blackMediaBg) Color.BLACK else Prefs.bgColor)
+                .colorToForeground(0.2f).withAlpha(255))
+        caption?.text = imageText
+        progress.tint(if (Prefs.blackMediaBg) Color.WHITE else Prefs.accentColor)
         panel?.addPanelSlideListener(object : SlidingUpPanelLayout.SimplePanelSlideListener() {
             override fun onPanelSlide(panel: View, slideOffset: Float) {
                 if (slideOffset == 0f && !fab.isShown) fab.show()
@@ -119,7 +127,7 @@ class ImageActivity : KauBaseActivity() {
             override fun onImageLoadError(e: Exception?) {
                 errorRef = e
                 e.logFlashAnswers("Image load error")
-                L.e { "Failed to load image $IMAGE_URL" }
+                L.e { "Failed to load image $imageUrl" }
                 tempFile?.delete()
                 fabAction = FabStates.ERROR
             }
@@ -128,7 +136,7 @@ class ImageActivity : KauBaseActivity() {
             themeWindow = false
         }
         doAsync({
-            L.e(it) { "Failed to load image $IMAGE_HASH" }
+            L.e(it) { "Failed to load image $imageHash" }
             errorRef = it
             runOnUiThread { progress.fadeOut() }
             tempFile?.delete()
@@ -155,7 +163,7 @@ class ImageActivity : KauBaseActivity() {
      * Returns a file pointing to the image, or null if something goes wrong
      */
     private inline fun loadImage(callback: (file: File?) -> Unit) {
-        val local = File(tempDir, IMAGE_HASH)
+        val local = File(tempDir, imageHash)
         if (local.exists() && local.length() > 1) {
             local.setLastModified(System.currentTimeMillis())
             L.d { "Loading from local cache ${local.absolutePath}" }
@@ -193,17 +201,24 @@ class ImageActivity : KauBaseActivity() {
     }
 
     @Throws(IOException::class)
-    private fun createPublicMediaFile(): File {
-        val timeStamp = SimpleDateFormat(TIME_FORMAT, Locale.getDefault()).format(Date())
-        val imageFileName = "${IMG_TAG}_${timeStamp}_"
-        val storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val flashDir = File(storageDir, IMG_TAG)
+    private fun createPublicMediaFile(url: String, contentDisposition: String? = null, mimeType: String? = null): File {
+        val filename = URLUtil.guessFileName(url, contentDisposition, mimeType)
+        val imageFileName = "${IMG_TAG}_${filename}_"
+        val storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + IMG_TAG + File.separator)
+        val flashDir = File(storageDir, IMG_TAG2)
         if (!flashDir.exists()) flashDir.mkdirs()
+        val request = DownloadManager.Request(Uri.parse(imageUrl))
+        request.setDescription(string(R.string.flash_name))
+        request.setTitle(imageFileName)
+        request.allowScanningByMediaScanner()
+        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        dm.enqueue(request)
+        registerReceiver(onComplete(imageFileName), IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         return File.createTempFile(imageFileName, IMG_EXTENSION, flashDir)
     }
 
     private fun getImageResponse() = Request.Builder()
-            .url(IMAGE_URL)
+            .url(imageUrl)
             .get()
             .call()
             .execute()
@@ -224,14 +239,10 @@ class ImageActivity : KauBaseActivity() {
             L.d { "Download image callback granted: $granted" }
             if (granted) {
                 doAsync {
-                    val destination = createPublicMediaFile()
+                    val destination = createPublicMediaFile(imageUrl)
                     var success = true
                     try {
-                        val temp = tempFile
-                        if (temp != null)
-                            temp.copyTo(destination, true)
-                        else
-                            downloadImageTo(destination)
+                        downloadImageTo(destination)
                     } catch (e: Exception) {
                         errorRef = e
                         success = false
@@ -248,7 +259,7 @@ class ImageActivity : KauBaseActivity() {
                         }
                         activityUiThreadWithContext {
                             val text = if (success) R.string.image_download_success else R.string.image_download_fail
-                            flashSnackbar(text)
+                            flashSnackbar(getString(text))
                             if (success) fabAction = FabStates.SHARE
                         }
                     }
@@ -258,7 +269,6 @@ class ImageActivity : KauBaseActivity() {
     }
 
     override fun onDestroy() {
-        tempFile = null
         val purge = System.currentTimeMillis() - PURGE_TIME
         tempDir.listFiles(FileFilter { it.isFile && it.lastModified() < purge }).forEach {
             it.delete()
@@ -278,7 +288,7 @@ internal enum class FabStates(val iicon: IIcon, val iconColor: Int = Prefs.iconC
                     if (activity.errorRef != null)
                         L.e(activity.errorRef) { "ImageActivity error report" }
                     activity.sendFlashEmail(R.string.debug_image_link_subject) {
-                        addItem("Url", activity.IMAGE_URL)
+                        addItem("Url", activity.imageUrl)
                         addItem("Message", activity.errorRef?.message ?: "Null")
                     }
                 }
@@ -329,5 +339,4 @@ internal enum class FabStates(val iicon: IIcon, val iconColor: Int = Prefs.iconC
     }
 
     abstract fun onClick(activity: ImageActivity)
-
 }

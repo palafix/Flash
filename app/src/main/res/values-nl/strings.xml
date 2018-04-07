@@ -25,13 +25,17 @@
 
     <string name="bookmarks">Bladwijzers </string>
     <string name="add_bookmark">Bladwijzers toevoegen</string>
-    <string name="added">Heb (</string>
-    <string name="added_string">) in Favoriete geplaats.</string>
+    <string name="remove_bookmark_desc">Weet u zeker dat u alle Bladwijzers wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="added">Heb ("</string>
+    <string name="added_string">") in Favoriete geplaats.</string>
     <string name="deleted">Favoriete verwijderen?</string>
-    <string name ="deleted_dia">Weet u zeker dat u (</string>
-    <string name ="deleted_dia_2">) wilt verwijderen van uw favorieten? Deze actie kan niet ongedaan worden gemaakt.</string>
-    <string name="refresh_bookmark">Bladwijzers vernieuwen</string>
-    <string name="bookmark_beta">(Beta)</string>
+    <string name ="deleted_dia">Weet u zeker dat u ("</string>
+    <string name ="deleted_dia_2">") wilt verwijderen van uw favorieten? Deze actie kan niet ongedaan worden gemaakt.</string>
+
+    <string name="history">Geschiedenis</string>
+    <string name="remove_history">Verwijder geschiedenis</string>
+    <string name="remove_history_desc">Weet u zeker dat u het geschiedenis wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="removed_all_history">Geschiedenis verwijderd</string>
 
     <string name="events">Evenementen </string>
     <string name="friends">Vrienden </string>
@@ -68,7 +72,7 @@
     <string name="show_all_results">Toon alle resultaten </string>
 
     <string name="flash_description">Flash is een volledig thema, volledig functioneel alternatief voor de officiële Facebook-app,
-    helemaal opnieuw door Allan Wang/Frost-for-Facebook gemaakt en met trots open source. </string>
+    helemaal opnieuw door Allan Wang gemaakt en met trots open source. </string>
 
     <string name="faq_title">Flash FAQ </string>
 
