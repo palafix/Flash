@@ -90,9 +90,9 @@ android {
 
         release {
             storeFile file('../files/flashkey.jks')
-            storePassword '!Wintermans1'
-            keyAlias 'palafix'
-            keyPassword '!Wintermans1'
+            storePassword ''
+            keyAlias ''
+            keyPassword ''
         }
 
         debug {
