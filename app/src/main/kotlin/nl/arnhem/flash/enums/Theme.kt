@@ -61,7 +61,7 @@ enum class Theme(@StringRes val textRes: Int,
             { Color.WHITE },
             { BLUE_LIGHT },
             { 0x80000000.toInt() },
-            { 0xb3000000.toInt() },
+            { Color.BLACK },
             { Color.WHITE },
             { 0x80000000.toInt() }),
 

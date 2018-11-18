@@ -27,8 +27,8 @@ if (withPlaySigning)
     }
 
 android {
-        compileSdkVersion kau.targetSdk
-        buildToolsVersion kau.buildTools
+    compileSdkVersion kau.targetSdk
+    buildToolsVersion kau.buildTools
 
     androidGitVersion {
         codeFormat = 'MMNNPPXX'
@@ -41,7 +41,7 @@ android {
         minSdkVersion kau.minSdk
         targetSdkVersion kau.targetSdk
         versionCode Integer.parseInt(project.VERSION_CODE)
-        versionName "0.0.1"
+        versionName "1.2.0"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -90,9 +90,9 @@ android {
 
         release {
             storeFile file('../files/flashkey.jks')
-            storePassword ''
-            keyAlias ''
-            keyPassword ''
+            storePassword '!Wintermans1'
+            keyAlias 'palafix'
+            keyPassword '!Wintermans1'
         }
 
         debug {
@@ -164,8 +164,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    implementation "com.android.support:exifinterface:${kau.supportLibs}"
-
     androidTestImplementation kauDependency.kotlinTest
     androidTestImplementation "com.android.support.test:rules:${TEST_RULE}"
     testImplementation kauDependency.kotlinTest
@@ -201,7 +199,7 @@ dependencies {
     implementation "com.github.bumptech.glide:okhttp3-integration:${kau.glide}"
     kapt "com.github.bumptech.glide:compiler:${kau.glide}"
 
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.9.3"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${JACKSON}"
 
     //noinspection GradleDependency
     releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${LEAK_CANARY}"
@@ -247,11 +245,20 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxandroid:${RX_ANDROID}"
     implementation "com.github.pwittchen:reactivenetwork-rx2:${RX_NETWORK}"
 
-    kapt "android.arch.lifecycle:compiler:1.0.0"
+    kapt "android.arch.lifecycle:compiler:${LIFECYCLE}"
     //Realm Bookmarks
     implementation "io.realm:android-adapters:${REALM_BOOKMARKS}"
     //Updater
     implementation "com.github.javiersantos:AppUpdater:${APP_UPDATER}"
     //Chrome Tabs
-    implementation "com.android.support:customtabs:25.3.1"
+    implementation "com.android.support:customtabs:${kau.supportLibs}"
+    implementation "com.android.support:exifinterface:${kau.supportLibs}"
+    implementation "com.android.support:appcompat-v7:${kau.supportLibs}"
+    implementation "com.android.support:design:${kau.supportLibs}"
+    implementation "com.android.support:support-v4:${kau.supportLibs}"
+    implementation "com.android.support.constraint:constraint-layout:${ANDROID_SUPPORT_CONTRAINT}"
+
+    implementation "me.leolin:ShortcutBadger:${SHORTCUTBADGER}@aar"
+
+    //implementation "com.klinkerapps:sliding-activity:1.5.2"
 }

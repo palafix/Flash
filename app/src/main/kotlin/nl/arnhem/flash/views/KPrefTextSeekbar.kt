@@ -10,7 +10,7 @@ import nl.arnhem.flash.R
  **/
 class KPrefTextSeekbar(builder: KPrefSeekbarContract) : KPrefSeekbar(builder) {
 
-    var descOriginalSize = 1f
+    private var descOriginalSize = 1f
 
     init {
         with(builder) {

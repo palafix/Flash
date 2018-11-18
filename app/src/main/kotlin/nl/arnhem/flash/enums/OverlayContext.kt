@@ -9,6 +9,7 @@ import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.utils.EnumBundle
 import nl.arnhem.flash.utils.EnumBundleCompanion
 import nl.arnhem.flash.utils.EnumCompanion
+import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.views.FlashWebView
 
 /**
@@ -57,7 +58,7 @@ class FlashMenuItem(
         val showAsAction: Int = MenuItem.SHOW_AS_ACTION_ALWAYS) {
     fun addToMenu(context: Context, menu: Menu, index: Int) {
         val item = menu.add(Menu.NONE, id, index, fbItem.titleId)
-        item.icon = fbItem.icon.toDrawable(context, 18)
+        item.icon = fbItem.icon.toDrawable(context, 18, Prefs.iconColor)
         item.setShowAsAction(showAsAction)
     }
 }

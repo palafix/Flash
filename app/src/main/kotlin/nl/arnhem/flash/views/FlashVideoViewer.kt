@@ -22,6 +22,7 @@ import nl.arnhem.flash.utils.flashDownload
 import nl.arnhem.flash.utils.flashSnackbar
 
 
+@Suppress("DEPRECATION")
 /**
  * Created by Allan Wang on 2017-10-13.
  **/

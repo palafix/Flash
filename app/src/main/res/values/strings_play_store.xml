@@ -3,7 +3,6 @@
     <string name="found_pro">Found Flash Pro!</string>
     <string name="found_pro_desc">Looks like you have Flash Pro! We\'ll reload the app so you can enjoy the awesome features!</string>
 
-    <string name="changelog_update">Check changelog!</string>
     <string name="cancel_update">Maybe later!</string>
     <string name="update_now">Update now?</string>
     <string name="found_update">Found new Update!</string>
@@ -12,7 +11,7 @@
 
     <string name="play_purchased_pro">Thank you for your support! Enjoy all the features in Flash.\n\nIf you like this app, please consider rating it and supporting this open source project.\n\nIf you have comments, please do not hesitate to contact me!</string>
     <string name="play_store_not_pro">It seems like you are a Pro user, but we couldn\'t find your purchasing info. If this error persists, please try clearing the Play Store cache and reinstalling the app.</string>
-    <string name="play_store_unsupported">It seems like this app version can\'t purchase Pro. Please reinstall from the play store if this is a persistent issue.</string>
+    <string name="play_store_unsupported">It seems like this app version can\'t purchase Flash Pro. Please reinstall from the play store if this is a persistent issue.</string>
     <string name="play_thank_you">Thank you!</string>
 
     <string name="purchases_restored">Purchases Restored</string>
@@ -21,9 +20,15 @@
 
     <string name="restoring_purchases">Restoring purchases…</string>
 
-    <string name="custom_pro">Flash [Pro] </string>
-
-    <string name="custom_pro_free">Flash [Pro-Free] </string>
+    <string name="custom_pro">Custom Theme. Needs [Flash Pro].</string>
+    <string name="pro_test">Flash Pro-Free.</string>
+    <string name="pro_free">Congratulations! You have Flash Pro for free.</string>
     <string name="uh_oh">Uh Oh</string>
+    <string name="uh_oh_no_pro">Uh Oh! It seems like you don\'t have Flash Pro.</string>
     <string name="reload">Reload</string>
+    <string name="Check_for_flash_pro">Check for Flash pro..</string>
+
+    <string name="pro_free_toast_enabled">Flash [Pro-Free] section is enabled! Go back to settings.</string>
+
+    <string name="pro_free_toast_disabled">Flash [Pro-Free] section is disabled! Go back to settings.</string>
 </resources>

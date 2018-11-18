@@ -1,7 +1,6 @@
 <resources>
 
-
-    <string name="google">Google</string>
+    <string name="facebook_search">Zoek op Facebook</string>
 
     <string name="more">Foto\'s &amp; meer </string>
     <string name="trending">Trending</string>
@@ -12,10 +11,14 @@
     <string name="reminders">Evenementen, Herinneringen &amp; Verjaardagen</string>
     <string name="savenotes">Opgeslagen &amp; Notities</string>
 
+    <string name="delete_search">Zoekgeschiedenis wissen</string>
+
     <string name="appversion">App Versie</string>
 
-    <string name="video_beta">Video instellingen kunnen niet werken</string>
-    <string name="video_settings">Video Instellingen</string>
+    <string name="video_beta">Facebook Video instellingen</string>
+    <string name="video_settings">Video\'s automatisch afspelen.</string>
+
+    <string name="videos">Video\'s</string>
     <string name="pokes">Porren</string>
 
     <string name="feed">Nieuwsoverzicht </string>
@@ -37,8 +40,9 @@
     <string name="remove_history_desc">Weet u zeker dat u het geschiedenis wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
     <string name="removed_all_history">Geschiedenis verwijderd</string>
 
-    <string name="events">Evenementen </string>
-    <string name="friends">Vrienden </string>
+    <string name="events">Evenementen</string>
+    <string name="friends">Vrienden</string>
+    <string name="my_friends">Mijn Vrienden</string>
     <string name="messages">Berichten </string>
     <string name="notifications">Meldingen </string>
     <string name="activity_log">Activiteitenlogboek </string>
@@ -85,5 +89,13 @@
     <string name="bottom_bar">TapBar Beneden. </string>
 
     <string name="tab_customizer_instructions">Sleep de bovenstaande pictogrammen en zet ze neer om ze aan de Navigatie Balk toe te voegen als er ruimte is.</string>
+
+    <string name="close_app_confirmation">Weet je zeker dat je wilt afsluiten?</string>
+    <string name="do_not_show_again">Laat dit niet meer zien</string>
+    <string name="exit">Afsluiten?</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nee</string>
+
+    <string name="context_share_image_progress">Voorbereiding van &#8230;</string>
 
 </resources>

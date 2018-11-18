@@ -10,7 +10,7 @@
     <string name = "intro_easy_navigation">Eenvoudige navigatie </string>
     <string name = "intro_easy_navigation_desc">Verschuif tussen weergaven met een veegbeweging en klik op het tabbladpictogram om terug te keren naar de top. \nKlik nogmaals op het pictogram om de pagina opnieuw te laden. </string>
     <string name = "intro_context_aware">Context Aware </string>
-    <string name = "intro_context_aware_desc">Druk lang op koppelingen om deze te kopiëren en te delen. \nGa lang op afbeeldingen om te zoomen en te downloaden. \nLaat lang op kaarten drukken om horizontaal te scrollen. </string>
+    <string name = "intro_context_aware_desc">Druk lang op koppelingen om deze te kopiëren en te delen. \nDruk lang op afbeeldingen om te zoomen en te downloaden. \nDruk lang op slide items om horizontaal te scrollen. </string>
 
     <string name = "intro_end">Laten we beginnen! </string>
     <string name = "intro_tap_to_exit">Tik ergens om af te sluiten </string>

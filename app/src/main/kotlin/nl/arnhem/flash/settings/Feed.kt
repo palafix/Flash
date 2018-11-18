@@ -21,13 +21,13 @@ fun SettingsActivity.getFeedPrefs(): KPrefAdapterBuilder.() -> Unit = {
             materialDialogThemed {
                 title(R.string.newsfeed_sort)
                 items(FeedSort.values().map { string(it.textRes) })
-                itemsCallbackSingleChoice(item.pref, { _, _, which, _ ->
+                itemsCallbackSingleChoice(item.pref) { _, _, which, _ ->
                     if (item.pref != which) {
                         item.pref = which
                         shouldRestartMain()
                     }
                     true
-                })
+                }
             }
         }
         textGetter = { string(FeedSort(it).textRes) }
@@ -52,6 +52,24 @@ fun SettingsActivity.getFeedPrefs(): KPrefAdapterBuilder.() -> Unit = {
         setFlashResult(REQUEST_REFRESH)
     }) {
         descRes = R.string.composer_desc
+    }
+
+    checkbox(R.string.fixed_composer, Prefs::fixedComposer, {
+        Prefs.fixedComposer = it
+        Prefs.bottomComposer = it
+        Prefs.paddingComposer = it
+        reloadByTitle(R.string.composer_remove_bottom)
+        reloadByTitle(R.string.composer_needs)
+        setFlashResult(REQUEST_REFRESH)
+    }) {
+        descRes = R.string.fixed_composer_desc
+    }
+
+    checkbox(R.string.storiestray, Prefs::showStoriesTray, {
+        Prefs.showStoriesTray = it
+        setFlashResult(REQUEST_REFRESH)
+    }) {
+        descRes = R.string.storiestray_desc
     }
 
     header(R.string.pro_features)

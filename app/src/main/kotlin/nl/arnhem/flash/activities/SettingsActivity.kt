@@ -21,7 +21,6 @@ import com.github.javiersantos.appupdater.enums.Display
 import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
-import nl.arnhem.flash.BuildConfig
 import nl.arnhem.flash.R
 import nl.arnhem.flash.enums.Support
 import nl.arnhem.flash.settings.*
@@ -58,7 +57,7 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
             ACTIVITY_REQUEST_DEBUG -> {
                 val url = data?.extras?.getString(DebugActivity.RESULT_URL)
                 if (resultCode == Activity.RESULT_OK && url?.isNotBlank() == true)
-                    sendDebug(url)
+                    sendDebug(url, data.getStringExtra(DebugActivity.RESULT_BODY))
                 return
             }
         }
@@ -102,6 +101,32 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
 
     override fun onCreateKPrefs(savedInstanceState: Bundle?): KPrefAdapterBuilder.() -> Unit = {
 
+
+        checkbox(R.string.pro_test, { Prefs.debugPro }, {
+            Prefs.debugPro = it
+        }) {
+            descRes = R.string.pro_free
+            iicon = GoogleMaterial.Icon.gmd_sentiment_satisfied
+            visible = { Prefs.freeProSettings }
+        }
+
+        plainText(R.string.why_pro) {
+            iicon = GoogleMaterial.Icon.gmd_help_outline
+            visible = { !IS_Flash_PRO }
+            onClick = {
+                flashWhyPro()
+            }
+        }
+
+        plainText(R.string.get_pro) {
+            descRes = R.string.get_pro_desc
+            iicon = GoogleMaterial.Icon.gmd_star_border
+            visible = { !IS_Flash_PRO }
+            onClick = {
+                restorePurchases()
+            }
+        }
+
         header(R.string.global_customization)
         subItems(R.string.appearance, getAppearancePrefs()) {
             descRes = R.string.appearance_desc
@@ -116,6 +141,11 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
         subItems(R.string.newsfeed, getFeedPrefs()) {
             descRes = R.string.newsfeed_desc
             iicon = CommunityMaterial.Icon.cmd_newspaper
+        }
+
+        subItems(R.string.media, getMediaPrefs()) {
+            descRes = R.string.media_desc
+            iicon = GoogleMaterial.Icon.gmd_settings_input_svideo
         }
 
         subItems(R.string.notifications, getNotificationPrefs()) {
@@ -150,34 +180,13 @@ class SettingsActivity : KPrefActivity(), FlashBilling by IabSettings() {
                         .setContentOnUpdateNotAvailable(R.string.no_update_desc)
                         .setButtonUpdate(R.string.update_now)
                         .setButtonDismiss(R.string.cancel_update)
-                        .setButtonDoNotShowAgain(R.string.changelog_update)
-                        .setButtonDoNotShowAgainClickListener { _, _ -> flashChangelog() }
+                        .setButtonDoNotShowAgain(R.string.no)
+                        .setButtonDoNotShowAgainClickListener { _, _ -> }
                         .setUpdateFrom(UpdateFrom.JSON)
                         .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
                         .setIcon(R.drawable.flash_notify) // Notification icon
                         .showAppUpdated(true)
                         .start()
-            }
-        }
-
-        if (BuildConfig.DEBUG) {
-            checkbox(R.string.custom_pro, { Prefs.debugPro }, { Prefs.debugPro = it })
-        }
-
-        plainText(R.string.why_pro) {
-            iicon = GoogleMaterial.Icon.gmd_help_outline
-            visible = { !IS_Flash_PRO }
-            onClick = {
-                flashWhyPro()
-            }
-        }
-
-        plainText(R.string.get_pro) {
-            descRes = R.string.get_pro_desc
-            iicon = GoogleMaterial.Icon.gmd_star_border
-            visible = { !IS_Flash_PRO }
-            onClick = {
-                restorePurchases()
             }
         }
 

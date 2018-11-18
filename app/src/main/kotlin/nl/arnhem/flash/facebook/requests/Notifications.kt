@@ -23,5 +23,5 @@ fun RequestAuth.markNotificationRead(notifId: Long): FlashRequest<Boolean> {
 
 fun RequestAuth.markNotificationsRead(vararg notifId: Long) =
         notifId.toTypedArray().zip<Long, Boolean, Boolean>(
-                { it.all { it } },
+                { it.all { self -> self } },
                 { markNotificationRead(it).invoke() })

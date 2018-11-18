@@ -60,13 +60,12 @@ class AboutActivity : AboutActivityBase(null, {
                 "Realm"
         )
 
-        val l = libs.prepareLibraries(this, include, null, false, true, true)
-//        l.forEach { KL.d{"Lib ${it.definedName}"} }
-        return l
+        //        l.forEach { KL.d{"Lib ${it.definedName}"} }
+        return libs.prepareLibraries(this, include, null, false, true, true)
     }
 
     private var lastClick = -1L
-    var clickCount = 0
+    private var clickCount = 0
 
     override fun postInflateMainPage(adapter: FastItemThemedAdapter<IItem<*, *>>) {
         /**
@@ -97,6 +96,21 @@ class AboutActivity : AboutActivityBase(null, {
                     Prefs.debugSettings = true
                     L.d { "Debugging section enabled" }
                     toast(R.string.debug_toast_enabled)
+                } else if (clickCount == 10 && Prefs.debugSettings) {
+                    Prefs.debugSettings = false
+                    L.d { "Debugging section disabled" }
+                    toast(R.string.debug_toast_disabled)
+                } else if (clickCount == 50 && !Prefs.freeProSettings) {
+                    Prefs.freeProSettings = true
+                    L.d { "Flash [Pro-Free] section enabled" }
+                    toast(R.string.pro_free_toast_enabled)
+                } else if (clickCount == 60 && Prefs.freeProSettings) {
+                    Prefs.freeProSettings = false
+                    L.d { "Flash [Pro-Free] section disabled" }
+                    toast(R.string.pro_free_toast_disabled)
+                }
+                if (clickCount >= 25) {
+                    toast(clickCount.toString())
                 }
             }
             false
@@ -134,9 +148,8 @@ class AboutActivity : AboutActivityBase(null, {
                 val size = c.dimenPixelSize(R.dimen.kau_avatar_bounds)
                 images = arrayOf<Pair<IIcon, () -> Unit>>(
                         GoogleMaterial.Icon.gmd_flash_on to { c.startPlayStoreLink(R.string.play_store_package_id) },
-                        GoogleMaterial.Icon.gmd_ac_unit to { c.startLink(R.string.frost_url) },
                         CommunityMaterial.Icon.cmd_github_circle to { c.startLink(R.string.github_url) },
-                        CommunityMaterial.Icon.cmd_xda to { c.startLink(R.string.xda_url) }
+                        GoogleMaterial.Icon.gmd_ac_unit to { c.startLink(R.string.frost_url) }
                 ).mapIndexed { i, (icon, onClick) ->
                     ImageView(c).apply {
                         layoutParams = ViewGroup.LayoutParams(size, size)

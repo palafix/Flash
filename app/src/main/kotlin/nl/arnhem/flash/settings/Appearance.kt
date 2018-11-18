@@ -14,6 +14,7 @@ import nl.arnhem.flash.injectors.CssAssets
 import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import nl.arnhem.flash.views.KPrefTextSeekbar
+import kotlin.math.max
 
 /**
  * Created by Allan Wang on 2017-06-29.
@@ -124,6 +125,34 @@ fun SettingsActivity.getAppearancePrefs(): KPrefAdapterBuilder.() -> Unit = {
         allowCustomAlpha = false
     }
 
+    checkbox(R.string.day_night, Prefs::DayNight, {
+        Prefs.DayNight = it
+        setFlashResult(REQUEST_REFRESH)
+        reloadByTitle(R.string.night_dialog)
+        reloadByTitle(R.string.day_dialog)
+        shouldRestartMain()
+    }) {
+        descRes = R.string.day_night_desc
+    }
+
+    timePicker(R.string.night_dialog, Prefs::nightTheme, { Prefs.nightTheme = it; }) {
+        enabler = Prefs::DayNight
+        setFlashResult(REQUEST_REFRESH)
+        shouldRestartMain()
+        descRes = R.string.night_dialog_desc
+        use24HourFormat = true
+        setFlashResult(REQUEST_TIME)
+    }
+
+    timePicker(R.string.day_dialog, Prefs::dayTheme, { Prefs.dayTheme = it; }) {
+        enabler = Prefs::DayNight
+        setFlashResult(REQUEST_REFRESH)
+        shouldRestartMain()
+        descRes = R.string.day_dialog_desc
+        use24HourFormat = true
+        setFlashResult(REQUEST_TIME)
+    }
+
     header(R.string.global_customization)
 
     text(R.string.main_activity_layout, Prefs::mainActivityLayoutType, { Prefs.mainActivityLayoutType = it }) {
@@ -144,13 +173,12 @@ fun SettingsActivity.getAppearancePrefs(): KPrefAdapterBuilder.() -> Unit = {
         }
     }
 
-    //checkbox(R.string.fab, { Prefs.enableFab }, { Prefs.enableFab = it })
-
     list.add(KPrefTextSeekbar(
             KPrefSeekbar.KPrefSeekbarBuilder(
-                    globalOptions,
-                    R.string.web_text_scaling, Prefs::webTextScaling, { Prefs.webTextScaling = it; setFlashResult(REQUEST_TEXT_ZOOM) })))
-
+                    globalOptions,R.string.web_text_scaling, Prefs::webTextScaling) {
+                Prefs.webTextScaling = it
+                setFlashResult(REQUEST_TEXT_ZOOM)
+            }))
 
     checkbox(R.string.rounded_icons, Prefs::showRoundedIcons, {
         Prefs.showRoundedIcons = it

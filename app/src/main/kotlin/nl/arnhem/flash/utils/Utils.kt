@@ -11,13 +11,17 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.support.annotation.StringRes
-import android.support.design.internal.SnackbarContentLayout
+import android.support.design.widget.SnackbarContentLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.FileProvider
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.FrameLayout
 import android.widget.TextView
 import ca.allanwang.kau.email.EmailBuilder
@@ -38,13 +42,19 @@ import nl.arnhem.flash.activities.*
 import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.facebook.*
 import nl.arnhem.flash.facebook.FbUrlFormatter.Companion.VIDEO_REDIRECT
+import nl.arnhem.flash.facebook.FbUrlFormatter.Companion.WWW_VIDEO_REDIRECT
+import nl.arnhem.flash.glide.FlashGlide
+import nl.arnhem.flash.glide.GlideApp
+import nl.arnhem.flash.services.NOTIF_CHANNEL_DOWNLOADS
 import nl.arnhem.flash.services.setFlashAlert
 import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import org.apache.commons.text.StringEscapeUtils
+import org.jetbrains.anko.runOnUiThread
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.File
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -55,6 +65,9 @@ const val ARG_URL = "arg_url"
 const val ARG_USER_ID = "arg_user_id"
 const val ARG_IMAGE_URL = "arg_image_url"
 const val ARG_TEXT = "arg_text"
+const val ARG_COOKIE = "arg_cookie"
+const val ARG_TITLE = "arg_title"
+
 
 inline fun <reified T : Activity> Context.launchNewTask(cookieList: ArrayList<CookieModel> = arrayListOf(), clearStack: Boolean = false) {
     startActivity<T>(clearStack, intentBuilder = {
@@ -97,16 +110,33 @@ fun Context.launchWebOverlay(url: String) = launchWebOverlayImpl<WebOverlayActiv
 
 fun Context.launchWebOverlayBasic(url: String) = launchWebOverlayImpl<WebOverlayBasicActivity>(url)
 
-private fun Context.fadeBundle() = ActivityOptions.makeCustomAnimation(this,
+fun Context.launchWebOverlayBasicFlash(url: String) = launchWebOverlayImpl<WebOverlayBasicFlashActivity>(url)
+
+fun Context.fadeBundle() = ActivityOptions.makeCustomAnimation(this,
         android.R.anim.fade_in, android.R.anim.fade_out).toBundle()
 
-fun Context.launchImageActivity(imageUrl: String, text: String?) {
+fun Context.launchImageActivity(imageUrl: String, text: String? = null, title: String? = null, cookie: String? = null) {
     startActivity<ImageActivity>(intentBuilder = {
         putExtras(fadeBundle())
         putExtra(ARG_IMAGE_URL, imageUrl)
         putExtra(ARG_TEXT, text)
+        putExtra(ARG_TITLE, title)
+        putExtra(ARG_COOKIE, cookie)
     })
 }
+
+//fun Context.popToRoot() {
+//    val intent = Intent(this, Test::class.java)
+//    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+//    startActivity(intent)
+//    Activity().overridePendingTransition(R.anim.kau_slide_in_bottom, R.anim.mu_no_anim)
+//}
+//
+//fun Context.popToTest(imageUrl: String) {
+//    startActivity<Test>(intentBuilder = {
+//        putExtra(ARG_URL, imageUrl)
+//    })
+//}
 
 /**
  * No Delete
@@ -117,37 +147,90 @@ fun Context.launchBookMarkOverlay() {
     return
 }
 
-fun Context.launchHistoryOverlay() {
-    val intent = Intent(this, HistoryActivity::class.java)
+fun Context.launchSettingsActivity() {
+    val intent = Intent(this, SettingsActivity::class.java)
     startActivity(intent)
     return
 }
 
+/**
+ * Used to get MimeType from url.
+ *
+ * @param url Url.
+ * @return Mime Type for the given url.
+ */
+private val DP = 40.dpToPx
 fun Context.onComplete(url: String): BroadcastReceiver? {
     val onComplete: BroadcastReceiver
     onComplete = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val pendingIntent = Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
-            val flashdownload = NotificationCompat.Builder(context)
-            flashdownload.setAutoCancel(true)
-                    .setDefaults(NotificationCompat.DEFAULT_ALL)
-                    .setWhen(System.currentTimeMillis())
-                    .setProgress(100, 100, false)
-                    .setSmallIcon(R.drawable.flash_f_256)
-                    .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-                    .setTicker("{Thanks for using Flash Social}")
-                    .setContentTitle(string(R.string.flash_name))
-                    .setContentText(url)
-                    .setStyle(NotificationCompat.BigTextStyle())
-                    .setFlashAlert(Prefs.notificationVibrate, Prefs.notificationRingtone)
-                    .setSubText(string(R.string.downloaded_compleet))
-                    .setContentIntent(PendingIntent.getActivity(context, 0, pendingIntent, 0))
-                    .color = color(R.color.flash_notification_icon)
+            val folder = if (url.endsWith(".mp4")
+                    || url.endsWith(".webm")
+                    || url.endsWith(".avi")
+                    || url.endsWith(".mkv")
+                    || url.endsWith(".mpg")
+                    || url.endsWith(".flv")
+                    || url.endsWith(".swv")
+                    || url.endsWith(".rm")
+                    || url.endsWith(".wmv")
+                    || url.endsWith(".mov")
+                    || url.endsWith(".m4v")) {
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Flash/Flash_Media/$url")
+            } else if (url.endsWith(".jpg")
+                    || url.endsWith(".img")
+                    || url.endsWith(".png")
+                    || url.endsWith(".jpeg")
+                    || url.endsWith(".gif")) {
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Flash/Flash_Images/$url")
+            } else
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Flash/Flash_Documents/$url")
+            val uri = flashUriFromFile(folder)
+            Log.d(BuildConfig.APPLICATION_ID, "File to download = $folder")
+            val mime = MimeTypeMap.getSingleton()
+            val ext = folder.name.substring(folder.name.indexOf(".") + 1)
+            val type = mime.getMimeTypeFromExtension(ext)
+            val openFile = Intent(Intent.ACTION_VIEW, Uri.parse("$folder"))
+            openFile.setDataAndType(Uri.parse("$folder"), type)
+            openFile.data = uri
+            openFile.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            openFile.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            val pIntent = PendingIntent.getActivity(context, 0, openFile, 0)
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // you must create a notification channel for API 26 and Above
+                val dls = string(R.string.download)
+                val appName = string(R.string.flash_name)
+                val description = string(R.string.download_notification_description)
+                val importance = NotificationManager.IMPORTANCE_DEFAULT
+                val channel = NotificationChannel(NOTIF_CHANNEL_DOWNLOADS, "$appName: $dls", importance)
+                channel.description = description
+                channel.enableLights(true)
+                channel.lightColor = R.color.md_white_1000
+                channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                channel.setShowBadge(true)
+                // Register the channel with the system; you can't change the importance
+                // or other notification behaviors after this
+                nm.createNotificationChannel(channel)
+            }
+
+                val flashdownload = NotificationCompat.Builder(context, NOTIF_CHANNEL_DOWNLOADS)
+                flashdownload.setAutoCancel(true)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+                        .setWhen(System.currentTimeMillis())
+                        .setProgress(100, 100, false)
+                        .setSmallIcon(R.drawable.flash_f_256)
+                        .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+                        .setTicker("{Thanks for using Flash Social}")
+                        .setContentTitle(string(R.string.flash_name))
+                        .setContentText(url)
+                        .setStyle(NotificationCompat.BigTextStyle())
+                        .setFlashAlert(Prefs.notificationVibrate, Prefs.notificationRingtone)
+                        .setSubText(string(R.string.downloaded_compleet))
+                        .setContentIntent(pIntent)
+                        .color = color(R.color.flash_notification_icon)
             nm.notify(1, flashdownload.build())
+            }
         }
-    }
     return onComplete
 }
 
@@ -157,7 +240,7 @@ fun Context.verSion(): Boolean {
             .setUpdateFrom(UpdateFrom.JSON)
             .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
             .setIcon(R.drawable.flash_notify) // Notification icon
-            .showAppUpdated(true)
+            .showAppUpdated(false)
             .start()
     return true
 }
@@ -176,6 +259,12 @@ fun Context.materialDialogThemed(action: MaterialDialog.Builder.() -> Unit): Mat
     val builder = MaterialDialog.Builder(this).theme()
     builder.action()
     return builder.show()
+}
+
+fun Context.materialDialogThemedImage(action: MaterialDialog.Builder.() -> Unit): MaterialDialog {
+    val builder = MaterialDialog.Builder(this).theme()
+    builder.action()
+    return builder.build()
 }
 
 fun MaterialDialog.Builder.theme(): MaterialDialog.Builder {
@@ -224,7 +313,7 @@ class ActivityThemeUtils {
 
     fun theme(activity: Activity) {
         with(activity) {
-            statusBarColor = Prefs.headerColor.darken(0.1f).withAlpha(255)
+            statusBarColor = Prefs.headerColor
             if (Prefs.tintNavBar) navigationBarColor = Prefs.headerColor
             if (themeWindow) window.setBackgroundDrawable(ColorDrawable(Prefs.bgColor))
             toolbar?.setBackgroundColor(Prefs.headerColor)
@@ -235,12 +324,87 @@ class ActivityThemeUtils {
             backgrounds.forEach { it.setBackgroundColor(Prefs.bgColor) }
         }
     }
+
+    fun daynighttheme(activity: Activity) {
+        with(activity) {
+            statusBarColor = Color.BLACK
+            if (Prefs.tintNavBar) navigationBarColor = Color.BLACK
+            if (themeWindow) window.setBackgroundDrawable(ColorDrawable(Color.BLACK))
+            toolbar?.setBackgroundColor(Color.BLACK)
+            toolbar?.setTitleTextColor(Color.WHITE)
+            toolbar?.overflowIcon?.setTint(Color.WHITE)
+            texts.forEach { it.setTextColor(Color.WHITE) }
+            headers.forEach { it.setBackgroundColor(Color.BLACK) }
+            backgrounds.forEach { it.setBackgroundColor(Color.BLACK) }
+        }
+    }
+}
+
+@SuppressLint("WrongConstant")
+fun isNightTime(activity: Activity): Boolean {
+    with(activity) {
+        if (!Prefs.DayNight) {
+            return false
+        }
+        try {
+            val startTime: Int
+            val endTime: Int
+            val start = Prefs.nightTheme
+            val nightStart = start.toString()
+            val daylight = start.toString()
+            val end = Prefs.dayTheme
+            val endDaynight = end.toString()
+            val nightEnd = end.toString()
+            val calNow = Calendar.getInstance()
+            val isDS = TimeZone.getDefault()
+            calNow.set(Calendar.PM, Calendar.AM)
+            val timeNow = SimpleDateFormat("HHmm", Locale.getDefault()).format(calNow.time)
+            startTime = if (isDS.useDaylightTime()) {
+                Integer.parseInt(daylight)
+            } else {
+                Integer.parseInt(nightStart)
+            }
+            endTime = if (isDS.useDaylightTime()) {
+                Integer.parseInt(endDaynight)
+            } else {
+                Integer.parseInt(nightEnd)
+            }
+            val nowTime = Integer.parseInt(timeNow)
+            return if (startTime > endTime) {
+                nowTime > startTime || nowTime < endTime
+            } else
+                !(startTime >= endTime || nowTime < startTime || nowTime > endTime)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
+    }
 }
 
 inline fun Activity.setFlashColors(builder: ActivityThemeUtils.() -> Unit) {
     val themer = ActivityThemeUtils()
     themer.builder()
     themer.theme(this)
+}
+
+fun flashEvent(name: String, vararg events: Pair<String, Any>) {
+    // todo bind
+    L.v { "Event: $name ${events.joinToString(", ")}" }
+}
+
+/**
+ * Helper method to quietly keep track of throwable issues
+ */
+fun Throwable?.logFlashEvent(text: String) {
+    val msg = if (this == null) text else "$text: $message"
+    L.e { msg }
+    flashEvent("Errors", "text" to text, "message" to (this?.message ?: "NA"))
+}
+
+inline fun Activity.setFlashDayNightColors(builder: ActivityThemeUtils.() -> Unit) {
+    val themer = ActivityThemeUtils()
+    themer.builder()
+    themer.daynighttheme(this)
 }
 
 fun flashAnswers(action: Answers.() -> Unit) {
@@ -322,13 +486,23 @@ inline val String?.isFacebookUrl
  * [true] if url is a video and can be accepted by VideoViewer
  */
 inline val String.isVideoUrl
-    get() = startsWith(VIDEO_REDIRECT) || (startsWith("https://video-") && contains(FBCDN_NET))
+    get() = startsWith(VIDEO_REDIRECT) || (startsWith("https://video-") && contains(FBCDN_NET)) || startsWith(WWW_VIDEO_REDIRECT) && contains("video_source=user_video_tab")
 
 /**
- * [true] if url is or redirects to an explicit facebook image
-+*/
-inline val String.isImageUrl
-    get() = contains(FBCDN_NET) && (contains(".png") || contains(".jpg"))
+ * [true] if url directly leads to a usable image
+ */
+inline val String.isImageUrl: Boolean
+    get() {
+        return contains(FBCDN_NET) && (contains(".png") || contains(".jpg"))
+    }
+
+/**
+ * [true] if url can be retrieved to get a direct image url
+ */
+inline val String.isIndirectImageUrl: Boolean
+    get() {
+        return contains("/photo/view_full_size/") && contains("fbid=")
+    }
 /**
  * [true] if url can be displayed in a different webview
  */
@@ -352,7 +526,11 @@ val dependentSet = setOf(
         "/pymk/xout/",
         "/place/review/xout/",
         "/review/xout/",
-        /**
+        /*
+         * Add new members to groups
+         */
+        "madminpanel",
+        /*
          * Editing images
          */
         "/confirmation/?",
@@ -371,16 +549,22 @@ inline val String?.isExplicitIntent
 
 fun Context.flashChangelog() = showChangelog(R.xml.flash_changelog, Prefs.textColor) {
     theme()
-    if (System.currentTimeMillis() - Prefs.installDate > 2592000000) { //show after 1 month
+    if (System.currentTimeMillis() - Prefs.installDate > 864000000) { //show after 10 days
         neutralText(R.string.kau_rate)
         onNeutral { _, _ -> startPlayStoreLink(R.string.play_store_package_id) }
     }
 }
 
+fun Context.flashNewChangelog() = showChangelog(R.xml.flash_changelog, Prefs.textColor) {
+    theme()
+}
+
 /**
  * Show Why Flash Pro
  */
-fun Context.flashWhyPro() = showChangelog(R.xml.flash_why_pro, Prefs.textColor) {
+fun Context.flashWhyPro() =
+        showChangelog(R.xml.flash_why_pro, Prefs.textColor) {
+            title(R.string.why_pro)
     theme()
 }
 

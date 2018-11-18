@@ -11,29 +11,38 @@
 
     <string name="theme_custom">Custom</string>
 
-    <string name = "theme">Thema </string>
-    <string name = "text_color">Tekst kleur </string>
-    <string name = "accent_color">Accent kleur </string>
-    <string name = "background_color">Achtergrond kleur </string>
-    <string name = "header_color">AppBar kleur </string>
+    <string name="day_night">Automatisch dag/nacht-thema.</string>
+    <string name="day_night_desc">Hiermee schakelt u de tijdkiezer in en activeer je deze functie.</string>
 
-    <string name = "icon_color">Pictogram kleur </string>
-    <string name="topbar_color">TopBar kleur</string>
+    <string name="night_dialog">Nacht tijdkiezer.</string>
+    <string name="night_dialog_desc">Kies de tijd waarop u het nacht-thema wilt activeren.</string>
 
-    <string name="enforce_black_media_bg">Zwarte media-achtergrond afdwingen</string>
-    <string name="enforce_black_media_bg_desc">Maak media-achtergrond zwart; standaard is de geselecteerde achtergrond van de thema hierboven</string>
+    <string name="day_dialog">Dag tijdkiezer.</string>
+    <string name="day_dialog_desc">Kies de tijd waarop u het dag-thema wilt activeren.</string>
 
-    <string name= "noti_color">Achtergrond kleur van Meldingen</string>
-    <string name = "global_customization">Gehele aanpassing </string>
-    <string name = "main_activity_layout">HoofdLayout Tab </string>
-    <string name=  "main_activity_layout_desc">HoofdLayout instellen</string>
-    <string name = "set_main_activity_layout">HoofdLayout instellen </string>
-    <string name = "rounded_icons">Afgeronde iconen </string>
-    <string name = "rounded_icons_desc">Profielfoto\'s en pictogrammen voor groepsgesprekken zijn afgerond </string>
-    <string name = "tint_nav">Tint navigatiebalk </string>
-    <string name = "tint_nav_desc">De navigatiebalk heeft dezelfde kleur als de kop </string>
-    <string name = "web_text_scaling">Web-tekstschaling </string>
-    <string name = "web_text_scaling_desc">Tekstschaalvoorbeeld; Druk lang op de percentagetekst om te resetten. </string>
-    <string name=  "main_tabs">Tabbladen aanpassen</string>
-    <string name=  "main_tabs_desc">Pas aan welke tabbladen u in uw tabbar ziet</string>
+    <string name = "theme">Thema.</string>
+    <string name = "text_color">Tekst kleur.</string>
+    <string name = "accent_color">Accent kleur.</string>
+    <string name = "background_color">Achtergrond kleur.</string>
+    <string name = "header_color">AppBar kleur.</string>
+
+    <string name = "icon_color">Pictogram kleur.</string>
+    <string name="topbar_color">TopBar kleur.</string>
+
+    <string name="enforce_black_media_bg">Zwarte media-achtergrond afdwingen.</string>
+    <string name="enforce_black_media_bg_desc">Maak media-achtergrond zwart; standaard is de geselecteerde achtergrond van de thema hierboven.</string>
+
+    <string name= "noti_color">Achtergrond kleur van Meldingen.</string>
+    <string name = "global_customization">Gehele aanpassing.</string>
+    <string name = "main_activity_layout">HoofdLayout Tab.</string>
+    <string name=  "main_activity_layout_desc">HoofdLayout instellen.</string>
+    <string name = "set_main_activity_layout">HoofdLayout instellen.</string>
+    <string name = "rounded_icons">Afgeronde iconen.</string>
+    <string name = "rounded_icons_desc">Profielfoto\'s en pictogrammen voor groepsgesprekken zijn afgerond.</string>
+    <string name = "tint_nav">Tint navigatiebalk.</string>
+    <string name = "tint_nav_desc">De navigatiebalk heeft dezelfde kleur als de kop.</string>
+    <string name = "web_text_scaling">Web-tekstschaling.</string>
+    <string name = "web_text_scaling_desc">Tekstschaalvoorbeeld; Druk lang op de percentagetekst om te resetten.</string>
+    <string name=  "main_tabs">Tabbladen aanpassen.</string>
+    <string name=  "main_tabs_desc">Pas aan welke tabbladen u in uw tabbar ziet.</string>
 </resources>

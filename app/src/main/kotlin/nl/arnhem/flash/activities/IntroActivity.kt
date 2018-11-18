@@ -61,7 +61,7 @@ class IntroActivity : KauBaseActivity(), ViewPager.PageTransformer, ViewPager.On
             adapter = this@IntroActivity.adapter
         }
         indicator.setViewPager(viewpager)
-        next.setIcon(GoogleMaterial.Icon.gmd_navigate_next)
+        next.setIcon(GoogleMaterial.Icon.gmd_navigate_next, 16, Prefs.iconColor)
         next.setOnClickListener {
             if (barHasNext) viewpager.setCurrentItem(viewpager.currentItem + 1, true)
             else finish(next.x + next.pivotX, next.y + next.pivotY)
@@ -159,7 +159,7 @@ class IntroActivity : KauBaseActivity(), ViewPager.PageTransformer, ViewPager.On
         if (barHasNext == hasNext) return
         barHasNext = hasNext
         next.fadeScaleTransition {
-            setIcon(if (barHasNext) GoogleMaterial.Icon.gmd_navigate_next else GoogleMaterial.Icon.gmd_done, color = Prefs.textColor)
+            setIcon(if (barHasNext) GoogleMaterial.Icon.gmd_navigate_next else GoogleMaterial.Icon.gmd_done, 16, Prefs.textColor)
         }
         skip.animate().scaleXY(if (barHasNext) 1f else 0f)
     }

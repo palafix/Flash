@@ -1,7 +1,29 @@
 <resources>
 
+    <style name="MaterialDialogSheet" parent="@android:style/Theme.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowAnimationStyle">@style/MaterialDialogSheetAnimation</item>
+    </style>
+
+    <style name="MaterialDialogSheetAnimation">
+        <item name="android:windowEnterAnimation">@anim/popup_show</item>
+        <item name="android:windowExitAnimation">@anim/popup_hide</item>
+    </style>
+
     <style name="Theme.AppCompat.Light.NoActionBar.FullScreen">
         <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="FlashThemeTest" parent="MaterialDrawerTheme.ActionBar">
+        <item name="colorPrimary">@android:color/transparent</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
+        <item name="colorAccent">@android:color/white</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
     <style name="FlashThemeBase" parent="MaterialDrawerTheme.ActionBar">
@@ -11,9 +33,14 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <style name="FlashTheme" parent="@style/FlashThemeBase">
+    <style name="FlashTheme" parent="@style/FlashThemeTest">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme">
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowAnimationStyle">@style/KauSlideInFadeOut</item>
     </style>
 
     <style name="FlashTheme.Light" parent="MaterialDrawerTheme.Light.DarkToolbar">

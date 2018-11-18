@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.support.annotation.WorkerThread
 import android.util.AttributeSet
 import android.view.View
 import android.webkit.WebView
@@ -45,27 +46,22 @@ class DebugWebView @JvmOverloads constructor(
         isDrawingCacheEnabled = true
     }
 
-    fun getScreenshot(output: File, callback: (Boolean) -> Unit) {
+    @WorkerThread
+    fun getScreenshot(output: File): Boolean {
 
         if (!output.createFreshFile()) {
             L.e { "Failed to create ${output.absolutePath} for debug screenshot" }
-            return callback(false)
+            return false
         }
-        doAsync {
-            var valid = true
-            try {
-                output.outputStream().use {
-                    drawingCache.compress(Bitmap.CompressFormat.PNG, 100, it)
-                }
-                L.d { "Created screenshot at ${output.absolutePath}" }
-            } catch (e: Exception) {
-                L.e { "An error occurred ${e.message}" }
-                valid = false
-            } finally {
-                uiThread {
-                    callback(valid)
-                }
+        return try {
+            output.outputStream().use {
+                drawingCache.compress(Bitmap.CompressFormat.PNG, 100, it)
             }
+            L.d { "Created screenshot at ${output.absolutePath}" }
+            true
+        } catch (e: Exception) {
+            L.e { "An error occurred ${e.message}" }
+            false
         }
     }
 
@@ -89,10 +85,10 @@ class DebugWebView @JvmOverloads constructor(
             if (url.isFacebookUrl)
                 view.jsInject(
                         CssAssets.ROUND_ICONS.maybe(Prefs.showRoundedIcons),
-                        CssHider.CORE,
+//                        CssHider.CORE,
                         CssHider.COMPOSER.maybe(!Prefs.showComposer),
-                        CssHider.PEOPLE_YOU_MAY_KNOW.maybe(!Prefs.showSuggestedFriends && IS_Flash_PRO),
-                        CssHider.SUGGESTED_GROUPS.maybe(!Prefs.showSuggestedGroups && IS_Flash_PRO),
+                        CssHider.PEOPLE_YOU_MAY_KNOW.maybe(!Prefs.showSuggestedFriends),
+                        CssHider.SUGGESTED_GROUPS.maybe(!Prefs.showSuggestedGroups),
                         Prefs.themeInjector,
                         CssHider.NON_RECENT.maybe((url?.contains("?sk=h_chr") ?: false)
                                 && Prefs.aggressiveRecents))

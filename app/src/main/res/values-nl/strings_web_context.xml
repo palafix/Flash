@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+     <string name="google">Google</string>
      <string name="share_link">Link delen</string>
      <string name="debug_link">Debug Link</string>
      <string name="debug_link_desc">Als een link niet goed wordt geladen, kunt u mij een e-mail sturen zodat ik kan helpen om deze te debuggen. Als u op OK klikt, opent u een e-mailverzoek</string>
@@ -11,5 +11,7 @@
      <string name="chrome">Mede mogelijk gemaakt door: Flash/Chrome</string>
      <string name="private_info">De verbinding met deze site is privé.</string>
      <string name="none_private_info">De verbinding met deze site is niet privé.</string>
-    <string name="google_search">Zoek op google of typ een url</string>
+     <string name="google_search">Zoek op google of typ een url</string>
+
+     <string name="image_loading">Afbeelding laden…</string>
 </resources>

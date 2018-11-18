@@ -1,15 +1,15 @@
 package nl.arnhem.flash.dbflow
 
-import nl.arnhem.flash.utils.L
 import com.raizlabs.android.dbflow.annotation.*
 import com.raizlabs.android.dbflow.kotlinextensions.*
 import com.raizlabs.android.dbflow.sql.SQLiteType
 import com.raizlabs.android.dbflow.sql.migration.AlterTableMigration
 import com.raizlabs.android.dbflow.structure.BaseModel
+import nl.arnhem.flash.utils.L
 
 /**
  * Created by Allan Wang on 2017-05-30.
- **/
+ */
 
 @Database(version = NotificationDb.VERSION)
 object NotificationDb {
@@ -27,9 +27,12 @@ class NotificationMigration2(modelClass: Class<NotificationModel>) : AlterTableM
 }
 
 @Table(database = NotificationDb::class, allFields = true, primaryKeyConflict = ConflictAction.REPLACE)
-data class NotificationModel(@PrimaryKey var id: Long = -1L, var epoch: Long = -1L, var epochIm: Long = -1) : BaseModel()
+data class NotificationModel(@PrimaryKey var id: Long = -1L,
+                             var epoch: Long = -1L,
+                             var epochIm: Long = -1L) : BaseModel()
 
-fun lastNotificationTime(id: Long): NotificationModel = (select from NotificationModel::class where (NotificationModel_Table.id eq id)).querySingle() ?: NotificationModel(id = id)
+fun lastNotificationTime(id: Long): NotificationModel = (select from NotificationModel::class where (NotificationModel_Table.id eq id)).querySingle()
+        ?: NotificationModel(id = id)
 
 fun saveNotificationTime(notificationModel: NotificationModel, callback: (() -> Unit)? = null) {
     notificationModel.async save {

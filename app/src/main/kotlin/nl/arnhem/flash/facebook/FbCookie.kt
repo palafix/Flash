@@ -20,20 +20,24 @@ import nl.arnhem.flash.utils.launchLogin
  */
 object FbCookie {
 
+    /**
+     * Retrieves the facebook cookie if it exists
+     * Note that this is a synchronized call
+     */
     inline val webCookie: String?
         get() = CookieManager.getInstance().getCookie(FB_URL_BASE)
 
     private fun setWebCookie(cookie: String?, callback: (() -> Unit)?) {
         with(CookieManager.getInstance()) {
-            removeAllCookies {
+            removeAllCookies { _ ->
                 if (cookie == null) {
                     callback?.invoke()
                     return@removeAllCookies
                 }
                 L.d { "Setting cookie" }
                 val cookies = cookie.split(";").map { Pair(it, SingleSubject.create<Boolean>()) }
-                cookies.forEach { (cookie, callback) -> setCookie(FB_URL_BASE, cookie, { callback.onSuccess(it) }) }
-                Observable.zip<Boolean, Unit>(cookies.map { (_, callback) -> callback.toObservable() }, {})
+                cookies.forEach { (cookie, callback) -> setCookie(FB_URL_BASE, cookie) { callback.onSuccess(it) } }
+                Observable.zip<Boolean, Unit>(cookies.map { (_, callback) -> callback.toObservable() }) {}
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             callback?.invoke()
@@ -106,7 +110,7 @@ object FbCookie {
     /**
      * Clear the cookies of the given id
      */
-    fun logout(id: Long, callback: () -> Unit) {
+    private fun logout(id: Long, callback: () -> Unit) {
         L.d { "Logging out user" }
         removeCookie(id)
         reset(callback)

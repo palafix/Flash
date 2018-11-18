@@ -19,8 +19,8 @@
     <item
         android:id="@+id/intro_phone_icon_1"
         android:bottom="140dp"
-        android:left="11dp"
-        android:right="74dp"
+        android:left="7dp"
+        android:right="78dp"
         android:top="15dp">
         <shape>
             <corners android:radius="1.5dp" />
@@ -30,8 +30,8 @@
     <item
         android:id="@+id/intro_phone_icon_2"
         android:bottom="140dp"
-        android:left="32dp"
-        android:right="53dp"
+        android:left="25dp"
+        android:right="60dp"
         android:top="15dp">
         <shape>
             <corners android:radius="1.5dp" />
@@ -41,8 +41,8 @@
     <item
         android:id="@+id/intro_phone_icon_3"
         android:bottom="140dp"
-        android:left="53dp"
-        android:right="32dp"
+        android:left="43dp"
+        android:right="42dp"
         android:top="15dp">
         <shape>
             <corners android:radius="1.5dp" />
@@ -52,8 +52,19 @@
     <item
         android:id="@+id/intro_phone_icon_4"
         android:bottom="140dp"
-        android:left="74dp"
-        android:right="11dp"
+        android:left="60dp"
+        android:right="25dp"
+        android:top="15dp">
+        <shape>
+            <corners android:radius="1.5dp" />
+            <solid android:color="#f00" />
+        </shape>
+    </item>
+    <item
+        android:id="@+id/intro_phone_icon_5"
+        android:bottom="140dp"
+        android:left="78dp"
+        android:right="7dp"
         android:top="15dp">
         <shape>
             <corners android:radius="1.5dp" />
@@ -62,12 +73,24 @@
     </item>
     <item
         android:id="@+id/intro_phone_icon_ripple"
-        android:bottom="129dp"
-        android:left="0dp"
-        android:right="63dp"
-        android:top="4dp">
+        android:bottom="133dp"
+        android:left="4dp"
+        android:right="67dp"
+        android:top="8dp"
+        android:start="0dp"
+        android:end="70dp">
         <shape android:shape="oval">
             <solid android:color="#800000ff" />
+        </shape>
+    </item>
+    <item
+        android:id="@+id/intro_phone_background"
+        android:bottom="10dp"
+        android:left="3dp"
+        android:right="3dp"
+        android:top="26dp">
+        <shape>
+            <solid android:color="#f0f" />
         </shape>
     </item>
 </layer-list>

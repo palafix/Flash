@@ -8,6 +8,7 @@ import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.web.FlashWebViewClient
 import org.apache.commons.text.StringEscapeUtils
 import java.util.*
+import io.reactivex.disposables.Disposable
 
 class JsBuilder {
     private val css = StringBuilder()
@@ -76,28 +77,29 @@ interface InjectorContract {
 /**
  * Helper method to inject multiple functions simultaneously with a single callback
  */
-fun WebView.jsInject(vararg injectors: InjectorContract, callback: ((Int) -> Unit)? = null) {
+fun WebView.jsInject(vararg injectors: InjectorContract, callback: ((Int) -> Unit)? = null): Disposable? {
     val validInjectors = injectors.filter { it != JsActions.EMPTY }
     if (validInjectors.isEmpty()) {
         callback?.invoke(0)
-        return
+        return null
     }
     L.d { "Injecting ${validInjectors.size} items" }
     if (callback == null) {
         validInjectors.forEach { it.inject(this) }
-        return
+        return null
     }
-    val observables = Array(validInjectors.size, { SingleSubject.create<Unit>() })
-    Single.zip<Unit, Int>(observables.asList(), { it.size })
+    val observables = Array(validInjectors.size) { SingleSubject.create<Unit>() }
+    val disposable = Single.zip<Unit, Int>(observables.asList()) { it.size }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { res, _ ->
                 callback(res)
             }
     (0 until validInjectors.size).forEach { i ->
-        validInjectors[i].inject(this, {
+        validInjectors[i].inject(this) {
             observables[i].onSuccess(Unit)
-        })
+        }
     }
+    return disposable
 }
 
 fun FlashWebViewClient.jsInject(vararg injectors: InjectorContract,
@@ -108,6 +110,6 @@ fun FlashWebViewClient.jsInject(vararg injectors: InjectorContract,
  */
 class JsInjector(val function: String) : InjectorContract {
     override fun inject(webView: WebView, callback: (() -> Unit)?) {
-        webView.evaluateJavascript(function, { callback?.invoke() })
+        webView.evaluateJavascript(function) { callback?.invoke() }
     }
 }

@@ -7,17 +7,21 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.realm.Realm
+import me.leolin.shortcutbadger.ShortcutBadger
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.views.BadgedIcon
 import org.jsoup.Jsoup
 import java.util.concurrent.TimeUnit
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+
 
 
 class MainActivity : BaseMainActivity() {
 
-    override val fragmentSubject = PublishSubject.create<Int>()!!
+    override val fragmentSubject = PublishSubject.create<Int>()
     var lastPosition = -1
-    val headerBadgeObservable = PublishSubject.create<String>()!!
+    val headerBadgeObservable = PublishSubject.create<String>()
 
     override fun onNestedCreate(savedInstanceState: Bundle?) {
         Realm.init(this)
@@ -62,18 +66,24 @@ class MainActivity : BaseMainActivity() {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 super.onTabSelected(tab)
                 (tab.customView as BadgedIcon).removeNotification(0)
+                tabsForEachView { _, view ->
+                    when (view.iicon) {
+                        FbItem.MESSAGES.icon -> ShortcutBadger.removeCount(this@MainActivity)
+                        FbItem.NOTIFICATIONS.icon -> ShortcutBadger.removeCount(this@MainActivity)
+                    }
+                }
             }
         })
         headerBadgeObservable.throttleFirst(15, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.newThread())
                 .map { Jsoup.parse(it) }
                 .filter { it.select("[data-sigil=count]").size >= 0 } //ensure headers exist
-                .map {
-                    val feed = it.select("[data-sigil*=feed] [data-sigil=count]")
-                    val requests = it.select("[data-sigil*=requests] [data-sigil=count]")
-                    val messages = it.select("[data-sigil*=messages] [data-sigil=count]")
-                    val notifications = it.select("[data-sigil*=notifications] [data-sigil=count]")
-                    return@map arrayOf(feed, requests, messages, notifications).map { it?.getOrNull(0)?.ownText() }
+                .map { it ->
+                    val feed = it.select("[id*=feed_jewel] [data-sigil=count]")
+                    val requests = it.select("[id*=requests_jewel] [data-sigil=count]")
+                    val messages = it.select("[id*=messages_jewel] [data-sigil=count]")
+                    val notifications = it.select("[id*=notifications_jewel] [data-sigil=count]")
+                    return@map arrayOf(feed, requests, messages, notifications).map { e -> e?.getOrNull(0)?.ownText() }
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { (feed, requests, messages, notifications) ->
@@ -85,7 +95,7 @@ class MainActivity : BaseMainActivity() {
                             FbItem.NOTIFICATIONS.icon -> view.badgeText = notifications
                         }
                     }
-                }
+                }.disposeOnDestroy()
         adapter.pages.forEach {
             tabs.addTab(tabs.newTab()
                     .setCustomView(BadgedIcon(this).apply { iicon = it.icon }))

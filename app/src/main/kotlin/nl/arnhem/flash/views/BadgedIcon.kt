@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.views
 
 import android.content.Context
@@ -54,7 +56,6 @@ class BadgedIcon @JvmOverloads constructor(
             else badgeTextView.gone()
         }
 
-
     fun removeNotification(notificationCount: Int) {
         badgeTextView.visibility = View.INVISIBLE
         if (notificationCount <= 0) {
@@ -64,7 +65,7 @@ class BadgedIcon @JvmOverloads constructor(
 
     var addfeed: String?
         get() = badgeTextView.text.toString()
-        set(String) {
+        set(value) {
             badgeTextView.gone()
             val handler = Handler()
             handler.postDelayed({
@@ -73,17 +74,14 @@ class BadgedIcon @JvmOverloads constructor(
                 badgeTextView.text = number
                 if (number == "1") badgeTextView.visible()
                 else badgeTextView.gone()
-            }, 300000)
+            }, 300000) //5 Minutes
             handler.postDelayed({
                 val number = "9+"
                 if (badgeTextView.text == number) return@postDelayed
                 badgeTextView.text = number
                 if (number == "9+") badgeTextView.visible()
                 else badgeTextView.gone()
-            }, 680000)
+            }, 680000) //11.333333 Minutes
+
         }
 }
-
-
-
-

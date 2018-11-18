@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.utils
 
 import android.annotation.SuppressLint
@@ -73,7 +75,7 @@ object Sharer {
         try {
             // open the specific App Info page
             val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.parse("package:" + DOWNLOAD_MANAGER_PACKAGE_NAME)
+            intent.data = Uri.parse("package:$DOWNLOAD_MANAGER_PACKAGE_NAME")
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()

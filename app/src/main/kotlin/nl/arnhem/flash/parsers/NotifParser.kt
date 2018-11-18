@@ -24,7 +24,7 @@ data class FlashNotifs(
     }.toString()
 
     override fun getUnreadNotifications(data: CookieModel) =
-            notifs.filter(FlashNotif::unread).map {
+            notifs.asSequence().filter(FlashNotif::unread).map {
                 with(it) {
                     NotificationContent(
                             data = data,
@@ -36,7 +36,7 @@ data class FlashNotifs(
                             profileUrl = img
                     )
                 }
-            }
+            }.toList()
 }
 
 /**

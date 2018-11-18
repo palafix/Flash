@@ -1,8 +1,8 @@
 <resources>
 
-    <string name="google">Google</string>
+    <string name="facebook_search">Search on Facebook</string>
 
-    <string name="more">Foto\'s en meer </string>
+    <string name="more">Picture\'s &amp; More </string>
     <string name="trending">Trending</string>
     <string name="faved">Favorite</string>
     <string name="favorites">Favorites</string>
@@ -11,10 +11,14 @@
     <string name="reminders">Events, Reminders &amp; Birthdays</string>
     <string name="savenotes">Saved &amp; Notes</string>
 
+    <string name="delete_search">Clear search history</string>
+
     <string name="appversion">App Version</string>
 
-    <string name="video_beta">Video Settings may not work</string>
-    <string name="video_settings">Video Settings</string>
+    <string name="video_beta">Facebook Video Settings</string>
+    <string name="video_settings">Play video\'s automatically</string>
+
+    <string name="videos">Video\'s</string>
     <string name="pokes">Pokes</string>
 
     <string name="feed">News Feed</string>
@@ -37,6 +41,7 @@
 
     <string name="events">Events</string>
     <string name="friends">Friends</string>
+    <string name="my_friends">My friends</string>
     <string name="messages">Messages</string>
     <string name="notifications">Notifications</string>
     <string name="activity_log">Activity Log</string>
@@ -72,7 +77,7 @@
     <string name="show_all_results">Show All Results</string>
 
 
-    <string name="flash_description">Flash is a fully themable,
+    <string name="flash_description">Flash is a fully themeable,
         fully functional alternative to the official Facebook app, made from scratch by Allan Wang and proudly open sourced.</string>
 
     <string name="faq_title">Flash FAQ</string>
@@ -90,6 +95,12 @@
     <string name="options">Options</string>
     <string name="tab_customizer_instructions">Long press and drag to rearrange the top icons.</string>
 
-    <string name="no_new_notifications">No new notifications found</string>
+    <string name="close_app_confirmation">Are you sure you want to exit?</string>
+    <string name="do_not_show_again">Do not show again</string>
+    <string name="exit">Exit?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="context_share_image_progress">Preparing&#8230;</string>
 
 </resources>

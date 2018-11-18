@@ -1,5 +1,11 @@
+@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+
 package nl.arnhem.flash.activities
 
+import android.animation.ValueAnimator
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -7,12 +13,14 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.PointF
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.widget.SwipeRefreshLayout
@@ -33,23 +41,28 @@ import ca.allanwang.kau.searchview.bindSearchView
 import ca.allanwang.kau.swipe.kauSwipeOnCreate
 import ca.allanwang.kau.swipe.kauSwipeOnDestroy
 import ca.allanwang.kau.utils.*
-import com.afollestad.materialdialogs.DialogAction
-import com.afollestad.materialdialogs.GravityEnum
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.view_video.*
 import nl.arnhem.flash.R
+import nl.arnhem.flash.contracts.*
 import nl.arnhem.flash.enums.OverlayContext
 import nl.arnhem.flash.facebook.CHROMEWEB_LOAD_DELAY
+import nl.arnhem.flash.facebook.FbItem
+import nl.arnhem.flash.glide.FlashGlide
+import nl.arnhem.flash.injectors.*
 import nl.arnhem.flash.model.BookmarkModel
-import nl.arnhem.flash.model.HistoryModel
 import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.utils.Prefs.animate
+import nl.arnhem.flash.utils.iab.IS_Flash_PRO
+import nl.arnhem.flash.glide.GlideApp
+import nl.arnhem.flash.views.FlashVideoViewer
 import nl.arnhem.flash.web.CustomChromeClient
 import nl.arnhem.flash.web.WebViewFlash
 import nl.arnhem.flash.web.shouldFlashInterceptRequest
+import org.jetbrains.anko.withAlpha
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
@@ -64,11 +77,15 @@ import kotlin.properties.Delegates
 
 
 @Suppress("OverridingDeprecatedMember", "DEPRECATION", "NAME_SHADOWING")
-class CustomTabs : BaseActivity(), SearchViewHolder {
+class CustomTabs : BaseActivity(),
+        SearchViewHolder, VideoViewHolder,
+        ActivityContract, FileChooserContract by FileChooserDelegate() {
 
+    override val frameWrapper: FrameLayout by bindView(R.id.frame_wrapper)
     val swipeRefreshLayout: SwipeRefreshLayout by bindView(R.id.swipe)
     val coordinator: CoordinatorLayout by bindView(R.id.overlay_main_content)
     val toolbar: Toolbar by bindView(R.id.browser_toolbar)
+    private val appBar: AppBarLayout by bindView(R.id.appbaroverlay)
     val secure: ImageView by bindView(R.id.lockButton)
     val unsecure: ImageView by bindView(R.id.unlockButton)
     private val toolbarTitle: TextView by bindView(R.id.toolbarTitle)
@@ -77,8 +94,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
     val share: TextView by bindView(R.id.action_share)
     val download: TextView by bindView(R.id.action_download)
     private val bookmark: TextView by bindView(R.id.action_bookmark)
-    private val history: TextView by bindView(R.id.action_history)
-    private val deleteHistory: TextView by bindView(R.id.delete_history)
     val open: TextView by bindView(R.id.simple_open_link)
     val progressBar: ProgressBar by bindView(R.id.content_progress)
     private val goForward: ImageView by bindView(R.id.simple_go_forward)
@@ -97,8 +112,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
     private var mFactory: XmlPullParserFactory? = null
     private var mXpp: XmlPullParser? = null
 
-    var willSave: Boolean? = true
-
     private var appDirectoryName: String? = null
     private var appDirectoryName2: String? = null
     private var appDirectoryName3: String? = null
@@ -112,10 +125,16 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
 
     private var flag = false
 
+    private inline fun v(crossinline message: () -> Any?) = L.v { "web client: ${message()}" }
+
+    private val glide
+        get() = GlideApp.with(this)
+
+    @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_browser)
-        overflowmenu()
+        itemsOverFlowOnclickMenu()
         Realm.init(this)
         progressBar.max = 100
         progressBar.progress = 1
@@ -128,10 +147,7 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         toolbarSub.setTextColor(Prefs.iconColor)
         toolbar.navigationIcon = GoogleMaterial.Icon.gmd_close.toDrawable(this, 16, Prefs.iconColor)
         toolbar.setNavigationOnClickListener { finishSlideOut() }
-        toolbar.setBackgroundColor(Prefs.headerColor.withAlpha(255))
-        statusBarColor = Prefs.headerColor.withAlpha(255).darken()
-        navigationBarColor = Prefs.headerColor.withAlpha(255)
-        coordinator.setBackgroundColor(Prefs.bgColor.withAlpha(255))
+        coordinator.setBackgroundColor(Prefs.bgColor)
         realm = Realm.getDefaultInstance()
         overflowMenu.setCardBackgroundColor(Prefs.headerColor.withAlpha(255))
         browserrefresh.setColorFilter(Prefs.iconColor)
@@ -144,16 +160,22 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         open.setTextColor(Prefs.iconColor)
         download.setTextColor(Prefs.iconColor)
         bookmark.setTextColor(Prefs.iconColor)
-        history.setTextColor(Prefs.iconColor)
-        deleteHistory.setTextColor(Prefs.iconColor)
         appDirectoryName = getString(R.string.flash_name).replace(" ", " ")
         appDirectoryName2 = getString(R.string.flash_name_image).replace(" ", " ")
         appDirectoryName3 = getString(R.string.flash_name_docu).replace(" ", " ")
         appDirectoryName4 = getString(R.string.flash_name_video).replace(" ", " ")
-        setFlashTheme(true)
-        setFlashColors {
-            toolbar(toolbar)
-            themeWindow = false
+        if (Prefs.DayNight && isNightTime(Activity())) {
+            setFlashDayNightColors {
+                toolbar(toolbar)
+                header(appBar)
+                themeWindow = false
+            }
+        } else {
+            setFlashColors {
+                toolbar(toolbar)
+                header(appBar)
+                themeWindow = false
+            }
         }
         if (Showcase.firstWebOverlay) {
             coordinator.flashSnackbar(getString(R.string.web_overlay_swipe_hint)) {
@@ -162,8 +184,12 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
             }
         }
         kauSwipeOnCreate {
-            if (!Prefs.overlayFullScreenSwipe) edgeSize = 50.dpToPx
-            transitionSystemBars = false
+            if (!Prefs.overlayFullScreenSwipe)
+                edgeSize = 20.dpToPx
+            sensitivity = 0.5f
+            setEdgeSizePercent(0.2f)//0.2 mean left 20% of screen can touch to begin swipe.
+            scrimColor = Prefs.iconColor
+            transitionSystemBars = true
         }
 
         val browserIntent = Intent("android.intent.action.VIEW", Uri.parse("http://"))
@@ -177,7 +203,7 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
 
         AdRemoval.init(this@CustomTabs)
         val url = intent.data
-        addRess = url!!.toString()
+        addRess = "$url"
 
         swipeRefreshLayout.setColorSchemeColors(Prefs.iconColor)
         swipeRefreshLayout.setProgressBackgroundColorSchemeColor(Prefs.headerColor.withAlpha(255))
@@ -233,8 +259,11 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
 
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? = view.shouldFlashInterceptRequest(request)
 
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                try {
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                v { "Url loading: ${request.url}" }
+                val path = request.url?.path ?: return true
+                v { "Url path $path" }
+                val url = request.url.toString()
                     if (url.startsWith("market:")
                             || url.startsWith("https://play.google.com") || url.startsWith("magnet:")
                             || url.startsWith("mailto:") || url.startsWith("intent:")
@@ -243,11 +272,10 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                         finish()
                         return true
-
-                    } else if (url.contains("http://") || url.contains("https://")) {
-                        return false
                     }
-
+                    if (url.contains("http://") || url.contains("https://")) {
+                        return true
+                    }
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                     try {
                         startActivity(intent)
@@ -255,18 +283,7 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                         Log.e("shouldOverrideUrlLoad", "No Activity to handle action", e)
                         e.printStackTrace()
                     }
-                    addToHistory(realm)
-                    willSave = true
-                    return true
-                } catch (ignored: Exception) {
-                    return true
-                }
-
-            }
-
-            override fun onPageCommitVisible(view: WebView?, url: String?) {
-                super.onPageCommitVisible(view, url)
-                willSave = true
+                return true
             }
 
             override fun onLoadResource(view: WebView, url: String) {
@@ -276,7 +293,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                     download.visibility = View.VISIBLE
                 } else
                     super.onLoadResource(view, url)
-                willSave = true
             }
 
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
@@ -286,7 +302,7 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                     AdRemoval.init(this@CustomTabs)
                     swipeRefreshLayout.isRefreshing = true
                     swipeRefreshLayout.isEnabled = true
-                    Handler().postDelayed({ swipeRefreshLayout.isRefreshing = false }, 2000)
+                    //Handler().postDelayed({ swipeRefreshLayout.isRefreshing = false }, 3000)
                     if (webView.canGoForward()) {
                         goForward.setImageDrawable(resources.getDrawable(R.drawable.ic_go_forward))
                     } else {
@@ -295,13 +311,11 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                     (findViewById<View>(R.id.toolbarSub) as TextView).text = url
                     if (url != null) {
                         if (url.contains("https://")) {
-                            secure.setIcon(GoogleMaterial.Icon.gmd_lock)
-                            secure.setColorFilter(Color.GREEN)
+                            secure.setIcon(GoogleMaterial.Icon.gmd_lock, 16, Color.GREEN)
                             secure.visibility = View.VISIBLE
                             unsecure.visibility = View.GONE
                         } else {
-                            unsecure.setIcon(GoogleMaterial.Icon.gmd_lock_open)
-                            unsecure.setColorFilter(Color.RED)
+                            unsecure.setIcon(GoogleMaterial.Icon.gmd_lock_open, 16, Color.RED)
                             secure.visibility = View.GONE
                             unsecure.visibility = View.VISIBLE
                         }
@@ -316,20 +330,82 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                 }
             }
 
-            override fun onPageFinished(view: WebView, url: String) {
-                super.onPageFinished(view, url)
-                addToHistory(realm)
+            override fun onPageFinished(view: WebView, url: String?) {
+                url ?: return
                 viewVisible(view)
+                v { "finished $url" }
                 try {
                     AdRemoval.init(this@CustomTabs)
                     swipeRefreshLayout.isRefreshing = false
                     browserstop.visibility = View.GONE
-                    browserrefresh.visibility = View.VISIBLE
                 } catch (ignored: Exception) {
 
                 }
+                browserrefresh.visibility = View.VISIBLE
                 progressBar.visibility = View.GONE
+                if (!url.isFacebookUrl) {
+                    swipeRefreshLayout.isRefreshing = false
+                    return
+                }
+                onPageFinishedActions(url)
             }
+
+            private fun injectBackgroundColor() {
+                webView.setBackgroundColor(
+                        when {
+                            webView.url.isFacebookUrl -> Prefs.bgColor.withAlpha(255)
+                            else -> Color.WHITE
+                        }
+                )
+            }
+
+            override fun onPageCommitVisible(view: WebView, url: String?) {
+                super.onPageCommitVisible(view, url)
+                injectBackgroundColor()
+                if (webView.url.isFacebookUrl) {
+                    view.jsInject(
+                            CssAssets.ROUND_ICONS.maybe(Prefs.showRoundedIcons),
+                            CssHider.CORE,
+                            CssHider.COMPOSER.maybe(!Prefs.showComposer),
+                            CssFixed.COMPOSER_FIXED.maybe(Prefs.fixedComposer),
+                            CssPadding.COMPOSER_PADDING.maybe(Prefs.paddingComposer),
+                            CssHider.COMPOSER_BOTTOM.maybe(Prefs.bottomComposer),
+                            CssHider.PEOPLE_YOU_MAY_KNOW.maybe(!Prefs.showSuggestedFriends && IS_Flash_PRO),
+                            CssHider.SUGGESTED_GROUPS.maybe(!Prefs.showSuggestedGroups && IS_Flash_PRO),
+                            Prefs.themeInjector,
+                            CssHider.NON_RECENT.maybe(webView.url.contains("?sk=h_chr")
+                                    && Prefs.aggressiveRecents),
+                            CssHider.VIDEOS,
+                            CssHider.VIDEOS2,
+                            CssHider.HEADER,
+                            CssHider.HEADER_TOP,
+                            JsAssets.DOCUMENT_WATCHER,
+                            JsAssets.HEADER_HIDER,
+                            JsAssets.CLICK_A,
+                            CssHider.ADS.maybe(!Prefs.showFacebookAds && IS_Flash_PRO),
+                            JsAssets.CONTEXT_A,
+                            JsActions.AUDIO_OFF.maybe(Prefs.DisableAudio),
+                            JsAssets.MEDIA)
+                } else
+                    swipeRefreshLayout.isRefreshing = false
+            }
+
+
+            private fun onPageFinishedActions(url: String) {
+                if (url.startsWith("${FbItem.MESSAGES.url}/read/") && Prefs.messageScrollToBottom)
+                    webView.pageDown(true)
+                injectAndFinish()
+            }
+
+            private fun injectAndFinish() {
+                v { "page finished reveal" }
+                swipeRefreshLayout.isRefreshing = false
+                injectBackgroundColor()
+                webView.jsInject(
+                        JsActions.LOGIN_CHECK,
+                        JsAssets.TEXTAREA_LISTENER)
+            }
+
 
             override fun onReceivedError(view: WebView, errorCode: Int, description: String, failingUrl: String) {
                 if (view.url == failingUrl) {
@@ -337,12 +413,16 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                         title(webView.title)
                         content(resources.getString(R.string.no_network))
                         positiveText(R.string.kau_ok)
-                        onPositive { _, _ -> }
+                        onPositive { _, _ ->
+                            if (webView.canGoBack()) {
+                                webView.reload()
+                                webView.goBack()
+                            }
+                        }
                     }
                 }
                 super.onReceivedError(view, errorCode, description, failingUrl)
-                Log.d("SimpleBrowser : ", "Failed to load page")
-                willSave = false
+                Log.d("Browser : ", "Failed to load page")
             }
 
         }
@@ -361,10 +441,16 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                 }
             }
 
+            override fun onShowFileChooser(webView: WebView, filePathCallback: ValueCallback<Array<Uri>?>, fileChooserParams: WebChromeClient.FileChooserParams): Boolean {
+                openFileChooser(filePathCallback, fileChooserParams)
+                return true
+            }
+
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 progressBar.progress = newProgress
                 if (newProgress == 125) {
                     progressBar.visibility = View.GONE
+                    swipeRefreshLayout.isRefreshing = false
                 } else {
                     progressBar.visibility = View.VISIBLE
                 }
@@ -382,16 +468,12 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         }
     }
 
-    private fun addToHistory(realm: Realm) {
-        if (willSave == true) {
-            Log.d("flag", "flagcheck")
-            realm.executeTransaction {
-                val history = realm.createObject(HistoryModel::class.java)
-                history.history = webView.url.toString()
-                history.title = webView.title.toString()
-            }
-            willSave = false
-        }
+    override fun openFileChooser(filePathCallback: ValueCallback<Array<Uri>?>, fileChooserParams: WebChromeClient.FileChooserParams) {
+        openMediaPicker(filePathCallback, fileChooserParams)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (onActivityResultWeb(requestCode, resultCode, data)) return
     }
 
     private fun viewVisible(view: WebView) {
@@ -434,8 +516,7 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
 
         var download: InputStream? = null
         try {
-            download = URL("http://google.com/complete/search?q=" + query
-                    + "&output=toolbar&hl=en").openStream()
+            download = URL("http://google.com/complete/search?q=" + query + "&output=toolbar&hl=en").openStream()
             if (mFactory == null) {
                 mFactory = XmlPullParserFactory.newInstance()
                 mFactory!!.isNamespaceAware = true
@@ -493,11 +574,11 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         toolbar.tint(Prefs.iconColor)
         setMenuIcons(menu, Prefs.iconColor,
                 R.id.simple_overflow to GoogleMaterial.Icon.gmd_more_vert,
-                R.id.action_search to GoogleMaterial.Icon.gmd_search)
+                R.id.custom_search to GoogleMaterial.Icon.gmd_search)
         searchViewBindIfNull {
-            bindSearchView(menu, R.id.action_search, Prefs.iconColor) {
+            bindSearchView(menu, R.id.custom_search, Prefs.iconColor) {
                 textCallback = { query, searchView ->
-                    val items = searchChrome(query).filter { it.contains(query) }.sorted().map { SearchItem(it) }.toMutableList()
+                    val items = searchChrome(query).asSequence().filter { it.contains(query) }.sorted().map { SearchItem(it) }.toMutableList()
                     if (items.isEmpty()) {
                         items.add(SearchItem(string(R.string.no_suggestions), iicon = GoogleMaterial.Icon.gmd_error))
                     } else (items.isNotEmpty())
@@ -505,7 +586,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                     searchView.results = items
                 }
                 hintText = string(R.string.google_search)
-                hintTextRes = Prefs.textColor.lighten(20F)
                 textDebounceInterval = 300
                 searchCallback = { url, _ ->
                     if (url.endsWith(".com")
@@ -527,6 +607,8 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                         webView.loadUrl("https://www.google.com/search?q=$url")
                     ; true
                 }
+                shouldClearOnClose = true
+                withDivider = true
                 closeListener = { _ -> searchViewCache.clear() }
                 foregroundColor = Prefs.textColor
                 backgroundColor = Prefs.bgColor.withMinAlpha(200)
@@ -557,10 +639,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
      */
     fun getBookmark(realm: Realm): OrderedRealmCollection<BookmarkModel> {
         return realm.where(BookmarkModel::class.java).findAll()
-    }
-
-    fun getHistory(realm: Realm): OrderedRealmCollection<HistoryModel> {
-        return realm.where(HistoryModel::class.java).findAll()
     }
 
     public override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -608,7 +686,7 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
     private fun showMenu() {
         menuScroll.scrollY = 0
         val grow = AnimationUtils.loadAnimation(this, R.anim.kau_slide_in_top)
-        val `in` = AnimationUtils.loadAnimation(this, R.anim.kau_slide_in_bottom)
+        val `in` = AnimationUtils.loadAnimation(this, R.anim.kau_slide_out_top)
         grow.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {
                 overflowMenu.visibility = View.VISIBLE
@@ -618,7 +696,9 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
             override fun onAnimationRepeat(animation: Animation) {}
         })
         `in`.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
+            override fun onAnimationStart(animation: Animation) {
+                overflowMenu.visibility = View.GONE
+            }
             override fun onAnimationEnd(animation: Animation) {}
             override fun onAnimationRepeat(animation: Animation) {}
         })
@@ -627,8 +707,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         share.startAnimation(grow)
         download.startAnimation(grow)
         bookmark.startAnimation(grow)
-        history.startAnimation(grow)
-        deleteHistory.startAnimation(grow)
         open.startAnimation(grow)
         menuHolder.isClickable = true
         menuHolder.isFocusable = true
@@ -651,11 +729,34 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
             hideMenu()
             return true
         }
+        if (Prefs.backToTop) {
+            if (webView.scrollY > 5) {
+                scrollToTop()
+                return true
+            }
+        }
         if (webView.canGoBack()) {
             webView.goBack()
             return true
         } else (finishSlideOut())
         return true
+    }
+
+    private fun scrollToTop() {
+        webView.flingScroll(0, 0) // stop fling
+        if (webView.scrollY > 10000)
+            webView.scrollTo(0, 0)
+        else
+            smoothScrollTo(0)
+    }
+
+    private fun smoothScrollTo(y: Int) {
+        ValueAnimator.ofInt(webView.scrollY, y).apply {
+            duration = Math.min(Math.abs(webView.scrollY - y), 500).toLong()
+            interpolator = AnimHolder.fastOutSlowInInterpolator(webView.context)
+            addUpdateListener { webView.scrollY = it.animatedValue as Int }
+            start()
+        }
     }
 
     override fun onResume() {
@@ -687,49 +788,99 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         if (result != null) {
             val type = result.type
             if (type == WebView.HitTestResult.IMAGE_TYPE || type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
-                showLongPressedImageMenu(menu!!, result.extra)
+                showLongPressedImageMenu(result.extra)
             }
         }
     }
-
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         val result = webView.hitTestResult.extra
-        when (item.itemId) {
-            ID_CONTEXT_MENU_SAVE_IMAGE -> {
-                if (URLUtil.isValidUrl(result)) {
-                    flashContextDownload(mPendingImageUrlToSave!!)
-                    flashSnackbar(string(R.string.downloading))
+            when (item.itemId) {
+                R.id.ID_CONTEXT_MENU_SAVE_IMAGE -> {
+                    if (URLUtil.isValidUrl(result)) {
+                        flashContextDownload(mPendingImageUrlToSave!!)
+                        flashSnackbar(R.string.downloading)
+                    }
                 }
-            }
-            ID_CONTEXT_MENU_SHARE_IMAGE -> {
-                try {
-                    shareText(mPendingImageUrlToSave)
-                    flashSnackbar(R.string.share_image)
-                } catch (e: Exception) {
-                    e.logFlashAnswers("Image share failed")
-                    flashSnackbar(R.string.image_share_failed)
+                R.id.ID_CONTEXT_MENU_SHARE_IMAGE -> {
+                    try {
+                        shareText(mPendingImageUrlToSave)
+                        flashSnackbar(R.string.share_image)
+                    } catch (e: Exception) {
+                        e.logFlashAnswers("Image share failed")
+                        flashSnackbar(R.string.image_share_failed)
+                    }
                 }
-            }
 
-            ID_CONTEXT_MENU_COPY_IMAGE -> {
-                copyToClipboard(webView.url)
-                flashSnackbar(R.string.copy_link)
+                R.id.ID_CONTEXT_MENU_COPY_IMAGE -> {
+                    copyToClipboard(webView.url)
+                    flashSnackbar(R.string.copy_link)
+                }
             }
-        }
         return super.onContextItemSelected(item)
     }
 
-
-    private fun showLongPressedImageMenu(menu: ContextMenu, url: String) {
+    @SuppressLint("InflateParams")
+    private fun showLongPressedImageMenu(url: String) {
+        val result = webView.hitTestResult.extra
         mPendingImageUrlToSave = url
-        menu.setHeaderTitle(mPendingImageUrlToSave)
-        menu.add(0, ID_CONTEXT_MENU_SAVE_IMAGE, 0, getString(R.string.download_image))
-        menu.add(0, ID_CONTEXT_MENU_SHARE_IMAGE, 1, getString(R.string.share_image))
-        menu.add(0, ID_CONTEXT_MENU_COPY_IMAGE, 2, getString(R.string.copy_image))
+        val view = layoutInflater.inflate(R.layout.textview_context_menu, null)
+        val content = view.findViewById(R.id.context_window) as RelativeLayout
+        val titelImage = view.findViewById(R.id.context_image) as ImageView
+        val imageMENUDownloader = view.findViewById(R.id.ID_CONTEXT_MENU_SAVE_IMAGE) as TextView
+        val imageMENUShare = view.findViewById(R.id.ID_CONTEXT_MENU_SHARE_IMAGE) as TextView
+        val imageMENUCopy = view.findViewById(R.id.ID_CONTEXT_MENU_COPY_IMAGE) as TextView
+        val imageSAVE = view.findViewById(R.id.ID_CONTEXT_SAVE_IMAGE) as ImageView
+        val imageSHARE = view.findViewById(R.id.ID_CONTEXT_SHARE_IMAGE) as ImageView
+        val imageCOPY = view.findViewById(R.id.ID_CONTEXT_COPY_IMAGE) as ImageView
+        val mBottomSheetDialog = Dialog(this, R.style.MaterialDialogSheet)
+
+        content.setBackgroundColor(Prefs.bgColor)
+        val glide = glide
+        glide.load(mPendingImageUrlToSave)
+                .transform(FlashGlide.customRoundCorner)
+                .into(titelImage)
+        imageMENUDownloader.setTextColor(Prefs.textColor.withAlpha(200).lighten())
+        imageMENUShare.setTextColor(Prefs.textColor.withAlpha(200).lighten())
+        imageMENUCopy.setTextColor(Prefs.textColor.withAlpha(200).lighten())
+        imageSAVE.setIcon(GoogleMaterial.Icon.gmd_file_download, 16, Prefs.accentColor)
+        imageSHARE.setIcon(GoogleMaterial.Icon.gmd_share, 16, Prefs.accentColor)
+        imageCOPY.setIcon(GoogleMaterial.Icon.gmd_content_copy, 16, Prefs.accentColor)
+
+        mBottomSheetDialog.setContentView(view)
+        mBottomSheetDialog.window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        mBottomSheetDialog.window.setGravity(Gravity.BOTTOM)
+
+        imageMENUDownloader.setOnClickListener {
+            if (URLUtil.isValidUrl(result)) {
+                flashContextDownload(mPendingImageUrlToSave!!)
+                flashSnackbar(R.string.downloading)
+            }
+            mBottomSheetDialog.dismiss()
+        }
+
+        imageMENUShare.setOnClickListener {
+            try {
+                shareText(mPendingImageUrlToSave)
+                flashSnackbar(R.string.share_image)
+            } catch (e: Exception) {
+                e.logFlashAnswers("Image share failed")
+                flashSnackbar(R.string.image_share_failed)
+            }
+            mBottomSheetDialog.dismiss()
+        }
+        imageMENUCopy.setOnClickListener {
+            copyToClipboard(webView.url, "",  false)
+            flashSnackbar(R.string.copy_link)
+            mBottomSheetDialog.dismiss()
+        }
+        mBottomSheetDialog.show()
+        mBottomSheetDialog.setOnCancelListener{
+            mBottomSheetDialog.dismiss()
+        }
     }
 
-    private fun overflowmenu() {
+    private fun itemsOverFlowOnclickMenu() {
         menuHolder.setOnClickListener(onClickListener)
         menuHolder.isClickable = false
         menuHolder.isFocusable = false
@@ -742,8 +893,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
         share.setOnClickListener(onClickListener)
         download.setOnClickListener(onClickListener)
         bookmark.setOnClickListener(onClickListener)
-        history.setOnClickListener(onClickListener)
-        deleteHistory.setOnClickListener(onClickListener)
         open.setOnClickListener(onClickListener)
     }
 
@@ -758,12 +907,12 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
     }
 
     /**
-     * ShowLongPressedImageMenu
+     * ENCODING
      */
     companion object {
-        private const val ID_CONTEXT_MENU_SAVE_IMAGE = 2562617
-        private const val ID_CONTEXT_MENU_SHARE_IMAGE = 2562618
-        private const val ID_CONTEXT_MENU_COPY_IMAGE = 2562619
+        //private const val ID_CONTEXT_MENU_SAVE_IMAGE = 2562617
+        //private const val ID_CONTEXT_MENU_SHARE_IMAGE = 2562618
+        //private const val ID_CONTEXT_MENU_COPY_IMAGE = 2562619
         private const val ENCODING = "UTF-8"
     }
 
@@ -832,42 +981,6 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
                 return@OnClickListener
             }
 
-            R.id.action_history -> {
-                hideMenu()
-                launchHistoryOverlay()
-                return@OnClickListener
-            }
-
-            R.id.delete_history -> {
-                val dimmerTextColor = Prefs.textColor.adjustAlpha(0.8f)
-                hideMenu()
-                materialDialogThemed {
-                    title(R.string.remove_history)
-                    titleColor(Prefs.textColor)
-                    titleGravity(GravityEnum.CENTER)
-                    backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
-                    dividerColor(Prefs.notiColor)
-                    iconRes(R.drawable.ic_warning)
-                    content(context.resources.getString(R.string.remove_history_desc))
-                    contentColor(dimmerTextColor)
-                    widgetColor(dimmerTextColor)
-                    positiveText(R.string.kau_ok)
-                    positiveColor(Prefs.textColor)
-                    negativeText(R.string.kau_cancel)
-                    negativeColor(Prefs.textColor)
-                    btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
-                    buttonRippleColor(Prefs.iconColor)
-                    buttonsGravity(GravityEnum.CENTER)
-                    onPositive { _, _ ->
-                        realm.executeTransaction {
-                            realm.delete(HistoryModel::class.java)
-                        }
-                    }
-                    onNegative({ _, _ -> })
-                }
-                return@OnClickListener
-            }
-
             R.id.action_download -> {
                 hideMenu()
                 if (webView.url.contains("mp4")
@@ -916,5 +1029,13 @@ class CustomTabs : BaseActivity(), SearchViewHolder {
             }
         }
     }
-}
 
+    /**
+     * ----------------------------------------------------
+     * Video Contract
+     * ----------------------------------------------------
+     */
+    override var videoViewer: FlashVideoViewer? = null
+    override val lowerVideoPadding: PointF = PointF(0f, 0f)
+
+}

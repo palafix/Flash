@@ -35,7 +35,7 @@ data class FlashMessages(val threads: List<FlashThread>,
     }.toString()
 
     override fun getUnreadNotifications(data: CookieModel) =
-            threads.filter(FlashThread::unread).map {
+            threads.asSequence().filter(FlashThread::unread).map {
                 with(it) {
                     NotificationContent(
                             data = data,
@@ -47,7 +47,7 @@ data class FlashMessages(val threads: List<FlashThread>,
                             profileUrl = img
                     )
                 }
-            }
+            }.toList()
 }
 
 /**
@@ -75,7 +75,7 @@ private class MessageParserImpl : FlashParserBase<FlashMessages>(true) {
 
     override fun textToDoc(text: String): Document? {
         var content = StringEscapeUtils.unescapeEcmaScript(text)
-        val begin = content.indexOf("id=\"threadlist_rows\"")
+        val begin = content.indexOf("id=\"threadlist_rows\">")
         if (begin <= 0) {
             L.d { "Script tail not found" }
             return null
@@ -92,7 +92,7 @@ private class MessageParserImpl : FlashParserBase<FlashMessages>(true) {
 
     override fun parseImpl(doc: Document): FlashMessages? {
         val threadList = doc.getElementById("threadlist_rows") ?: return null
-        val threads: List<FlashThread> = threadList.getElementsByAttributeValueContaining("id", "thread_fbid_")
+        val threads: List<FlashThread> = threadList.getElementsByAttributeValueContaining("id", "threadlist_row_other_user_fbid_")
                 .mapNotNull(this::parseMessage)
         val seeMore = parseLink(doc.getElementById("see_older_threads"))
         val extraLinks = threadList.nextElementSibling().select("a")

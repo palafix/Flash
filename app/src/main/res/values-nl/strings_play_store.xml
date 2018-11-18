@@ -3,7 +3,6 @@
     <string name = "found_pro">Flash Pro gevonden! </string>
     <string name = "found_pro_desc">Het lijkt erop dat je Flash Pro hebt! We zullen de app herladen zodat u kunt genieten van de geweldige functies! </string>
 
-    <string name = "changelog_update">Bekijk changelog! </string>
     <string name = "cancel_update">Misschien later! </string>
     <string name = "update_now">Nu bijwerken? </string>
     <string name = "found_update">Nieuwe update gevonden! </string>
@@ -12,7 +11,7 @@
 
     <string name = "play_purchased_pro">Bedankt voor uw steun! Geniet van alle functies in Flash. \ N \ nAls u van deze app houdt, kunt u overwegen deze te beoordelen en dit open source-project te ondersteunen. \ N \ nAls u opmerkingen heeft, neemt u dan gerust contact met mij op! </string>
     <string name = "play_store_not_pro">Het lijkt erop dat u een pro-gebruiker bent, maar we kunnen uw inkoopinformatie niet vinden. Als deze fout zich blijft voordoen, probeert u de cache van de Play Store leeg te maken en de app opnieuw te installeren. </string>
-    <string name = "play_store_unsupported">Het lijkt erop dat deze app-versie niet Pro is. Installeer het opnieuw vanuit de Play Store als dit een hardnekkig probleem is.</string>
+    <string name = "play_store_unsupported">Het lijkt erop dat deze app-versie niet Flash Pro is. Installeer het opnieuw vanuit de Play Store als dit een hardnekkig probleem is.</string>
     <string name = "play_thank_you">Bedankt! </string>
 
     <string name = "purchases_restored">Aankopen hersteld </string>
@@ -21,8 +20,14 @@
 
     <string name = "restoring_purchases">Aankopen herstellen … </string>
 
-    <string name = "custom_pro">Flash [Pro] </string>
-    <string name="custom_pro_free">Flash [Pro-Gratis] </string>
-    <string name = "uh_oh">Uh Oh </string>
-    <string name = "reload">Herlaad </string>
+    <string name="custom_pro">Custom Thema. [Flash Pro] functie nodig.</string>
+    <string name="pro_test">Flash Pro-Gratis.</string>
+    <string name="pro_free">Gefeliciteerd! Je hebt Flash Pro gratis.</string>
+    <string name="uh_oh">Uh Oh</string>
+    <string name="uh_oh_no_pro">Oh Oh! Het lijkt erop dat je geen Flash pro hebt.</string>
+    <string name="reload">Herlaad</string>
+    <string name="Check_for_flash_pro">Controleren op Flash pro..</string>
+
+    <string name="pro_free_toast_enabled">Flash [Pro-Free] -sectie is ingeschakeld! Ga terug naar instellingen.</string>
+    <string name="pro_free_toast_disabled">Flash [Pro-Free] -sectie is uitgeschakeld! Ga terug naar instellingen.</string>
 </resources>

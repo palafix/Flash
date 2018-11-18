@@ -27,8 +27,7 @@ private const val Flash_PRO = "arnhem_flash_pro"
  * Use this when checking if the pro feature is enabled
  */
 inline val IS_Flash_PRO: Boolean
-    get() = Prefs.pro
-            || (BuildConfig.DEBUG && Prefs.debugPro)
+    get() = Prefs.pro || Prefs.debugPro || (BuildConfig.DEBUG)
 
 interface FlashBilling : BillingProcessor.IBillingHandler {
     fun Activity.onCreateBilling()

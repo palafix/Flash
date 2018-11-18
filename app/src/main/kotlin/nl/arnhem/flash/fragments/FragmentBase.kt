@@ -117,16 +117,17 @@ abstract class BaseFragment : Fragment(), FragmentContract, DynamicUiContract {
                 when (it) {
                     REQUEST_REFRESH -> {
                         core?.apply {
-                            reload(true)
                             clearHistory()
+                            firstLoad = true
+                            firstLoadRequest()
                         }
                     }
                     position -> {
                         contract.setTitle(baseEnum.titleId)
                         if (Prefs.HasFab) {
                             updateFab(contract)
-                            core?.active = true
                         }
+                        core?.active = true
                     }
                     -(position + 1) -> {
                         core?.active = false
@@ -144,10 +145,10 @@ abstract class BaseFragment : Fragment(), FragmentContract, DynamicUiContract {
     protected fun FloatingActionButton.update(iicon: IIcon, click: () -> Unit) {
         if (isShown) {
             fadeScaleTransition {
-                setIcon(iicon, Prefs.iconColor)
+                setIcon(iicon, 16, Prefs.iconColor)
             }
         } else {
-            setIcon(iicon, Prefs.iconColor)
+            setIcon(iicon, 16, Prefs.iconColor)
             show()
         }
         setOnClickListener { click() }

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.activities
 
 import android.graphics.drawable.Drawable
@@ -16,6 +18,10 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.crashlytics.android.answers.LoginEvent
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.BiFunction
+import io.reactivex.subjects.SingleSubject
 import nl.arnhem.flash.R
 import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.dbflow.fetchUsername
@@ -27,10 +33,6 @@ import nl.arnhem.flash.glide.GlideApp
 import nl.arnhem.flash.glide.transform
 import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.web.LoginWebView
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.BiFunction
-import io.reactivex.subjects.SingleSubject
 
 
 /**
@@ -62,7 +64,7 @@ class LoginActivity : BaseActivity() {
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
         setTitle(R.string.kau_login)
-        setFlashColors{
+        setFlashColors {
             toolbar(toolbar)
         }
         web.loadLogin({ refresh = it != 100 }) { cookie ->
@@ -83,32 +85,32 @@ class LoginActivity : BaseActivity() {
                 usernameSubject,
                 BiFunction(::Pair))
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { (foundImage, name) ->
-            refresh = false
-            if (!foundImage) {
-                L.e { "Could not get profile photo; Invalid userId?" }
-                L._i { cookie }
-            }
-            textview.text = String.format(getString(R.string.welcome), name)
-            textview.fadeIn()
-            flashAnswers {
-                logLogin(LoginEvent()
-                        .putMethod("flash_browser")
-                        .putSuccess(true))
-            }
-            /*
+                    refresh = false
+                    if (!foundImage) {
+                        L.e { "Could not get profile photo; Invalid userId?" }
+                        L._i { cookie }
+                    }
+                    textview.text = String.format(getString(R.string.welcome), name)
+                    textview.fadeIn()
+                    flashAnswers {
+                        logLogin(LoginEvent()
+                                .putMethod("flash_browser")
+                                .putSuccess(true))
+                    }
+                    /*
              * The user may have logged into an account that is already in the database
              * We will let the db handle duplicates and load it now after the new account has been saved
              */
-            loadFbCookiesAsync {
-                val cookies = ArrayList(it)
-                Handler().postDelayed({
-                    if (Showcase.intro)
-                        launchNewTask<IntroActivity>(cookies, true)
-                    else
-                        launchNewTask<MainActivity>(cookies, true)
-                }, 1000)
-            }
-        }
+                    loadFbCookiesAsync {
+                        val cookies = ArrayList(it)
+                        Handler().postDelayed({
+                            if (Showcase.intro)
+                                launchNewTask<IntroActivity>(cookies, true)
+                            else
+                                launchNewTask<MainActivity>(cookies, true)
+                        }, 1000)
+                    }
+                }.disposeOnDestroy()
         loadProfile(cookie.id)
         loadUsername(cookie)
     }
@@ -117,21 +119,21 @@ class LoginActivity : BaseActivity() {
     private fun loadProfile(id: Long) {
         profileLoader.load(PROFILE_PICTURE_URL(id))
                 .transform(FlashGlide.roundCorner).listener(object : RequestListener<Drawable> {
-            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                profileSubject.onSuccess(true)
-                return false
-            }
+                    override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                        profileSubject.onSuccess(true)
+                        return false
+                    }
 
-            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                e.logFlashAnswers("Profile loading exception")
-                profileSubject.onSuccess(false)
-                return false
-            }
-        }).into(profile)
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                        e.logFlashAnswers("Profile loading exception")
+                        profileSubject.onSuccess(false)
+                        return false
+                    }
+                }).into(profile)
     }
 
     private fun loadUsername(cookie: CookieModel) {
-        cookie.fetchUsername(usernameSubject::onSuccess)
+        cookie.fetchUsername(usernameSubject::onSuccess).disposeOnDestroy()
     }
 
     override fun backConsumer(): Boolean {

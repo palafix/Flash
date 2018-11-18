@@ -1,19 +1,18 @@
 package nl.arnhem.flash.activities
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.ActivityOptions
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PointF
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.TabLayout
+import android.support.design.widget.*
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v7.widget.Toolbar
@@ -60,6 +59,7 @@ import nl.arnhem.flash.dbflow.loadFbCookie
 import nl.arnhem.flash.dbflow.loadFbTabs
 import nl.arnhem.flash.enums.MainActivityLayout
 import nl.arnhem.flash.enums.Theme
+import nl.arnhem.flash.facebook.FB_URL_BASE
 import nl.arnhem.flash.facebook.FbCookie
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.facebook.PROFILE_PICTURE_URL
@@ -69,22 +69,26 @@ import nl.arnhem.flash.model.BookmarkModel
 import nl.arnhem.flash.parsers.FlashSearch
 import nl.arnhem.flash.parsers.SearchParser
 import nl.arnhem.flash.utils.*
+import nl.arnhem.flash.utils.Prefs.userId
 import nl.arnhem.flash.utils.iab.FlashBilling
 import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import nl.arnhem.flash.utils.iab.IabMain
 import nl.arnhem.flash.views.BadgedIcon
 import nl.arnhem.flash.views.FlashVideoViewer
 import nl.arnhem.flash.views.FlashViewPager
+import org.jetbrains.anko.withAlpha
 import java.util.*
 import kotlin.collections.set
 import kotlin.properties.Delegates
-
+//import kotlinx.android.synthetic.main.activity_main.*
+//import kotlinx.android.synthetic.main.view_main_toolbar.*
 /**
  * Created by Allan Wang on 20/12/17.
  *
  * Most of the logic that is unrelated to handling fragments
  */
 
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "DEPRECATION")
 abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         FileChooserContract by FileChooserDelegate(),
         VideoViewHolder, SearchViewHolder,
@@ -102,6 +106,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
 
     private lateinit var drawer: Drawer
     private lateinit var drawerHeader: AccountHeader
+    private var lastAccessTime = -1L
 
     override var searchView: SearchView? = null
     private val searchViewCache = mutableMapOf<String, List<SearchItem>>()
@@ -115,12 +120,22 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         realm = Realm.getDefaultInstance()
         val start = System.currentTimeMillis()
         setFrameContentView(Prefs.mainActivityLayout.layoutRes)
-        setFlashColors {
-            toolbar(toolbar)
-            themeWindow = false
-            header(appBar)
-            background(viewPager)
+        if (Prefs.DayNight && isNightTime(Activity())) {
+            setFlashDayNightColors {
+                toolbar(toolbar)
+                themeWindow = false
+                header(appBar)
+                background(viewPager)
+            }
+        } else {
+            setFlashColors {
+                toolbar(toolbar)
+                themeWindow = false
+                header(appBar)
+                background(viewPager)
+            }
         }
+
         setSupportActionBar(toolbar)
 
         val params = toolbar.layoutParams as AppBarLayout.LayoutParams
@@ -152,6 +167,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         L.i { "Main started in ${System.currentTimeMillis() - start} ms" }
 
         initFab()
+        lastAccessTime = System.currentTimeMillis()
 
         if (Prefs.AutoUpdate) {
             AppUpdater(this)
@@ -168,18 +184,16 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                             content(R.string.no_Auto_update_desc)
                             positiveText(R.string.kau_yes)
                             negativeText(R.string.kau_no)
-                            onPositive { _, _ -> refreshAll() }
-                            checkBoxPromptRes(R.string.kau_do_not_show_again, false, { _, _ -> Prefs.AutoUpdate = false })
+                            onPositive { _, _ -> Prefs.AutoUpdate = false }
                         }
                     }
                     .setUpdateFrom(UpdateFrom.JSON)
                     .setUpdateJSON("http://updatephase.palafix.nl/flash_updater.json")
                     .setIcon(R.drawable.flash_notify) // Notification icon
-                    .showAppUpdated(true)
+                    .showAppUpdated(false)
                     .start()
         }
     }
-
     /**
      * Injector to handle creation for sub classes
      */
@@ -193,30 +207,36 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         shouldShow = false
         fab.backgroundTintList = ColorStateList.valueOf(Prefs.headerColor.withMinAlpha(200))
         fab.hide()
-        appBar.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-            if (!hasFab) return@addOnOffsetChangedListener
+        appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            if (!hasFab) return@OnOffsetChangedListener
             val percent = Math.abs(verticalOffset.toFloat() / appBarLayout.totalScrollRange)
             val shouldShow = percent < 0.2
             if (this.shouldShow != shouldShow) {
                 this.shouldShow = shouldShow
                 fab.showIf(shouldShow)
             }
-        }
+        })
     }
-
 
     override fun showFab(iicon: IIcon, clickEvent: () -> Unit) {
         hasFab = true
-        fab.setOnClickListener { clickEvent() }
+        fab.setOnClickListener {
+            clickEvent()
+            //launchWebOverlay(FB_URL_BASE)
+        }
+        //fab.setOnClickListener {
+            //clickEvent()
+         //   launchSharerActivity("https://www.facebook.com/")
+        //}
         if (shouldShow) {
             if (fab.isShown) {
                 fab.fadeScaleTransition {
-                    setIcon(iicon, Prefs.iconColor)
+                    setIcon(iicon, 16, Prefs.iconColor)
                 }
                 return
             }
         }
-        fab.setIcon(iicon, Prefs.iconColor)
+        fab.setIcon(iicon, 16, Prefs.iconColor)
         fab.showIf(shouldShow)
     }
 
@@ -234,7 +254,11 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
 
     @SuppressLint("PrivateResource")
     private fun setupDrawer(savedInstanceState: Bundle?) {
-        val navBg = Prefs.bgColor.withAlpha(255).darken().toLong()
+        val navBg = if (Prefs.DayNight && isNightTime(Activity())) Color.BLACK.withAlpha(255).darken().toLong() else Prefs.bgColor.withAlpha(255).darken().toLong()
+        val accent = if (Prefs.DayNight && isNightTime(Activity())) Color.LTGRAY.withAlpha(255).darken().toLong() else Prefs.accentColor.toLong()
+        val text = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE.withAlpha(255).darken().toLong() else Prefs.textColor.toLong()
+        val icon = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE.withAlpha(255).darken().toLong() else Prefs.iconColor.toLong()
+        val noti = if (Prefs.DayNight && isNightTime(Activity())) Color.GRAY.withAlpha(255).darken().toLong() else Prefs.notiColor.toLong()
         drawer = drawer {
             toolbar = this@BaseMainActivity.toolbar
             savedInstance = savedInstanceState
@@ -244,32 +268,32 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             drawerHeader = accountHeader {
                 background = (R.drawable.flash_f_24)
                 customViewRes = R.layout.material_drawer_header
-                textColor = Prefs.accentColor.toLong()
+                textColor = accent
                 selectionSecondLineShown = false
                 cookies().forEach { (id, name) ->
                     profile(name = name ?: "") {
                         iconUrl = PROFILE_PICTURE_URL(id)
-                        textColor = Prefs.textColor.toLong()
-                        selectedTextColor = Prefs.accentColor.toLong()
+                        textColor = text
+                        selectedTextColor = accent
                         selectedColor = 0x00000001.toLong()
                         identifier = id
                     }
                 }
                 profileSetting(nameRes = R.string.kau_logout) {
                     iicon = GoogleMaterial.Icon.gmd_exit_to_app
-                    iconColor = Prefs.textColor.toLong()
-                    textColor = Prefs.textColor.toLong()
+                    iconColor = text
+                    textColor = text
                     identifier = -2L
                 }
                 profileSetting(nameRes = R.string.kau_add_account) {
-                    iconDrawable = IconicsDrawable(this@BaseMainActivity, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).color(Prefs.textColor)
-                    textColor = Prefs.textColor.toLong()
+                    iconDrawable = IconicsDrawable(this@BaseMainActivity, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).color(text.toInt())
+                    textColor = text
                     identifier = -3L
                 }
                 profileSetting(nameRes = R.string.kau_manage_account) {
                     iicon = GoogleMaterial.Icon.gmd_settings
-                    iconColor = Prefs.textColor.toLong()
-                    textColor = Prefs.textColor.toLong()
+                    iconColor = text
+                    textColor = text
                     identifier = -4L
                 }
                 onProfileChanged { _, profile, current ->
@@ -308,10 +332,10 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             }
             val drawerItem = primaryItem(R.string.bookmarks) {
                 iicon = GoogleMaterial.Icon.gmd_bookmark
-                iconColor = Prefs.textColor.toLong()
-                textColor = Prefs.textColor.toLong()
-                selectedIconColor = Prefs.textColor.toLong()
-                selectedTextColor = Prefs.textColor.toLong()
+                iconColor = text
+                textColor = text
+                selectedIconColor = text
+                selectedTextColor = text
                 selectedColor = 0x00000001.toLong()
                 identifier = -999L
                 onClick { _ ->
@@ -323,8 +347,8 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                     false
                 }
                 badge(realm.where(BookmarkModel::class.java).findAll().size.toString()) {
-                    textColor = Prefs.iconColor.toLong()
-                    color = Prefs.notiColor.toLong()
+                    textColor = icon
+                    color = noti
                     cornersDp = 4
                     paddingHorizontalDp = 25
                 }
@@ -335,10 +359,26 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             primaryFlashItem(FbItem.FEED_TOP_STORIES)
 
             sectionHeader(R.string.more)
-            primaryFlashItem(FbItem.POKE)
+            primaryItem(R.string.videos) {
+                iicon = GoogleMaterial.Icon.gmd_video_library
+                iconColor = text
+                textColor = text
+                selectedIconColor = text
+                selectedTextColor = text
+                selectedColor = 0x00000001.toLong()
+                onClick { _ ->
+                    flashAnswers {
+                        logContentView(ContentViewEvent()
+                                .putContentType("drawer_item"))
+                    }
+                    launchWebOverlayBasic("https://www.facebook.com/$userId/videos_by?lst=$userId:$userId:1529771337")
+                    false
+                }
+            }
             primaryFlashItem(FbItem.PHOTOS)
+            primaryFlashItem(FbItem.POKE)
             primaryFlashItem(FbItem.GROUPS)
-            primaryFlashItem(FbItem.FRIENDS)
+            primaryFlashItem(FbItem.MY_FRIENDS)
             primaryFlashItem(FbItem.CHAT)
             primaryFlashItem(FbItem.PAGES)
 
@@ -355,10 +395,10 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
             divider()
             primaryItem(R.string.appversion) {
                 iicon = GoogleMaterial.Icon.gmd_info_outline
-                iconColor = Prefs.textColor.toLong()
-                textColor = Prefs.textColor.toLong()
-                selectedIconColor = Prefs.textColor.toLong()
-                selectedTextColor = Prefs.textColor.toLong()
+                iconColor = text
+                textColor = text
+                selectedIconColor = text
+                selectedTextColor = text
                 selectedColor = 0x00000001.toLong()
                 onClick { _ ->
                     flashAnswers {
@@ -369,21 +409,21 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                     false
                 }
                 badge(BuildConfig.VERSION_NAME) {
-                    textColor = Prefs.iconColor.toLong()
-                    color = Prefs.notiColor.toLong()
+                    textColor = icon
+                    color = noti
                     cornersDp = 4
                     paddingHorizontalDp = 25
                 }
             }
             onOpened {
-                drawerItem.badge?.let {
+                drawerItem.badge?.run {
                     drawer.updateBadge(-999L, StringHolder(realm.where(BookmarkModel::class.java).findAll().size.toString()))
                     drawer.updateItem(drawerItem)
                 }
             }
 
             onClosed {
-                drawerItem.badge?.let {
+                drawerItem.badge?.run {
                     drawer.updateBadge(-999L, StringHolder(realm.where(BookmarkModel::class.java).findAll().size.toString()))
                     drawer.updateItem(drawerItem)
                 }
@@ -393,11 +433,12 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
     }
 
     private fun Builder.primaryFlashItem(item: FbItem) = this.primaryItem(item.titleId) {
+        val text = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE.withAlpha(255).darken().toLong() else Prefs.textColor.toLong()
         iicon = item.icon
-        iconColor = Prefs.textColor.toLong()
-        textColor = Prefs.textColor.toLong()
-        selectedIconColor = Prefs.textColor.toLong()
-        selectedTextColor = Prefs.textColor.toLong()
+        iconColor = text
+        textColor = text
+        selectedIconColor = text
+        selectedTextColor = text
         selectedColor = 0x00000001.toLong()
         identifier = item.titleId.toLong()
         onClick { _ ->
@@ -412,6 +453,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
     }
 
     private fun refreshAll() {
+        L.d { "Refresh all" }
         fragmentSubject.onNext(REQUEST_REFRESH)
     }
 
@@ -430,7 +472,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                     else {
                         val data = SearchParser.query(FbCookie.webCookie, query)?.data?.results
                         if (data != null) {
-                            val items = data.map(FlashSearch::toSearchItem).toMutableList()
+                            val items = data.mapTo(mutableListOf(), FlashSearch::toSearchItem)
                             if (items.isNotEmpty())
                                 items.add(SearchItem("${FbItem._SEARCH.url}?q=$query", string(R.string.show_all_results), iicon = null))
                             searchViewCache[query] = items
@@ -438,6 +480,18 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                         }
                     }
                 }
+                //extraIcon = Pair(GoogleMaterial.Icon.gmd_delete_forever, View.OnClickListener {
+                //    materialDialogThemed {
+                //        title(R.string.searchremoval)
+                //        content(R.string.searchremoval_desc)
+                //        positiveText(R.string.kau_yes)
+                //        negativeText(R.string.kau_no)
+                //        onPositive { _, _ -> launchWebOverlay("https://mobile.facebook.com/$userId/allactivity?log_filter=search") }
+                //    }
+                //})
+                shouldClearOnClose = true
+                withDivider = true
+                hintText = string(R.string.facebook_search)
                 textDebounceInterval = 300
                 searchCallback = { query, _ -> launchWebOverlay("${FbItem._SEARCH.url}/?q=$query"); true }
                 closeListener = { _ -> searchViewCache.clear() }
@@ -497,8 +551,6 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         }
     }
 
-    private val STATE_FORCE_FALLBACK = "flash_state_force_fallback"
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putStringArrayList(STATE_FORCE_FALLBACK, ArrayList(adapter.forcedFallbacks))
@@ -515,11 +567,16 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         FbCookie.switchBackUser {}
         drawer.updateBadge(-999L, StringHolder(realm.where(BookmarkModel::class.java).findAll().size.toString()))
         controlWebview?.resumeTimers()
+        if (System.currentTimeMillis() - lastAccessTime > MAIN_TIMEOUT_DURATION) {
+            refreshAll()
+        }
+        lastAccessTime = System.currentTimeMillis() // precaution to avoid loops
     }
 
     override fun onPause() {
         controlWebview?.pauseTimers()
         L.v { "Pause main web timers" }
+        lastAccessTime = System.currentTimeMillis()
         super.onPause()
     }
 
@@ -533,8 +590,8 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
 
     override fun onDestroy() {
         onDestroyBilling()
-        controlWebview?.destroy()
         controlWebview?.clearCache(true)
+        controlWebview?.destroy()
         super.onDestroy()
     }
 
@@ -555,12 +612,12 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         }
         if (Prefs.exitConfirmation) {
             materialDialogThemed {
-                title(R.string.kau_exit)
-                content(R.string.kau_exit_confirmation)
-                positiveText(R.string.kau_yes)
-                negativeText(R.string.kau_no)
+                title(R.string.exit)
+                content(R.string.close_app_confirmation)
+                positiveText(R.string.yes)
+                negativeText(R.string.no)
                 onPositive { _, _ -> finishAndRemoveTask() }
-                checkBoxPromptRes(R.string.kau_do_not_show_again, false, { _, b -> Prefs.exitConfirmation = !b })
+                checkBoxPromptRes(R.string.do_not_show_again, false) { _, b -> Prefs.exitConfirmation = !b }
             }
             return true
         } else {
@@ -616,6 +673,10 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
                 PointF(0f, toolbar.height.toFloat())
             else
                 PointF(0f, 0f)
+
+    companion object {
+        private const val STATE_FORCE_FALLBACK = "flash_state_force_fallback"
+    }
 }
 
 

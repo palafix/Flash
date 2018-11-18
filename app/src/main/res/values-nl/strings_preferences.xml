@@ -5,10 +5,13 @@
     <string name = "notifications_desc">Frequentie, filters, beltonen, etc</string>
 
     <string name = "newsfeed">Nieuwsoverzicht</string>
-    <string name = "newsfeed_desc">Definieer welke items in de nieuwsfeed verschijnen</string>
+    <string name = "newsfeed_desc">Definieer welke items in de Nieuwsoverzicht verschijnen</string>
 
     <string name = "behaviour">Gedrag</string>
     <string name = "behaviour_desc">Definieer hoe de app in bepaalde instellingen reageert</string>
+
+    <string name = "media">Facebook Video &amp; Geluid</string>
+    <string name = "media_desc">Definieer welke Video &amp; geluid dat je wilt. Geluid uit/aan. Videostandaard/Flash Video of Video automatisch afspelen wanneer u door de Nieuwsoverzicht scrolt</string>
 
     <string name = "network">Netwerk</string>
     <string name = "network_desc">Definieer opties die van invloed zijn op gemeten netwerken</string>

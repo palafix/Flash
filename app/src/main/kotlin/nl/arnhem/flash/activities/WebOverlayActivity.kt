@@ -2,11 +2,14 @@
 
 package nl.arnhem.flash.activities
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.graphics.PointF
 import android.net.Uri
 import android.os.Bundle
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.Toolbar
@@ -22,6 +25,7 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import me.leolin.shortcutbadger.ShortcutBadger
 import nl.arnhem.flash.R
 import nl.arnhem.flash.contracts.*
 import nl.arnhem.flash.enums.OverlayContext
@@ -46,10 +50,11 @@ import okhttp3.HttpUrl
  * Used by notifications. Unlike the other overlays, this runs as a singleInstance
  * Going back will bring you back to the previous app
  */
-class FlashWebActivity : WebOverlayActivityBase(false) {
+class FlashWebActivity : WebOverlayActivityBase(false, false) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val requiresAction = !parseActionSend()
+        ShortcutBadger.removeCount(this)
         super.onCreate(savedInstanceState)
         if (requiresAction) {
             /*
@@ -96,12 +101,13 @@ class FlashWebActivity : WebOverlayActivityBase(false) {
  * Variant that forces a basic user agent. This is largely internal,
  * and is only necessary when we are launching from an existing [WebOverlayActivityBase]
  */
-class WebOverlayBasicActivity : WebOverlayActivityBase(true)
+class WebOverlayBasicActivity : WebOverlayActivityBase(true, false)
 
+class WebOverlayBasicFlashActivity : WebOverlayActivityBase(false, false)
 /**
  * Internal overlay for the app; this is tied with the main task and is singleTop as opposed to singleInstance
  */
-class WebOverlayActivity : WebOverlayActivityBase(false)
+class WebOverlayActivity : WebOverlayActivityBase(false, false)
 
 
 /**
@@ -109,12 +115,13 @@ class WebOverlayActivity : WebOverlayActivityBase(false)
  */
 @Suppress("DEPRECATION")
 @SuppressLint("Registered")
-open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseActivity(),
+open class WebOverlayActivityBase(private val forceBasicAgent: Boolean, private val forceAgent: Boolean) : BaseActivity(),
         ActivityContract, FlashContentContainer,
         VideoViewHolder, FileChooserContract by FileChooserDelegate() {
 
     override val frameWrapper: FrameLayout by bindView(R.id.frame_wrapper)
     val toolbar: Toolbar by bindView(R.id.overlay_toolbar)
+    private val appBar: AppBarLayout by bindView(R.id.appbaroverlay)
     val content: FlashContentWeb by bindView(R.id.flash_content_web)
     val web: FlashWebView
         get() = content.coreView
@@ -147,29 +154,37 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
             return
         }
         setFrameContentView(R.layout.activity_web_overlay)
-        setFlashTheme(true)
+        collapseAppBar()
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        statusBarColor = Prefs.headerColor.withAlpha(255).darken()
-        navigationBarColor = Prefs.headerColor.withAlpha(255)
-        toolbar.setBackgroundColor(Prefs.headerColor.withAlpha(255))
-        coordinator.setBackgroundColor(Prefs.bgColor.withAlpha(255))
+        coordinator.setBackgroundColor(Prefs.bgColor)
         toolbar.overflowIcon?.setTint(Prefs.iconColor)
         toolbar.setTitleTextColor(Prefs.iconColor)
         toolbar.navigationIcon = GoogleMaterial.Icon.gmd_close.toDrawable(this, 16, Prefs.iconColor)
         toolbar.setNavigationOnClickListener { finishSlideOut() }
-        setFlashColors {
-            toolbar(toolbar)
-            themeWindow = false
+        if (Prefs.DayNight && isNightTime(Activity())) {
+            setFlashDayNightColors {
+                toolbar(toolbar)
+                header(appBar)
+                themeWindow = false
+            }
+        } else {
+            setFlashColors {
+                toolbar(toolbar)
+                header(appBar)
+                themeWindow = false
+            }
         }
-
         content.bind(this)
         content.titleObservable
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { toolbar.title = it }
+                .disposeOnDestroy()
         with(web) {
             if (forceBasicAgent) //todo check; the webview already adds it dynamically
+                userAgentString = USER_AGENT_VIDEO_SETTINGS
+            if (forceAgent) //todo check; the webview already adds it dynamically
                 userAgentString = USER_AGENT_BASIC
             Prefs.prevId = Prefs.userId
             if (userId != Prefs.userId) FbCookie.switchUser(userId) { reloadBase(true) }
@@ -184,11 +199,14 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
         FlashRunnable.propagate(this, intent)
         L.v { "Done propagation" }
         kauSwipeOnCreate {
-            if (!Prefs.overlayFullScreenSwipe) edgeSize = 20.dpToPx
-            transitionSystemBars = false
+            if (!Prefs.overlayFullScreenSwipe)
+                edgeSize = 20.dpToPx
+            sensitivity = 0.5f
+            setEdgeSizePercent(0.2f)//0.2 mean left 20% of screen can touch to begin swipe.
+            scrimColor = Prefs.iconColor
+            transitionSystemBars = true
         }
         with(web.settings) {
-            javaScriptEnabled = true
             mediaPlaybackRequiresUserGesture = true
             textZoom = Prefs.webTextScaling
             javaScriptCanOpenWindowsAutomatically = true
@@ -211,6 +229,15 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
         super.onNewIntent(intent)
         L.d { "New intent" }
         val newUrl = (intent.getStringExtra(ARG_URL) ?: intent.dataString)?.formattedFbUrl ?: return
+        if (newUrl.contains("photo.php")
+                || newUrl.contains("story_fbid")
+                || newUrl.contains("ec_friends_card")
+                //|| newUrl.contains("albums")
+                || newUrl.contains("photos?")) {
+            this.intent = intent
+            L.i { "Use New WebOverlay" }
+            launchWebOverlayBasic(newUrl)
+        } else
         if (baseUrl != newUrl) {
             this.intent = intent
             content.baseUrl = newUrl
@@ -219,22 +246,44 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
     }
 
     override fun backConsumer(): Boolean {
-        if (web.canGoBack()) {
-            web.goBack()
-            return true
-        } else (finishSlideOut())
+        if (Prefs.backToTop) {
+            if (web.scrollY > 5) {
+                scrollToTop()
+                return true
+            }
+        }
+        if (!web.onBackPressed())
+            finishSlideOut()
         return true
+    }
+
+    private fun scrollToTop() {
+        web.flingScroll(0, 0) // stop fling
+        if (web.scrollY > 10000)
+            web.scrollTo(0, 0)
+        else
+            smoothScrollTo(0)
+    }
+
+    private fun smoothScrollTo(y: Int) {
+        ValueAnimator.ofInt(web.scrollY, y).apply {
+            duration = Math.min(Math.abs(web.scrollY - y), 500).toLong()
+            interpolator = AnimHolder.fastOutSlowInInterpolator(web.context)
+            addUpdateListener { web.scrollY = it.animatedValue as Int }
+            start()
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        web.onResume()
         web.resumeTimers()
     }
 
     override fun onPause() {
+        super.onPause()
         web.pauseTimers()
         L.v { "Pause overlay web timers" }
-        super.onPause()
     }
 
     override fun onDestroy() {
@@ -267,7 +316,7 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
     @SuppressLint("RestrictedApi")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_copy_link -> copyToClipboard(web.currentUrl)
+            R.id.action_copy_link -> copyToClipboard(web.currentUrl, string(R.string.copy_link), true)
             R.id.action_share -> shareText(web.currentUrl)
         }
         return false
@@ -280,6 +329,10 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean) : BaseAc
      */
     override var videoViewer: FlashVideoViewer? = null
     override val lowerVideoPadding: PointF = PointF(0f, 0f)
+
+    private fun collapseAppBar() {
+        appBar.post { appBar.setExpanded(false) }
+    }
 }
 
 

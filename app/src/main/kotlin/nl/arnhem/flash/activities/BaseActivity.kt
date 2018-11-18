@@ -4,8 +4,12 @@ import android.content.res.Configuration
 import android.os.Bundle
 import ca.allanwang.kau.internal.KauBaseActivity
 import ca.allanwang.kau.searchview.SearchViewHolder
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import nl.arnhem.flash.contracts.VideoViewHolder
 import nl.arnhem.flash.utils.setFlashTheme
+import org.jsoup.select.Elements
 
 /**
  * Created by Allan Wang on 2017-06-12.
@@ -16,6 +20,8 @@ abstract class BaseActivity : KauBaseActivity() {
      * Inherited consumer to customize back press
      */
     protected open fun backConsumer(): Boolean = false
+
+    private val compositeDisposable = CompositeDisposable()
 
     final override fun onBackPressed() {
         if (this is SearchViewHolder && searchViewOnBackPress()) return
@@ -28,6 +34,16 @@ abstract class BaseActivity : KauBaseActivity() {
         super.onCreate(savedInstanceState)
         if (this !is WebOverlayActivityBase) setFlashTheme()
         if (this !is CustomTabs) setFlashTheme()
+        //if (this !is Test) setFlashTheme()
+    }
+
+    override fun onDestroy() {
+        compositeDisposable.dispose()
+        super.onDestroy()
+    }
+
+    fun Disposable.disposeOnDestroy() {
+        compositeDisposable.add(this)
     }
 
 //

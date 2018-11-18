@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.activities
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Point
 import android.os.Bundle
@@ -24,10 +27,7 @@ import nl.arnhem.flash.R
 import nl.arnhem.flash.adapter.BookmarkAdapter
 import nl.arnhem.flash.enums.OverlayContext
 import nl.arnhem.flash.model.BookmarkModel
-import nl.arnhem.flash.utils.Prefs
-import nl.arnhem.flash.utils.launchWebOverlayBasic
-import nl.arnhem.flash.utils.materialDialogThemed
-import nl.arnhem.flash.utils.setFlashColors
+import nl.arnhem.flash.utils.*
 import kotlin.properties.Delegates
 
 /**
@@ -42,7 +42,6 @@ class BookMarkActivity : AppCompatActivity(), BookmarkAdapter.OnItemClicked {
 
     val toolbar: Toolbar by bindView(R.id.book_toolbar)
     val coordinator: CoordinatorLayout by bindView(R.id.overlay_bookmark_content)
-    val text: TextView by bindView(R.id.textView)
 
     private val overlayContext: OverlayContext?
         get() = OverlayContext[intent.extras]
@@ -63,17 +62,28 @@ class BookMarkActivity : AppCompatActivity(), BookmarkAdapter.OnItemClicked {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.navigationIcon = GoogleMaterial.Icon.gmd_close.toDrawable(this, 16, Prefs.iconColor)
         toolbar.setNavigationOnClickListener { finishSlideOut() }
-        toolbar.setBackgroundColor(Prefs.headerColor.withAlpha(255))
-        text.setTextColor(Prefs.iconColor)
+        supportActionBar?.title = string(R.string.bookmarks)
+        toolbar.setTitleTextColor(Prefs.iconColor)
         coordinator.setBackgroundColor(Prefs.bgColor)
-        setFlashColors {
-            toolbar(toolbar)
-            themeWindow = false
+        if (Prefs.DayNight && isNightTime(Activity())) {
+            setFlashDayNightColors {
+                toolbar(toolbar)
+                themeWindow = false
+            }
+        } else {
+            setFlashColors {
+                toolbar(toolbar)
+                themeWindow = false
+            }
         }
 
         kauSwipeOnCreate {
-            if (!Prefs.overlayFullScreenSwipe) edgeSize = 20.dpToPx
-            transitionSystemBars = false
+            if (!Prefs.overlayFullScreenSwipe)
+                edgeSize = 20.dpToPx
+            sensitivity = 0.5f
+            setEdgeSizePercent(0.2f)//0.2 mean left 20% of screen can touch to begin swipe.
+            scrimColor = Prefs.iconColor
+            transitionSystemBars = true
         }
     }
 
@@ -135,7 +145,7 @@ class BookMarkActivity : AppCompatActivity(), BookmarkAdapter.OnItemClicked {
                         }
                         reStart(context)
                     }
-                    onNegative({ _, _ -> })
+                    onNegative { _, _ -> }
                 }
                 true
             }

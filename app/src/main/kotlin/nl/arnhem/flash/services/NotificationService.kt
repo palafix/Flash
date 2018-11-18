@@ -10,7 +10,7 @@ import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.dbflow.loadFbCookiesSync
 import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.utils.Prefs
-import nl.arnhem.flash.utils.flashAnswersCustom
+import nl.arnhem.flash.utils.flashEvent
 import org.jetbrains.anko.doAsync
 import java.util.concurrent.Future
 
@@ -31,7 +31,7 @@ class NotificationService : JobService() {
     override fun onStopJob(params: JobParameters?): Boolean {
         val time = System.currentTimeMillis() - startTime
         L.d { "Notification service has finished abruptly in $time ms" }
-        flashAnswersCustom("NotificationTime",
+        flashEvent("NotificationTime",
                 "Type" to "Service force stop",
                 "IM Included" to Prefs.notificationsInstantMessages,
                 "Duration" to time)
@@ -43,7 +43,7 @@ class NotificationService : JobService() {
     fun finish(params: JobParameters?) {
         val time = System.currentTimeMillis() - startTime
         L.i { "Notification service has finished in $time ms" }
-        flashAnswersCustom("NotificationTime",
+        flashEvent("NotificationTime",
                 "Type" to "Service",
                 "IM Included" to Prefs.notificationsInstantMessages,
                 "Duration" to time)
@@ -55,8 +55,6 @@ class NotificationService : JobService() {
     override fun onStartJob(params: JobParameters?): Boolean {
         L.i { "Fetching notifications" }
         future = doAsync {
-            val context = weakRef.get()
-                    ?: return@doAsync L.eThrow("NotificationService had null weakRef to self")
             val currentId = Prefs.userId
             val cookies = loadFbCookiesSync()
             val jobId = params?.extras?.getInt(NOTIFICATION_PARAM_ID, -1) ?: -1
@@ -70,7 +68,7 @@ class NotificationService : JobService() {
                         && (current || Prefs.notificationsImAllAccounts))
                     notifCount += fetch(jobId, NotificationType.MESSAGE, it)
             }
-
+            L.i { "Sent $notifCount notifications" }
             if (notifCount == 0 && jobId == NOTIFICATION_JOB_NOW)
                 generalNotification(665, R.string.no_new_notifications, BuildConfig.DEBUG)
 
@@ -104,6 +102,7 @@ class NotificationService : JobService() {
                 .setContentTitle(string(R.string.flash_name))
                 .setContentText(string(textRes))
         NotificationManagerCompat.from(this).notify(id, notifBuilder.build())
+
     }
 
 }

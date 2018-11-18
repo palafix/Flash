@@ -2,26 +2,49 @@
 <resources>
 
 <string name = "newsfeed_sort">Nieuwsoverzicht volgorde</string>
-    <string name = "newsfeed_sort_desc">Bepaalt de volgorde waarin de berichten worden getoond</string>
+    <string name = "newsfeed_sort_desc">Bepaalt de volgorde waarin de berichten worden getoond.</string>
     <string name = "aggressive_recents">Filter Recents</string>
     <string name = "aggressive_recents_desc">Filter extra oude berichten uit Facebook\'s oorspronkelijke meest Recent-Nieuwsoverzicht. Schakel dit uit als uw Nieuwsoverzicht leeg is.</string>
+
+    <string name = "audio">Media Beheer geluidsfuncties.</string>
+    <string name = "audio_test">Schakel het geluid uit/in als u op de like of de reactieknop klikt in het Nieuwsoverzicht.</string>
+
     <string name = "composer">Status wat ben je aan het doen?</string>
-    <string name = "composer_desc">Toon/Verberg status in de Nieuwsoverzicht</string>
+    <string name = "composer_desc">Toon/Verberg status in het Nieuwsoverzicht.</string>
+
+    <string name = "fixed_composer">Sticky naar boven Status</string>
+    <string name = "fixed_composer_desc">Fixed/Sticky status boven aan het Nieuwsoverzicht.</string>
+
+    <string name = "composer_remove_bottom">Status onderkant</string>
+    <string name = "composer_remove_bottom_desc">Verwijder de onderkant van de Status.</string>
+
+    <string name ="composer_needs">Status heeft dit nodig!!</string>
+
+    <string name ="storiestray">Verhalen</string>
+    <string name ="storiestray_desc">Verhalen weergeven of verbergen in het Nieuwsoverzicht.</string>
+
+    <string name ="imagepicker">Foto\'s toevoegen</string>
+    <string name ="videopicker">Video\'s toevoegen</string>
+
+    <string name ="dialogfileoicker">Foto\'s &amp; video\'s toevoegen</string>
 
     <string name="adremoval">Externe site advertenties</string>
-    <string name="adremoval_desc">Toon/Verberg advertenties in externe site\'s</string>
+    <string name="adremoval_desc">Toon/Verberg advertenties in externe site\'s.</string>
+
+    <string name="searchremoval">Zoekgeschiedenis verwijderen?</string>
+    <string name="searchremoval_desc">Je zoekgeschiedenis helpt ons om je betere resultaten te geven tijdens zoekopdrachten. Onthoud dat alleen jij je zoekopdrachten kunt zien.</string>
 
     <string name="fab">Fab</string>
 
     <string name="hide_fab">Status FAB</string>
-    <string name="hide_fab_desc">Toon/Verberg status FAB rechts onder</string>
+    <string name="hide_fab_desc">Toon/Verberg status Floating Action Button rechts onder.</string>
 
     <string name = "pro_features">Pro-functies</string>
     <string name = "suggested_friends">Voorgestelde vrienden</string>
-    <string name = "suggested_friends_desc">Toon/Verberg "Mensen die je misschien kent" in het Nieuwsoverzicht</string>
+    <string name = "suggested_friends_desc">Toon/Verberg "Mensen die je misschien kent" in het Nieuwsoverzicht.</string>
     <string name = "suggested_groups">Aanbevolen groepen</string>
-    <string name = "suggested_groups_desc">Toon/Verberg "Aanbevolen groepen" in het Nieuwsoverzicht</string>
+    <string name = "suggested_groups_desc">Toon/Verberg "Aanbevolen groepen" in het Nieuwsoverzicht.</string>
     <string name = "facebook_ads">Facebook advertenties</string>
-    <string name = "facebook_ads_desc">Toon/Verberg Facebook-advertenties in het Nieuwsoverzicht</string>
+    <string name = "facebook_ads_desc">Toon/Verberg Facebook-advertenties in het Nieuwsoverzicht.</string>
 
 </resources>

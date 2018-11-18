@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.views
 
 import android.content.Context
@@ -9,7 +11,9 @@ import android.widget.FrameLayout
 import android.widget.ProgressBar
 import ca.allanwang.kau.utils.*
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import nl.arnhem.flash.R
@@ -43,7 +47,7 @@ abstract class FlashContentView<out T> @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes),
         FlashContentParent where T : View, T : FlashContentCore {
 
-    private val refresh: SwipeRefreshLayout by bindView(R.id.content_refresh)
+    val refresh: SwipeRefreshLayout by bindView(R.id.content_refresh)
     private val progress: ProgressBar by bindView(R.id.content_progress)
     val coreView: T by bindView(R.id.content_core)
 
@@ -53,6 +57,8 @@ abstract class FlashContentView<out T> @JvmOverloads constructor(
     override val progressObservable: PublishSubject<Int> = PublishSubject.create()
     override val refreshObservable: PublishSubject<Boolean> = PublishSubject.create()
     override val titleObservable: BehaviorSubject<String> = BehaviorSubject.create()
+
+    private val compositeDisposable = CompositeDisposable()
 
     override lateinit var baseUrl: String
     override var baseEnum: FbItem? = null
@@ -71,6 +77,7 @@ abstract class FlashContentView<out T> @JvmOverloads constructor(
      * Sets up everything
      * Called by [bind]
      */
+
     protected fun init() {
         inflate(context, layoutRes, this)
         coreView.parent = this
@@ -81,14 +88,14 @@ abstract class FlashContentView<out T> @JvmOverloads constructor(
                 progress.setProgress(it, true)
             else
                 progress.progress = it
-        }
+        }.addTo(compositeDisposable)
 
         refreshObservable
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     refresh.isRefreshing = it
                     refresh.isEnabled = true
-                }
+                }.addTo(compositeDisposable)
         refresh.setOnRefreshListener { coreView.reload(true) }
 
         reloadThemeSelf()
@@ -126,6 +133,7 @@ abstract class FlashContentView<out T> @JvmOverloads constructor(
         progressObservable.onComplete()
         refreshObservable.onComplete()
         core.destroy()
+        compositeDisposable.dispose()
     }
 
     private var dispose: Disposable? = null

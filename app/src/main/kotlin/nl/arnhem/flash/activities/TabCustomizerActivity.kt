@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.activities
 
 import android.app.Activity
@@ -39,21 +41,18 @@ class TabCustomizerActivity : BaseActivity() {
     val instructions: TextView by bindView(R.id.instructions)
     val divider: View by bindView(R.id.divider)
     val adapter = FastItemAdapter<TabIItem>()
-    val fabCancel: FloatingActionButton by bindView(R.id.fab_cancel)
-    val fabSave: FloatingActionButton by bindView(R.id.fab_save)
+    private val fabCancel: FloatingActionButton by bindView(R.id.fab_cancel)
+    private val fabSave: FloatingActionButton by bindView(R.id.fab_save)
 
     private val wobble = lazyContext { AnimationUtils.loadAnimation(it, R.anim.rotate_delta) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tab_customizer)
-
         toolbar.setBackgroundColor(Prefs.headerColor)
-
         recycler.layoutManager = GridLayoutManager(this, TAB_COUNT, GridLayoutManager.VERTICAL, false)
         recycler.adapter = adapter
         recycler.setHasFixedSize(true)
-
         divider.setBackgroundColor(Prefs.textColor.withAlpha(30))
         instructions.setTextColor(Prefs.textColor)
 
@@ -69,14 +68,14 @@ class TabCustomizerActivity : BaseActivity() {
 
         setResult(Activity.RESULT_CANCELED)
 
-        fabSave.setIcon(GoogleMaterial.Icon.gmd_check, Prefs.iconColor)
+        fabSave.setIcon(GoogleMaterial.Icon.gmd_check, 16, Prefs.iconColor)
         fabSave.backgroundTintList = ColorStateList.valueOf(Prefs.accentColor)
         fabSave.setOnClickListener {
             adapter.adapterItems.subList(0, TAB_COUNT).map(TabIItem::item).save()
             setResult(Activity.RESULT_OK)
             finish()
         }
-        fabCancel.setIcon(GoogleMaterial.Icon.gmd_close, Prefs.iconColor)
+        fabCancel.setIcon(GoogleMaterial.Icon.gmd_close, 16, Prefs.iconColor)
         fabCancel.backgroundTintList = ColorStateList.valueOf(Prefs.accentColor)
         fabCancel.setOnClickListener { finish() }
         setFlashColors {

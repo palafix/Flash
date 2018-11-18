@@ -4,13 +4,16 @@ package nl.arnhem.flash.contracts
 
 
 import com.mikepenz.iconics.typeface.IIcon
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import nl.arnhem.flash.fragments.BaseFragment
 
 /**
  * All the contracts for [MainActivity]
  */
-interface ActivityContract : FileChooserActivityContract
+interface ActivityContract : FileChooserActivityContract {
+    fun backConsumer(): Boolean = false
+}
 
 interface MainActivityContract : ActivityContract, MainFabContract {
     val fragmentSubject: PublishSubject<Int>

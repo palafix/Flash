@@ -48,7 +48,9 @@ class BookmarkAdapter(val context: Context,
         card?.setCardBackgroundColor(Prefs.notiColor.withAlpha(255))
         numcard?.setCardBackgroundColor(Prefs.notiColor.withAlpha(255))
         txt?.setTextColor(Prefs.textColor)
+        txt?.textSize = Prefs.webTextScaling.div(5).toFloat()
         num?.setTextColor(Prefs.textColor)
+        num?.textSize = Prefs.webTextScaling.div(7).toFloat()
         return myViewHolder
     }
 
@@ -57,12 +59,12 @@ class BookmarkAdapter(val context: Context,
         val dimmerTextColor = Prefs.textColor.adjustAlpha(0.8f)
         holder.txt.text = data!![position].title
         holder.num.text = (position + 1).toString()
-        holder.card.setOnClickListener({
+        holder.card.setOnClickListener {
             itemClick.onItemClick(data!![position].bookMark)
-        })
+        }
         holder.delete.setImageResource(R.drawable.ic_delete_forever)
         holder.delete.setColorFilter(Prefs.textColor)
-        holder.delete.setOnClickListener({
+        holder.delete.setOnClickListener {
             MaterialDialog.Builder(context)
                     .title(R.string.deleted)
                     .titleColor(Prefs.textColor)
@@ -87,10 +89,10 @@ class BookmarkAdapter(val context: Context,
                         }))
                         reStart(context)
                     }
-                    .onNegative({ _, _ -> })
+                    .onNegative { _, _ -> }
                     .show()
             return@setOnClickListener
-        })
+        }
     }
 
     private fun reStart(ctx: Context) {

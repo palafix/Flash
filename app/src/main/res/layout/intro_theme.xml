@@ -19,6 +19,20 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/intro_theme_custom"
+        style="@style/IntroButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/theme_custom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/intro_title"
+        app:layout_constraintVertical_bias="0.19"
+        tools:layout_editor_absoluteX="112dp" />
+
+    <Button
         android:id="@+id/intro_theme_gray"
         style="@style/IntroButton"
         android:layout_width="wrap_content"
@@ -30,6 +44,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/intro_title"
         app:layout_constraintVertical_bias="0.33"
+        tools:layout_editor_absoluteX="112dp" />
+
+    <Button
+        android:id="@+id/intro_theme_default"
+        style="@style/IntroButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/theme_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/intro_title"
+        app:layout_constraintVertical_bias="0.48"
         tools:layout_editor_absoluteX="112dp" />
 
     <Button

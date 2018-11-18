@@ -1,14 +1,13 @@
 package nl.arnhem.flash.web
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.util.Log
+import android.webkit.*
 import io.reactivex.subjects.Subject
-import nl.arnhem.flash.facebook.FB_URL_BASE
-import nl.arnhem.flash.facebook.FbItem
+import nl.arnhem.flash.R
+import nl.arnhem.flash.facebook.*
 import nl.arnhem.flash.injectors.*
 import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.utils.iab.IS_Flash_PRO
@@ -32,6 +31,7 @@ open class BaseWebViewClient : WebViewClient() {
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? = view.shouldFlashInterceptRequest(request)
 }
 
+
 /**
  * The default webview client
  */
@@ -39,8 +39,15 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
 
     private val refresh: Subject<Boolean> = web.parent.refreshObservable
     private val isMain = web.parent.baseEnum != null
-
     protected inline fun v(crossinline message: () -> Any?) = L.v { "web client: ${message()}" }
+
+    private val dialog=  web.context.materialDialogThemedImage{
+            progress(true, 100)
+            content(R.string.image_loading)
+            negativeText(R.string.kau_cancel)
+            onNegative { dialog, _ -> dialog.dismiss() }
+            canceledOnTouchOutside(false)
+    }
 
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
@@ -48,6 +55,7 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
         v { "loading $url" }
         refresh.onNext(true)
     }
+
 
     private fun injectBackgroundColor() {
         web.setBackgroundColor(
@@ -62,34 +70,71 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
     override fun onPageCommitVisible(view: WebView, url: String?) {
         super.onPageCommitVisible(view, url)
         injectBackgroundColor()
-        if (url.isFacebookUrl)
-            view.jsInject(
+        if (url.isFacebookUrl) {
+            web.jsInject(
                     CssAssets.ROUND_ICONS.maybe(Prefs.showRoundedIcons),
+                    //CssStatus.COMPOSER_STATUS,
                     CssHider.CORE,
                     CssHider.COMPOSER.maybe(!Prefs.showComposer),
+                    CssHider.STORIESTRAY.maybe(!Prefs.showStoriesTray),
+                    CssFixed.COMPOSER_FIXED.maybe(Prefs.fixedComposer),
+                    CssPadding.COMPOSER_PADDING.maybe(Prefs.paddingComposer),
+                    CssHider.COMPOSER_BOTTOM.maybe(Prefs.bottomComposer),
                     CssHider.PEOPLE_YOU_MAY_KNOW.maybe(!Prefs.showSuggestedFriends && IS_Flash_PRO),
                     CssHider.SUGGESTED_GROUPS.maybe(!Prefs.showSuggestedGroups && IS_Flash_PRO),
                     Prefs.themeInjector,
-                    CssHider.NON_RECENT.maybe((web.url?.contains("?sk=h_chr") ?: false)
+                    CssHider.NON_RECENT.maybe((web.url?.contains("?sk=h_chr")
+                            ?: false)
                             && Prefs.aggressiveRecents),
+                    CssHider.VIDEOS,
+                    CssHider.VIDEOS2,
+                    //CssHider.WWW_FACEBOOK_COM,
+                    CssHider.HEADER_TOP,
+                    CssHider.HEADER,
                     JsAssets.DOCUMENT_WATCHER,
                     JsAssets.HEADER_HIDER,
                     JsAssets.CLICK_A,
                     CssHider.ADS.maybe(!Prefs.showFacebookAds && IS_Flash_PRO),
                     JsAssets.CONTEXT_A,
+                    JsActions.AUDIO_OFF.maybe(Prefs.DisableAudio),
+                    CssAssets.MATERIAL_AMOLED.maybe(Prefs.DayNight && isNightTime(Activity())),
                     JsAssets.MEDIA)
-        else
+        } else
             refresh.onNext(false)
     }
 
     override fun onPageFinished(view: WebView, url: String?) {
         url ?: return
+        //if (url.startsWith("https://www.facebook.com") || url.startsWith("https://web.facebook.com")) {
+        //    view.loadUrl("javascript:function removeElement(id) { var node = document.getElementById(id); node.parentNode.removeChild(node); } removeElement('pagelet_bluebar');removeElement('leftCol');removeElement('rightCol');")
+        //}
         v { "finished $url" }
         if (!url.isFacebookUrl) {
             refresh.onNext(false)
             return
         }
+        //if (web.copyBackForwardList().currentIndex > 0) {
+            //web.clearHistory()
+        //} else if (web.copyBackForwardList().currentIndex == 0) {
+        //return
+        //}
         onPageFinishedActions(url)
+    }
+
+    @Suppress("DEPRECATION", "OverridingDeprecatedMember")
+    override fun onReceivedError(view: WebView, errorCode: Int, description: String, failingUrl: String) {
+        if (view.url == failingUrl) {
+            view.context.materialDialogThemed {
+                title(web.title)
+                content(view.context.resources.getString(R.string.no_network))
+                positiveText(R.string.kau_ok)
+                onPositive { _, _ ->
+                        web.reload()
+                }
+            }
+        }
+        super.onReceivedError(view, errorCode, description, failingUrl)
+        Log.d("Facebook : ", "Failed to load page")
     }
 
     internal open fun onPageFinishedActions(url: String) {
@@ -126,14 +171,15 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
         return web.requestWebOverlay(request.url.toString())
     }
 
-    private fun launchImage(url: String, text: String? = null): Boolean {
+    private fun launchImage(url: String, text: String? = null, title: String? = null, cookie: String? = null): Boolean {
         v { "Launching image: $url" }
-        web.context.launchImageActivity(url, text)
+        web.context.launchImageActivity(url, text, title, cookie)
         if (web.canGoBack()) web.goBack()
         return true
     }
 
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        super.shouldOverrideUrlLoading(view, request)
         v { "Url loading: ${request.url}" }
         val path = request.url?.path ?: return super.shouldOverrideUrlLoading(view, request)
         v { "Url path $path" }
@@ -143,8 +189,8 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
             return true
         }
         if (path.startsWith("/composer/")) return launchRequest(request)
-        if (url.isImageUrl)
-            return launchImage(url)
+        if (url.isImageUrl) return launchImage(url.formattedFbUrl, view.title)
+        if (url.isIndirectImageUrl) return launchImage(url.formattedFbUrl, view.title, cookie = FbCookie.webCookie)
         if (Prefs.linksInDefaultApp && view.context.resolveActivityForUri(request.url)) return true
         return super.shouldOverrideUrlLoading(view, request)
     }
@@ -186,4 +232,3 @@ class FlashWebViewClientMenu(web: FlashWebView) : FlashWebViewClient(web) {
         if (!url.shouldInjectMenu) injectAndFinish()
     }
 }
-

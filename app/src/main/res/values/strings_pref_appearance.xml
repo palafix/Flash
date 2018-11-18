@@ -20,6 +20,15 @@
 
     <string name="noti_color">Massage background Color</string>
 
+    <string name="day_night">Automatic Day/Night theme</string>
+    <string name="day_night_desc">This enables the time picker and activate this function.</string>
+
+    <string name="night_dialog">Night time picker</string>
+    <string name="night_dialog_desc">Choose the time you want to activate the Night theme</string>
+
+    <string name="day_dialog">Day time picker</string>
+    <string name="day_dialog_desc">Choose the time you want to activate the Day theme</string>
+
     <string name="topbar_color">TopBar Color</string>
 
     <string name="global_customization">Global Customization</string>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/dialogfileoicker">
+        <menu>
+            <item
+                android:id="@+id/action_image"
+                android:title="@string/imagepicker" />
+            <item
+                android:id="@+id/action_video"
+                android:title="@string/videopicker" />
+        </menu>
+    </item>
+</menu>

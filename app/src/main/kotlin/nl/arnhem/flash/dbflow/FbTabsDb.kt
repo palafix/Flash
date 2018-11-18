@@ -1,8 +1,5 @@
 package nl.arnhem.flash.dbflow
 
-import nl.arnhem.flash.facebook.FbItem
-import nl.arnhem.flash.facebook.defaultTabs
-import nl.arnhem.flash.utils.L
 import com.raizlabs.android.dbflow.annotation.Database
 import com.raizlabs.android.dbflow.annotation.PrimaryKey
 import com.raizlabs.android.dbflow.annotation.Table
@@ -11,6 +8,9 @@ import com.raizlabs.android.dbflow.kotlinextensions.fastSave
 import com.raizlabs.android.dbflow.kotlinextensions.from
 import com.raizlabs.android.dbflow.kotlinextensions.select
 import com.raizlabs.android.dbflow.structure.BaseModel
+import nl.arnhem.flash.facebook.FbItem
+import nl.arnhem.flash.facebook.defaultTabs
+import nl.arnhem.flash.utils.L
 
 /**
  * Created by Allan Wang on 2017-05-30.

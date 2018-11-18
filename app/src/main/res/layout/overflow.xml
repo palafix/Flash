@@ -111,28 +111,6 @@
                     tools:ignore="RtlHardcoded,RtlSymmetry" />
 
                 <TextView
-                    android:id="@+id/action_history"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="16dp"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="16dp"
-                    android:text="@string/history"
-                    android:textSize="16sp"
-                    tools:ignore="RtlHardcoded,RtlSymmetry" />
-
-                <TextView
-                    android:id="@+id/delete_history"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="16dp"
-                    android:paddingLeft="16dp"
-                    android:paddingTop="16dp"
-                    android:text="@string/remove_history"
-                    android:textSize="16sp"
-                    tools:ignore="RtlHardcoded,RtlSymmetry" />
-
-                <TextView
                     android:id="@+id/action_share"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -168,8 +146,7 @@
                 <View
                     android:id="@+id/separator"
                     android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:background="#FFE0E0E0" />
+                    android:layout_height="1dp"/>
 
                 <TextView
                     android:layout_width="fill_parent"

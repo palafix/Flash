@@ -8,11 +8,14 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.WebOverlayActivity">
 
+    <!--suppress AndroidDomInspection -->
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbaroverlay"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:layout_scrollFlags="scroll|enterAlways|snap">
 
+        <!--suppress AndroidDomInspection -->
         <include
             layout="@layout/view_overlay_toolbar"
             android:layout_width="match_parent"

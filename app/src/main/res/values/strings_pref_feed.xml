@@ -2,26 +2,49 @@
 <resources>
 
     <string name="newsfeed_sort">Newsfeed Order</string>
-    <string name="newsfeed_sort_desc">Defines the order in which the posts are shown</string>
+    <string name="newsfeed_sort_desc">Defines the order in which the posts are shown.</string>
     <string name="aggressive_recents">Aggressive Recents</string>
     <string name="aggressive_recents_desc">Filter out additional old posts from Facebook\'s original most recents feed. Disable this if your feed is empty.</string>
+
+    <string name="audio">Media Manage sound controls.</string>
+    <string name="audio_test">Turn the sound off/on when you click the like or the reaction button in the Newsfeed.</string>
+
     <string name="composer">Status Composer</string>
-    <string name="composer_desc">Show/Hide status composer in the feed</string>
+    <string name="composer_desc">Show/Hide status composer in the Newsfeed.</string>
+
+    <string name="fixed_composer">Sticky to top Status Composer</string>
+    <string name="fixed_composer_desc">Fixed/Sticky status composer to the top of the Newsfeed.</string>
+
+    <string name="composer_remove_bottom">Status Composer bottom</string>
+    <string name="composer_remove_bottom_desc">Remove the bottom off the Status Composer.</string>
+
+    <string name="composer_needs">Status Composer needs!!</string>
+
+    <string name="storiestray">Stories Tray</string>
+    <string name="storiestray_desc">Show/Hide Stories Tray in the Newsfeed.</string>
+
+    <string name="imagepicker">Add pictures</string>
+    <string name="videopicker">Add videos</string>
+
+    <string name="dialogfileoicker">Add photos &amp; videos</string>
 
     <string name="adremoval">External site ads</string>
-    <string name="adremoval_desc">Show/Hide ads in external site\'s</string>
+    <string name="adremoval_desc">Show/Hide ads in external site\'s.</string>
+
+    <string name="searchremoval">Remove search history?</string>
+    <string name="searchremoval_desc">Your search history helps us to give you better results during searches. Remember that only you can see your searches.</string>
 
     <string name="fab">Fab</string>
 
     <string name="hide_fab">Status FAB</string>
-    <string name="hide_fab_desc">Show/Hide status FAB down right corner</string>
+    <string name="hide_fab_desc">Show/Hide status Floating Action Button down right corner.</string>
 
     <string name="pro_features">Pro Features</string>
     <string name="suggested_friends">Suggested Friends</string>
-    <string name="suggested_friends_desc">Show/Hide "People You May Know" in the feed</string>
+    <string name="suggested_friends_desc">Show/Hide "People You May Know" in the Newsfeed.</string>
     <string name="suggested_groups">Suggested Groups</string>
-    <string name="suggested_groups_desc">Show/Hide "Suggested Groups" in the feed</string>
+    <string name="suggested_groups_desc">Show/Hide "Suggested Groups" in the Newsfeed.</string>
     <string name="facebook_ads">Facebook Ads</string>
-    <string name="facebook_ads_desc">Show/Hide native Facebook ads in the feed</string>
+    <string name="facebook_ads_desc">Show/Hide native Facebook ads in the Newsfeed.</string>
 
 </resources>

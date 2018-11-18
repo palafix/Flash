@@ -10,6 +10,7 @@ import ca.allanwang.kau.kpref.activity.KPrefAdapterBuilder
 import ca.allanwang.kau.kpref.activity.items.KPrefText
 import ca.allanwang.kau.utils.minuteToText
 import ca.allanwang.kau.utils.string
+import com.raizlabs.android.dbflow.kotlinextensions.save
 import nl.arnhem.flash.BuildConfig
 import nl.arnhem.flash.R
 import nl.arnhem.flash.activities.SettingsActivity
@@ -36,11 +37,11 @@ fun SettingsActivity.getNotificationPrefs(): KPrefAdapterBuilder.() -> Unit = {
             materialDialogThemed {
                 title(R.string.notification_frequency)
                 items(texts)
-                itemsCallbackSingleChoice(options.indexOf(item.pref), { _, _, which, _ ->
+                itemsCallbackSingleChoice(options.indexOf(item.pref)) { _, _, which, _ ->
                     item.pref = options[which]
                     scheduleNotifications(item.pref)
                     true
-                })
+                }
             }
         }
         enabler = {
@@ -84,7 +85,9 @@ fun SettingsActivity.getNotificationPrefs(): KPrefAdapterBuilder.() -> Unit = {
     }
 
     checkbox(R.string.notification_general_all_accounts, Prefs::notificationAllAccounts,
-            { Prefs.notificationAllAccounts = it }) {
+            {
+                Prefs.notificationAllAccounts = it
+            }) {
         descRes = R.string.notification_general_all_accounts_desc
         enabler = Prefs::notificationsGeneral
     }
@@ -116,11 +119,13 @@ fun SettingsActivity.getNotificationPrefs(): KPrefAdapterBuilder.() -> Unit = {
             }
         }
     } else {
-        checkbox(R.string.notification_sound, Prefs::notificationSound, {
-            Prefs.notificationSound = it
+        checkbox(R.string.notification_sound, Prefs::notificationSound,
+                {
+                    Prefs.notificationSound = it
+                }) {
             reloadByTitle(R.string.notification_ringtone,
                     R.string.message_ringtone)
-        })
+        }
 
         fun KPrefText.KPrefTextContract<String>.ringtone(code: Int) {
             enabler = Prefs::notificationSound
@@ -154,17 +159,21 @@ fun SettingsActivity.getNotificationPrefs(): KPrefAdapterBuilder.() -> Unit = {
         }
 
         checkbox(R.string.notification_vibrate, Prefs::notificationVibrate,
-                { Prefs.notificationVibrate = it })
+                {
+                    Prefs.notificationVibrate = it
+                }) {}
 
         checkbox(R.string.notification_lights, Prefs::notificationLights,
-                { Prefs.notificationLights = it })
+                {
+                    Prefs.notificationLights = it
+                }) {}
     }
 
     if (BuildConfig.DEBUG) {
         plainText(R.string.reset_notif_epoch) {
             onClick = {
-                loadFbCookiesAsync {
-                    it.map { NotificationModel(it.id) }.forEach { it.save() }
+                loadFbCookiesAsync { cookies ->
+                    cookies.map { NotificationModel(it.id) }.forEach { it.save() }
                 }
             }
         }

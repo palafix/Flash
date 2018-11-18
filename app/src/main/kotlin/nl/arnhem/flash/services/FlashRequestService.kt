@@ -122,7 +122,7 @@ object FlashRunnable {
         bundle.putString(ARG_COMMAND, command.name)
 
         if (bundle.getCookie().isNullOrBlank()) {
-            L.e { "Scheduled Flash request with empty cookie" }
+            L.e { "Scheduled flash request with empty cookie" }
             return false
         }
 
@@ -168,17 +168,16 @@ class FlashRequestService : JobService() {
             L.eThrow("Launched ${this::class.java.simpleName} without command")
             return false
         }
-
         future = doAsync {
             val now = System.currentTimeMillis()
             var failed = true
             cookie.fbRequest {
-                L.d { "Requesting Flash service for ${command.name}" }
+                L.d { "Requesting flash service for ${command.name}" }
                 command.invoke(this, bundle)
                 failed = false
             }
             L.d {
-                "${if (failed) "Failed" else "Finished"} Flash service for ${command.name} in ${System.currentTimeMillis() - now} ms"
+                "${if (failed) "Failed" else "Finished"} flash service for ${command.name} in ${System.currentTimeMillis() - now} ms"
             }
             jobFinished(params, false)
         }

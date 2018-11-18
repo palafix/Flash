@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
-import ca.allanwang.kau.kpref.StringSet
 import ca.allanwang.kau.utils.bindView
 import ca.allanwang.kau.utils.string
 import ca.allanwang.kau.utils.tint
@@ -25,6 +24,7 @@ import nl.arnhem.flash.R
 import nl.arnhem.flash.utils.Prefs
 
 
+@Suppress("DEPRECATION")
 /**
  * Created by Allan Wang on 2017-06-19.
  */
@@ -32,8 +32,8 @@ class Keywords @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    val editText: AppCompatEditText by bindView(R.id.edit_text)
-    val addIcon: ImageView by bindView(R.id.add_icon)
+    private val editText: AppCompatEditText by bindView(R.id.edit_text)
+    private val addIcon: ImageView by bindView(R.id.add_icon)
     val recycler: RecyclerView by bindView(R.id.recycler)
     val adapter = FastItemAdapter<KeywordItem>()
 
@@ -42,18 +42,17 @@ class Keywords @JvmOverloads constructor(
         editText.tint(Prefs.textColor)
         addIcon.setImageDrawable(GoogleMaterial.Icon.gmd_add.keywordDrawable(context))
         addIcon.setOnClickListener {
-            if (editText.text.isEmpty()) editText.error = context.string(R.string.empty_keyword)
+            if (editText.text.isNullOrEmpty()) editText.error = context.string(R.string.empty_keyword)
             else {
                 adapter.add(0, KeywordItem(editText.text.toString()))
-                editText.text.clear()
+                editText.text?.clear()
             }
         }
         adapter.add(Prefs.notificationKeywords.map { KeywordItem(it) })
         recycler.layoutManager = LinearLayoutManager(context)
         recycler.adapter = adapter
         adapter.withEventHook(object : ClickEventHook<KeywordItem>() {
-            override fun onBind(viewHolder: RecyclerView.ViewHolder): View?
-                    = (viewHolder as? KeywordItem.ViewHolder)?.delete
+            override fun onBind(viewHolder: RecyclerView.ViewHolder): View? = (viewHolder as? KeywordItem.ViewHolder)?.delete
 
             override fun onClick(v: View, position: Int, fastAdapter: FastAdapter<KeywordItem>, item: KeywordItem) {
                 adapter.remove(position)
@@ -62,8 +61,7 @@ class Keywords @JvmOverloads constructor(
     }
 
     fun save() {
-        val keywords = adapter.adapterItems.map { it.keyword }
-        Prefs.notificationKeywords = StringSet(keywords)
+        Prefs.notificationKeywords = adapter.adapterItems.mapTo(mutableSetOf()) { it.keyword }
     }
 
 
@@ -71,6 +69,7 @@ class Keywords @JvmOverloads constructor(
 
 private fun IIcon.keywordDrawable(context: Context): Drawable = toDrawable(context, 20, Prefs.textColor)
 
+@Suppress("DEPRECATION")
 class KeywordItem(val keyword: String) : AbstractItem<KeywordItem, KeywordItem.ViewHolder>() {
 
     override fun getViewHolder(v: View): ViewHolder = ViewHolder(v)

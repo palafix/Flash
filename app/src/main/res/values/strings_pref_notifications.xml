@@ -35,4 +35,8 @@
     <string name="notification_headsup">Notifications style</string>
     <string name="notification_headsup_desc">Switch on to get Heads Up notifications, or off for normal notifications</string>
 
+    <string name="no_new_notifications">No new notifications found.</string>
+
+    <string name="download_notification_description">This is only to control the download Notifications style.</string>
+
 </resources>

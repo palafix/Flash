@@ -3,10 +3,6 @@ package nl.arnhem.flash.dbflow
 import android.os.Parcel
 import android.os.Parcelable
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork
-import nl.arnhem.flash.facebook.FbItem
-import nl.arnhem.flash.utils.L
-import nl.arnhem.flash.utils.flashJsoup
-import nl.arnhem.flash.utils.logFlashAnswers
 import com.raizlabs.android.dbflow.annotation.ConflictAction
 import com.raizlabs.android.dbflow.annotation.Database
 import com.raizlabs.android.dbflow.annotation.PrimaryKey
@@ -14,8 +10,13 @@ import com.raizlabs.android.dbflow.annotation.Table
 import com.raizlabs.android.dbflow.kotlinextensions.*
 import com.raizlabs.android.dbflow.structure.BaseModel
 import io.reactivex.schedulers.Schedulers
+import nl.arnhem.flash.facebook.FbItem
+import nl.arnhem.flash.utils.L
+import nl.arnhem.flash.utils.flashJsoup
+import nl.arnhem.flash.utils.logFlashEvent
 import paperparcel.PaperParcel
 import java.net.UnknownHostException
+import io.reactivex.disposables.Disposable
 
 /**
  * Created by Allan Wang on 2017-05-30.
@@ -67,26 +68,25 @@ fun removeCookie(id: Long) {
     }
 }
 
-inline fun CookieModel.fetchUsername(crossinline callback: (String) -> Unit) {
-    ReactiveNetwork.checkInternetConnectivity().subscribeOn(Schedulers.io()).subscribe { yes, _ ->
-        if (!yes) return@subscribe callback("")
-        var result = ""
-        try {
-            result = flashJsoup(cookie, FbItem.PROFILE.url).title()
-            L.d { "Fetch username found" }
-        } catch (e: Exception) {
-            if (e !is UnknownHostException)
-                e.logFlashAnswers("Fetch username failed")
-        } finally {
-            if (result.isBlank() && (name?.isNotBlank() == true)) {
-                callback(name!!)
-                return@subscribe
+inline fun CookieModel.fetchUsername(crossinline callback: (String) -> Unit): Disposable =
+        ReactiveNetwork.checkInternetConnectivity().subscribeOn(Schedulers.io()).subscribe { yes, _ ->
+            if (!yes) return@subscribe callback("")
+            var result = ""
+            try {
+                result = flashJsoup(cookie, FbItem.PROFILE.url).title()
+                L.d { "Fetch username found" }
+            } catch (e: Exception) {
+                if (e !is UnknownHostException)
+                    e.logFlashEvent("Fetch username failed")
+            } finally {
+                if (result.isBlank() && (name?.isNotBlank() == true)) {
+                    callback(name!!)
+                    return@subscribe
+                }
+                if (name != result) {
+                    name = result
+                    saveFbCookie(this@fetchUsername)
+                }
+                callback(result)
             }
-            if (name != result) {
-                name = result
-                saveFbCookie(this@fetchUsername)
-            }
-            callback(result)
         }
-    }
-}

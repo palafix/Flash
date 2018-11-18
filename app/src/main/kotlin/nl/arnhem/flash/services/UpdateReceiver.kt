@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import nl.arnhem.flash.utils.L
 import nl.arnhem.flash.utils.Prefs
+import nl.arnhem.flash.utils.onComplete
 
 /**
  * Created by Allan Wang on 2017-05-31.
@@ -18,5 +19,4 @@ class UpdateReceiver : BroadcastReceiver() {
         L.d { "Flash has updated" }
         context.scheduleNotifications(Prefs.notificationFreq) //Update notifications
     }
-
 }

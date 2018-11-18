@@ -30,6 +30,7 @@ enum class FbItem(
     FEED_MOST_RECENT(R.string.most_recent, GoogleMaterial.Icon.gmd_history, "home.php?sk=h_chr"),
     FEED_TOP_STORIES(R.string.top_stories, GoogleMaterial.Icon.gmd_star, "home.php?sk=h_nor"),
     FRIENDS(R.string.friends, GoogleMaterial.Icon.gmd_person_add, "friends/center/requests"),
+    MY_FRIENDS(R.string.my_friends, GoogleMaterial.Icon.gmd_person, "friends/center/friends"),
     GROUPS(R.string.groups, GoogleMaterial.Icon.gmd_group, "groups"),
     MENU(R.string.menu, GoogleMaterial.Icon.gmd_menu, "settings", ::MenuFragment),
     MESSAGES(R.string.messages, MaterialDesignIconic.Icon.gmi_comments, "messages"),
@@ -40,7 +41,7 @@ enum class FbItem(
     PHOTOS(R.string.photos, GoogleMaterial.Icon.gmd_photo, "me/photos"),
     PROFILE(R.string.profile, CommunityMaterial.Icon.cmd_account, "me"),
     SAVED(R.string.saved, GoogleMaterial.Icon.gmd_bookmark, "saved"),
-    _SEARCH(R.string.search_menu_title, GoogleMaterial.Icon.gmd_search, "search/top"),
+    _SEARCH(R.string.kau_search, GoogleMaterial.Icon.gmd_search, "search/top"),
     SETTINGS(R.string.settings, GoogleMaterial.Icon.gmd_settings, "settings/"),
     POKE(R.string.pokes, GoogleMaterial.Icon.gmd_thumb_up, "pokes"),
     ;

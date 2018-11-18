@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageView
 import ca.allanwang.kau.logging.KL
+import ca.allanwang.kau.utils.buildIsLollipopAndUp
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.signature.ApplicationVersionSignature
 import com.crashlytics.android.Crashlytics
@@ -18,6 +19,7 @@ import com.raizlabs.android.dbflow.config.FlowConfig
 import com.raizlabs.android.dbflow.config.FlowManager
 import com.raizlabs.android.dbflow.runtime.ContentResolverNotifier
 import io.fabric.sdk.android.Fabric
+import io.reactivex.exceptions.UndeliverableException
 import io.reactivex.plugins.RxJavaPlugins
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -28,9 +30,7 @@ import nl.arnhem.flash.facebook.FbCookie
 import nl.arnhem.flash.glide.GlideApp
 import nl.arnhem.flash.services.scheduleNotifications
 import nl.arnhem.flash.services.setupNotificationChannels
-import nl.arnhem.flash.utils.L
-import nl.arnhem.flash.utils.Prefs
-import nl.arnhem.flash.utils.Showcase
+import nl.arnhem.flash.utils.*
 import java.net.SocketTimeoutException
 import java.util.*
 import kotlin.reflect.KClass
@@ -54,6 +54,11 @@ class FlashApp : Application() {
                     .build())
 
     override fun onCreate() {
+        if (!buildIsLollipopAndUp) { // not supported
+            super.onCreate()
+            return
+        }
+
         Realm.init(this)
         val config = RealmConfiguration.Builder()
                 .deleteRealmIfMigrationNeeded()
@@ -75,7 +80,12 @@ class FlashApp : Application() {
         KL.shouldLog = { BuildConfig.DEBUG }
         Prefs.verboseLogging = false
         L.i { "Begin Flash for Facebook" }
-        FbCookie()
+        try {
+            FbCookie()
+        } catch (e: Exception) {
+            // no webview found; error will be handled in start activity
+        }
+        AdRemoval.init(this)
         if (Prefs.installDate == -1L) Prefs.installDate = System.currentTimeMillis()
         if (Prefs.identifier == -1) Prefs.identifier = Random().nextInt(Int.MAX_VALUE)
         Prefs.lastLaunch = System.currentTimeMillis()
@@ -83,7 +93,6 @@ class FlashApp : Application() {
         super.onCreate()
 
         setupNotificationChannels(applicationContext)
-
         applicationContext.scheduleNotifications(Prefs.notificationFreq)
 
         /**
@@ -121,9 +130,14 @@ class FlashApp : Application() {
 
         RxJavaPlugins.setErrorHandler {
             when (it) {
-                is SocketTimeoutException -> Unit
-                else -> L.e(it) { "RxJava error" }
+                is SocketTimeoutException, is UndeliverableException ->
+                    L.e { "RxJava common error ${it.message}" }
+                else ->
+                    L.e(it) { "RxJava error" }
             }
         }
+
     }
+
+
 }

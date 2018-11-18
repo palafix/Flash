@@ -14,16 +14,17 @@ import nl.arnhem.flash.utils.REQUEST_REFRESH
 
 fun SettingsActivity.getBehaviourPrefs(): KPrefAdapterBuilder.() -> Unit = {
 
-    checkbox(R.string.enable_pip, Prefs::enablePip, {
-        Prefs.enablePip = it
-        setFlashResult(REQUEST_REFRESH)
-    }) {
-        descRes = R.string.enable_pip_desc
-    }
-
     checkbox(R.string.fancy_animations, Prefs::animate, { Prefs.animate = it; animate = it }) {
         descRes = R.string.fancy_animations_desc
     }
+
+    checkbox(R.string.back_to_top, Prefs::backToTop, { Prefs.backToTop = it; }) {
+        descRes = R.string.back_to_top_desc
+    }
+
+    //checkbox(R.string.image_loader, Prefs::autoImageLoader, { Prefs.autoImageLoader = it; }) {
+    //    descRes = R.string.image_loader_desc
+    //}
 
     checkbox(R.string.overlay_swipe, Prefs::overlayEnabled, { Prefs.overlayEnabled = it; setFlashResult(REQUEST_REFRESH) }) {
         descRes = R.string.overlay_swipe_desc

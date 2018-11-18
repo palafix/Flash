@@ -22,4 +22,10 @@
     <string name="analytics">Analytics</string>
     <string name="analytics_desc">Enable anonymous analytics to help improve the app. No personal information is ever exposed.</string>
 
+    <string name="image_loader">Open images onclick.</string>
+    <string name="image_loader_desc">Enable Open images onclick automatic after page is loaded, or disable to load the page only.</string>
+
+    <string name="back_to_top">Back to top</string>
+    <string name="back_to_top_desc">If enabled - Press the back button to go back to top then go back to previous page.</string>
+
 </resources>

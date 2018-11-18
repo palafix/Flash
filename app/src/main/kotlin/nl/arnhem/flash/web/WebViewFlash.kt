@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
@@ -20,6 +21,15 @@ import android.util.Base64
 import android.view.KeyEvent
 import android.view.View
 import android.webkit.*
+import kotlinx.android.synthetic.main.activity_browser.view.*
+import nl.arnhem.flash.contracts.MEDIA_CHOOSER_RESULT
+import nl.arnhem.flash.facebook.FbCookie
+import nl.arnhem.flash.facebook.FbItem
+import nl.arnhem.flash.facebook.formattedFbUrl
+import nl.arnhem.flash.injectors.*
+import nl.arnhem.flash.utils.*
+import nl.arnhem.flash.utils.iab.IS_Flash_PRO
+import org.jetbrains.anko.withAlpha
 import java.io.UnsupportedEncodingException
 import java.lang.ref.WeakReference
 import java.util.*
@@ -49,11 +59,12 @@ class WebViewFlash : NestedWebView {
     /**
      * File upload callback for platform versions prior to Android 5.0
      */
-    private var mFileUploadCallbackFirst: ValueCallback<Uri>? = null
+    private var mFileUploadCallbackFirst: ValueCallback<Array<Uri>>? = null
     /**
      * File upload callback for Android 5.0+
      */
     private lateinit var mFileUploadCallbackSecond: ValueCallback<Array<Uri?>>
+    private var filePathCallback: ValueCallback<Array<Uri>?>? = null
     private var mLastError: Long = 0
     private var mLanguageIso3: String? = null
     private var mRequestCodeFilePicker = REQUEST_CODE_FILE_PICKER
@@ -62,6 +73,7 @@ class WebViewFlash : NestedWebView {
     private var mGeolocationEnabled: Boolean = false
     private var mUploadableFileTypes = "*/*"
     private val mHttpHeaders: MutableMap<String, String> = HashMap()
+    private inline fun v(crossinline message: () -> Any?) = L.v { "web client: ${message()}" }
 
     init {
         isNestedScrollingEnabled = true
@@ -193,6 +205,77 @@ class WebViewFlash : NestedWebView {
 
         super.setWebViewClient(object : WebViewClient() {
 
+            private fun injectBackgroundColor() {
+                webview.setBackgroundColor(
+                        when {
+                            url.isFacebookUrl -> Prefs.bgColor.withAlpha(255)
+                            else -> Color.WHITE
+                        }
+                )
+            }
+
+            override fun onPageCommitVisible(view: WebView, url: String?) {
+                super.onPageCommitVisible(view, url)
+                injectBackgroundColor()
+                if (url.isFacebookUrl)
+                    view.jsInject(
+                            CssAssets.ROUND_ICONS.maybe(Prefs.showRoundedIcons),
+                            //CssStatus.COMPOSER_STATUS,
+                            CssHider.CORE,
+                            CssHider.COMPOSER.maybe(!Prefs.showComposer),
+                            CssHider.STORIESTRAY.maybe(!Prefs.showStoriesTray),
+                            CssFixed.COMPOSER_FIXED.maybe(Prefs.fixedComposer),
+                            CssPadding.COMPOSER_PADDING.maybe(Prefs.paddingComposer),
+                            CssHider.COMPOSER_BOTTOM.maybe(Prefs.bottomComposer),
+                            CssHider.PEOPLE_YOU_MAY_KNOW.maybe(!Prefs.showSuggestedFriends && IS_Flash_PRO),
+                            CssHider.SUGGESTED_GROUPS.maybe(!Prefs.showSuggestedGroups && IS_Flash_PRO),
+                            Prefs.themeInjector,
+                            CssHider.VIDEOS,
+                            CssHider.VIDEOS2,
+                            //CssHider.WWW_FACEBOOK_COM,
+                            CssHider.HEADER_TOP,
+                            CssHider.HEADER,
+                            JsAssets.DOCUMENT_WATCHER,
+                            JsAssets.HEADER_HIDER,
+                            JsAssets.CLICK_A,
+                            CssHider.ADS.maybe(!Prefs.showFacebookAds && IS_Flash_PRO),
+                            JsAssets.CONTEXT_A,
+                            JsActions.AUDIO_OFF.maybe(Prefs.DisableAudio),
+                            //JsActions.AUTO_VIDEO_OFF.maybe(!Prefs.DisableVideoAUTO),
+                            JsAssets.MEDIA)
+            }
+
+            fun onPageFinishedActions(url: String) {
+                if (url.startsWith("${FbItem.MESSAGES.url}/read/") && Prefs.messageScrollToBottom)
+                    webview.pageDown(true)
+                injectAndFinish()
+            }
+
+            fun injectAndFinish() {
+                v { "page finished reveal" }
+                injectBackgroundColor()
+                webview.jsInject(
+                        JsActions.LOGIN_CHECK,
+                        JsAssets.TEXTAREA_LISTENER)
+            }
+
+            /**
+             * Helper to format the request and launch it
+             * returns true to override the url
+             * returns false if we are already in an overlaying activity
+             */
+            private fun launchRequest(request: WebResourceRequest): Boolean {
+                v { "Launching url: ${request.url}" }
+                return webview.requestWebOverlay(request.url.toString())
+            }
+
+            private fun launchImage(url: String, text: String? = null, title: String? = null, cookie: String? = null): Boolean {
+                v { "Launching image: $url" }
+                webview.context.launchImageActivity(url, text, title, cookie)
+                if (webview.canGoBack()) webview.goBack()
+                return true
+            }
+
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                 if (!hasError()) {
                     if (mListener != null) {
@@ -211,7 +294,7 @@ class WebViewFlash : NestedWebView {
                         mListener!!.onPageFinished(url)
                     }
                 }
-
+                onPageFinishedActions(url)
                 if (mCustomWebViewClient != null) {
                     mCustomWebViewClient!!.onPageFinished(view, url)
                 }
@@ -264,6 +347,24 @@ class WebViewFlash : NestedWebView {
                 } else {
                     super.onLoadResource(view, url)
                 }
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                v { "Url loading: ${request.url}" }
+                val path = request.url?.path ?: return super.shouldOverrideUrlLoading(view, request)
+                v { "Url path $path" }
+                val url = request.url.toString()
+                if (url.isExplicitIntent) {
+                    view.context.resolveActivityForUri(request.url)
+                    return true
+                }
+                if (path.startsWith("/composer/")) return launchRequest(request)
+                if (url.isImageUrl)
+                    return launchImage(url.formattedFbUrl)
+                if (url.isIndirectImageUrl)
+                    return launchImage(url.formattedFbUrl, view.title, cookie = FbCookie.webCookie)
+                if (Prefs.linksInDefaultApp && view.context.resolveActivityForUri(request.url)) return true
+                return super.shouldOverrideUrlLoading(view, request)
             }
 
             @SuppressLint("NewApi")
@@ -369,16 +470,9 @@ class WebViewFlash : NestedWebView {
         super.setWebChromeClient(object : WebChromeClient() {
 
             // file upload callback (Android 5.0 (API level 21) -- current) (public method)
-            override fun onShowFileChooser(webView: WebView, filePathCallback: ValueCallback<Array<Uri>>, fileChooserParams: WebChromeClient.FileChooserParams): Boolean {
-                return if (Build.VERSION.SDK_INT >= 21) {
-                    val allowMultiple = fileChooserParams.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
-
-                    openFileInput(null, filePathCallback, allowMultiple)
-
-                    true
-                } else {
-                    false
-                }
+            override fun onShowFileChooser(webView: WebView, filePathCallback: ValueCallback<Array<Uri?>>, fileChooserParams: WebChromeClient.FileChooserParams): Boolean {
+                openFileChooser(null, filePathCallback, true)
+                return true
             }
 
             override fun onProgressChanged(view: WebView, newProgress: Int) {
@@ -688,73 +782,56 @@ class WebViewFlash : NestedWebView {
 
     /**
      * Provides localizations for the 25 most widely spoken languages that have a ISO 639-2/T code
-
-     * @return the label for the file upload prompts as a string
      */
-    private // return English translation by default
-    val fileUploadPromptLabel: String
-        get() {
-            try {
-                when (mLanguageIso3) {
-                    "zho" -> return decodeBase64("6YCJ5oup5LiA5Liq5paH5Lu2")
-                    "spa" -> return decodeBase64("RWxpamEgdW4gYXJjaGl2bw==")
-                    "hin" -> return decodeBase64("4KSP4KSVIOCkq+CkvOCkvuCkh+CksiDgpJrgpYHgpKjgpYfgpII=")
-                    "ben" -> return decodeBase64("4KaP4KaV4Kaf4Ka/IOCmq+CmvuCmh+CmsiDgpqjgpr/gprDgp43gpqzgpr7gpprgpqg=")
-                    "ara" -> return decodeBase64("2KfYrtiq2YrYp9ixINmF2YTZgSDZiNin2K3Yrw==")
-                    "por" -> return decodeBase64("RXNjb2xoYSB1bSBhcnF1aXZv")
-                    "rus" -> return decodeBase64("0JLRi9Cx0LXRgNC40YLQtSDQvtC00LjQvSDRhNCw0LnQuw==")
-                    "jpn" -> return decodeBase64("MeODleOCoeOCpOODq+OCkumBuOaKnuOBl+OBpuOBj+OBoOOBleOBhA==")
-                    "pan" -> return decodeBase64("4KiH4Kmx4KiVIOCoq+CovuCoh+CosiDgqJrgqYHgqKPgqYs=")
-                    "deu" -> return decodeBase64("V8OkaGxlIGVpbmUgRGF0ZWk=")
-                    "jav" -> return decodeBase64("UGlsaWggc2lqaSBiZXJrYXM=")
-                    "msa" -> return decodeBase64("UGlsaWggc2F0dSBmYWls")
-                    "tel" -> return decodeBase64("4LCS4LCVIOCwq+CxhuCxluCwsuCxjeCwqOCxgSDgsI7gsILgsJrgsYHgsJXgsYvgsILgsKHgsL8=")
-                    "vie" -> return decodeBase64("Q2jhu41uIG3hu5l0IHThuq1wIHRpbg==")
-                    "kor" -> return decodeBase64("7ZWY64KY7J2YIO2MjOydvOydhCDshKDtg50=")
-                    "fra" -> return decodeBase64("Q2hvaXNpc3NleiB1biBmaWNoaWVy")
-                    "mar" -> return decodeBase64("4KSr4KS+4KSH4KSyIOCkqOCkv+CkteCkoeCkvg==")
-                    "tam" -> return decodeBase64("4K6S4K6w4K+BIOCuleCvh+CuvuCuquCvjeCuquCviCDgrqTgr4fgrrDgr43grrXgr4E=")
-                    "urd" -> return decodeBase64("2KfbjNqpINmB2KfYptmEINmF24zauiDYs9uSINin2YbYqtiu2KfYqCDaqdix24zaug==")
-                    "fas" -> return decodeBase64("2LHYpyDYp9mG2KrYrtin2Kgg2qnZhtuM2K8g24zaqSDZgdin24zZhA==")
-                    "tur" -> return decodeBase64("QmlyIGRvc3lhIHNlw6dpbg==")
-                    "ita" -> return decodeBase64("U2NlZ2xpIHVuIGZpbGU=")
-                    "tha" -> return decodeBase64("4LmA4Lil4Li34Lit4LiB4LmE4Lif4Lil4LmM4Lir4LiZ4Li24LmI4LiH")
-                    "guj" -> return decodeBase64("4KqP4KqVIOCqq+CqvuCqh+CqsuCqqOCrhyDgqqrgqrjgqoLgqqY=")
-                    else -> {
-                    }
-                }
-            } catch (ignored: Exception) {
+    private fun getFileUploadPromptLabel(): String {
+        try {
+            when (mLanguageIso3) {
+                "zho" -> return decodeBase64("6YCJ5oup5LiA5Liq5paH5Lu2")
+                "spa" -> return decodeBase64("RWxpamEgdW4gYXJjaGl2bw==")
+                "hin" -> return decodeBase64("4KSP4KSVIOCkq+CkvOCkvuCkh+CksiDgpJrgpYHgpKjgpYfgpII=")
+                "ben" -> return decodeBase64("4KaP4KaV4Kaf4Ka/IOCmq+CmvuCmh+CmsiDgpqjgpr/gprDgp43gpqzgpr7gpprgpqg=")
+                "ara" -> return decodeBase64("2KfYrtiq2YrYp9ixINmF2YTZgSDZiNin2K3Yrw==")
+                "por" -> return decodeBase64("RXNjb2xoYSB1bSBhcnF1aXZv")
+                "rus" -> return decodeBase64("0JLRi9Cx0LXRgNC40YLQtSDQvtC00LjQvSDRhNCw0LnQuw==")
+                "jpn" -> return decodeBase64("MeODleOCoeOCpOODq+OCkumBuOaKnuOBl+OBpuOBj+OBoOOBleOBhA==")
+                "pan" -> return decodeBase64("4KiH4Kmx4KiVIOCoq+CovuCoh+CosiDgqJrgqYHgqKPgqYs=")
+                "deu" -> return decodeBase64("V8OkaGxlIGVpbmUgRGF0ZWk=")
+                "jav" -> return decodeBase64("UGlsaWggc2lqaSBiZXJrYXM=")
+                "msa" -> return decodeBase64("UGlsaWggc2F0dSBmYWls")
+                "tel" -> return decodeBase64("4LCS4LCVIOCwq+CxhuCxluCwsuCxjeCwqOCxgSDgsI7gsILgsJrgsYHgsJXgsYvgsILgsKHgsL8=")
+                "vie" -> return decodeBase64("Q2jhu41uIG3hu5l0IHThuq1wIHRpbg==")
+                "kor" -> return decodeBase64("7ZWY64KY7J2YIO2MjOydvOydhCDshKDtg50=")
+                "fra" -> return decodeBase64("Q2hvaXNpc3NleiB1biBmaWNoaWVy")
+                "mar" -> return decodeBase64("4KSr4KS+4KSH4KSyIOCkqOCkv+CkteCkoeCkvg==")
+                "tam" -> return decodeBase64("4K6S4K6w4K+BIOCuleCvh+CuvuCuquCvjeCuquCviCDgrqTgr4fgrrDgr43grrXgr4E=")
+                "urd" -> return decodeBase64("2KfbjNqpINmB2KfYptmEINmF24zauiDYs9uSINin2YbYqtiu2KfYqCDaqdix24zaug==")
+                "fas" -> return decodeBase64("2LHYpyDYp9mG2KrYrtin2Kgg2qnZhtuM2K8g24zaqSDZgdin24zZhA==")
+                "tur" -> return decodeBase64("QmlyIGRvc3lhIHNlw6dpbg==")
+                "ita" -> return decodeBase64("U2NlZ2xpIHVuIGZpbGU=")
+                "tha" -> return decodeBase64("4LmA4Lil4Li34Lit4LiB4LmE4Lif4Lil4LmM4Lir4LiZ4Li24LmI4LiH")
+                "guj" -> return decodeBase64("4KqP4KqVIOCqq+CqvuCqh+CqsuCqqOCrhyDgqqrgqrjgqoLgqqY=")
             }
-
-            return "Choose a file"
+        } catch (ignored: Exception) {
         }
+        // return English translation by default
+        return "Choose a file"
+    }
 
-    @SuppressLint("NewApi")
-    private fun openFileInput(fileUploadCallbackFirst: ValueCallback<Uri>?, fileUploadCallbackSecond: ValueCallback<Array<Uri>>?, allowMultiple: Boolean) {
-        if (mFileUploadCallbackFirst != null) {
-            mFileUploadCallbackFirst!!.onReceiveValue(null)
-        }
-        mFileUploadCallbackFirst = fileUploadCallbackFirst
+    override fun openFileChooser(filePathCallback: ValueCallback<Array<Uri>?>?, fileChooserParams: ValueCallback<Array<Uri?>>, b: Boolean) {
+        val intent = Intent("android.intent.action.PICK")
+        intent.type = mUploadableFileTypes
+        intent.action = Intent.ACTION_GET_CONTENT
+        mActivity.get()!!.startActivityForResult(Intent.createChooser(intent, getFileUploadPromptLabel()), MEDIA_CHOOSER_RESULT)
 
-        mFileUploadCallbackSecond.onReceiveValue(null)
-        mFileUploadCallbackSecond != fileUploadCallbackSecond
+    }
 
-        val i = Intent(Intent.ACTION_GET_CONTENT)
-        i.addCategory(Intent.CATEGORY_OPENABLE)
-
-        if (allowMultiple) {
-            if (Build.VERSION.SDK_INT >= 18) {
-                i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-            }
-        }
-
-        i.type = mUploadableFileTypes
-
-        if (mFragment != null && mFragment!!.get() != null && Build.VERSION.SDK_INT >= 11) {
-            mFragment!!.get()!!.startActivityForResult(Intent.createChooser(i, fileUploadPromptLabel), mRequestCodeFilePicker)
-        } else if (mActivity.get() != null) {
-            mActivity.get()!!.startActivityForResult(Intent.createChooser(i, fileUploadPromptLabel), mRequestCodeFilePicker)
-        }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean {
+        L.d { "FileChooser On activity results web $requestCode" }
+        if (requestCode != MEDIA_CHOOSER_RESULT) return false
+        val data = intent?.data
+        filePathCallback?.onReceiveValue(if (data != null) arrayOf(data) else null)
+        filePathCallback = null
+        return true
     }
 
     /**
@@ -842,7 +919,7 @@ class WebViewFlash : NestedWebView {
     companion object {
 
         private const val PACKAGE_NAME_DOWNLOAD_MANAGER = "com.android.providers.downloads"
-        const val REQUEST_CODE_FILE_PICKER = 51426
+        const val REQUEST_CODE_FILE_PICKER = 67
         private const val LANGUAGE_DEFAULT_ISO3 = "eng"
         /**
          * Alternative browsers that have their own rendering engine and *may* be installed on this device

@@ -67,7 +67,15 @@ class FlashRecyclerView @JvmOverloads constructor(
         // todo see if any
     }
 
-    override fun onBackPressed() = false
+    override fun onBackPressed():Boolean {
+        if (Prefs.backToTop) {
+            val firstPosition = (layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+            if (firstPosition == 0) return false
+            else scrollToTop()
+                return true
+        }
+        return false
+    }
 
     /**
      * If recycler is already at the top, refresh

@@ -1,13 +1,59 @@
 # Changelog
 
+## ToDo
+* File picker in external site\'s not working properly.
+
+## v1.2.0
+* Added some Theme/app style.
+* Added option when back pressed, page return to top. Can be turned on in Settings > Behaviour > 
+* Text scaling in notifications and menu page works.
+
+## v1.1.9
+* Fixed Theme style.
+* Fix for back pressed return to home page.
+* FAB Button fix
+* Added free pro!! Try to find it in the app!
+
+## v1.1.8
+* Some Theme style change.
+* Notification bug fixed.
+
+## v1.1.7
+* Fixed theme.
+* Fixed Messages Notifications.
+* Fixed Ads on Facebook. They not disappear when disable the hide facebook ads.
+* Added custom File picker.
+* Added FAB Button in the status overlay. When type a message you can click on it to send.
+* Now you can set your own time for Day & Night theme. Go to Settings > Appearance > Timepicker.
+
+## v1.1.6
+* Fixed theme.
+* Added Option to turn off the like/reaction sound. You can find it in Settings > Facebook Video & Sound.
+* Added Option to hide the story at the top off the feed. You can find it in settings > Feed.
+* Added Day-Night theme. Go to Settings > Appearance
+
+## v1.1.5
+* Improved theme Style.
+* FAB Button is back.
+* Minor Bug Fixed
+
+## v1.1.4
+* Fixed, theme Style
+
+## v1.1.3
+* Fixed, theme Style
+* Removed FAB Button. Is coming back soon
+* Added Sticky Status Editor/Composer. Stays on top when scroll the page. You can turn it off in settings > Feed > Sticky to top Status Composer 
+* Minor Bug Fixed
+
 ## v1.1.2
 * Fixed, login on external site\'s, crash the app
 * Fixed, Overlay redirection
 * Fixed, app crashes when remove a bookmark en then you click on it
 * Fixed, page was broken, now it\'s load fine
-* Changed download location, videos-images-documents. Destination is (Downloads/Flash/)
-* Add option to turn off/on AppUpdate notification. Go to App Settings/Notifications/Update notification
-* Add option to turn off/on Floating Action Button. Go to App Settings/Feed/Status FAB
+* Changed download location, videos-images-documents. Destination is on your phone is (Downloads > Flash > )
+* Add option to turn off/on AppUpdate notification. Go to App Settings > Notifications > Update notification
+* Add option to turn off/on Floating Action Button. Go to App Settings > Feed > Status FAB
 * Added search function to external site overlay
 
 ## v1.1.1
@@ -37,13 +83,13 @@
 * Fixed all theme\'s. Problem was, text under the toolbar in status update
 
 ## v1.0.6
-* Added FloatingActionbutton, easy status update. (Allan Wang: Frost For Facebook)
+* Added Floating Action button, easy status update. (Allan Wang: Frost For Facebook)
 
 ## v1.0.5
 * Fixed notification profile image\'s
 
 ## v1.0.4
-* Fixed website\'s insane long url when open in Weboverlay. Now all link/website\'s should work/load properly
+* Fixed website\'s insane long url when open in Web overlay. Now all link/website\'s should work/load properly
 
 ## v1.0.3
 * Add option to disable pip (settings > behaviour)

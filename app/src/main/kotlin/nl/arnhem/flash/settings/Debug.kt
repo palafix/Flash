@@ -10,6 +10,7 @@ import nl.arnhem.flash.activities.DebugActivity
 import nl.arnhem.flash.activities.SettingsActivity
 import nl.arnhem.flash.activities.SettingsActivity.Companion.ACTIVITY_REQUEST_DEBUG
 import nl.arnhem.flash.debugger.OfflineWebsite
+import nl.arnhem.flash.facebook.FB_URL_BASE
 import nl.arnhem.flash.facebook.FbCookie
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.parsers.FlashParser
@@ -90,18 +91,12 @@ private fun Context.createEmail(parser: FlashParser<*>, content: Any?) =
 
 private const val ZIP_NAME = "debug"
 
-fun SettingsActivity.sendDebug(urlOrig: String) {
-
-    val url = when {
-        urlOrig.endsWith("soft=requests") -> FbItem.FRIENDS.url
-        urlOrig.endsWith("soft=messages") -> FbItem.MESSAGES.url
-        urlOrig.endsWith("soft=notifications") -> FbItem.NOTIFICATIONS.url
-        urlOrig.endsWith("soft=search") -> "${FbItem._SEARCH.url}?q=a"
-        else -> urlOrig
-    }
+fun SettingsActivity.sendDebug(url: String, html: String?) {
 
     val downloader = OfflineWebsite(url, FbCookie.webCookie ?: "",
-            DebugActivity.baseDir(this))
+            baseUrl = FB_URL_BASE,
+            html = html,
+            baseDir = DebugActivity.baseDir(this))
 
     val md = materialDialog {
         title(R.string.parsing_data)

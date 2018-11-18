@@ -14,7 +14,7 @@ import java.util.*
  * Mapping of the available assets
  * The enum name must match the css file name
  */
-enum class CssAssets(val folder: String = "themes") : InjectorContract {
+enum class CssAssets(private val folder: String = "themes") : InjectorContract {
     FACEBOOK_MOBILE, MATERIAL_GRAY, MATERIAL_DARK, MATERIAL_AMOLED, MATERIAL_GLASS, CUSTOM, ROUND_ICONS("components")
     ;
 
@@ -56,5 +56,4 @@ enum class CssAssets(val folder: String = "themes") : InjectorContract {
     fun reset() {
         injector.invalidate()
     }
-
 }

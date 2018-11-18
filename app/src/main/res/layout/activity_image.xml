@@ -37,6 +37,7 @@
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/image_fab"
         android:layout_width="wrap_content"
@@ -44,5 +45,6 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/kau_fab_margin"
         android:visibility="invisible" />
+
 
 </android.support.design.widget.CoordinatorLayout>

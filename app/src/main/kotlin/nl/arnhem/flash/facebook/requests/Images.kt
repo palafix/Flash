@@ -11,9 +11,8 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
-import nl.arnhem.flash.facebook.FB_IMAGE_ID_MATCHER
-import nl.arnhem.flash.facebook.FB_URL_BASE
-import nl.arnhem.flash.facebook.get
+import io.reactivex.Maybe
+import nl.arnhem.flash.facebook.*
 import okhttp3.Call
 import okhttp3.Request
 import java.io.IOException
@@ -26,6 +25,15 @@ fun RequestAuth.getFullSizedImage(fbid: Long) = flashRequest(::getJsonUrl) {
     url("${FB_URL_BASE}photo/view_full_size/?fbid=$fbid&__ajax__=&__user=$userId")
     get()
 }
+
+val test: () -> InputStream? = { null }
+
+fun String.getFullSizedImageUrl(url: String): Maybe<String?> = Maybe.fromCallable {
+    val redirect = requestBuilder().url(url).get().call()
+            .execute().body()?.string() ?: return@fromCallable null
+    return@fromCallable FB_REDIRECT_URL_MATCHER.find(redirect)[1]?.formattedFbUrl
+            ?: return@fromCallable null
+}.onErrorComplete()
 
 /**
  * Request loader for a potentially hd version of a url
@@ -64,7 +72,6 @@ fun <T> RequestBuilder<T>.loadWithPotentialHd(model: HdImageMaybe) =
 
 class HdImageLoading : ModelLoader<HdImageMaybe, InputStream> {
 
-
     override fun buildLoadData(model: HdImageMaybe,
                                width: Int,
                                height: Int,
@@ -77,7 +84,8 @@ class HdImageLoading : ModelLoader<HdImageMaybe, InputStream> {
 
 class HdImageFetcher(private val model: HdImageMaybe) : DataFetcher<InputStream> {
 
-    @Volatile private var cancelled: Boolean = false
+    @Volatile
+    private var cancelled: Boolean = false
     private var urlCall: Call? = null
     private var inputStream: InputStream? = null
 
@@ -93,7 +101,8 @@ class HdImageFetcher(private val model: HdImageMaybe) : DataFetcher<InputStream>
         if (!model.isValid) return callback.fail("Model is invalid")
         model.cookie.fbRequest(fail = { callback.fail("Invalid auth") }) {
             if (cancelled) return@fbRequest callback.fail("Cancelled")
-            val url = getFullSizedImage(model.id).invoke() ?: return@fbRequest callback.fail("Null url")
+            val url = getFullSizedImage(model.id).invoke()
+                    ?: return@fbRequest callback.fail("Null url")
             if (cancelled) return@fbRequest callback.fail("Cancelled")
             if (!url.contains("png") && !url.contains("jpg")) return@fbRequest callback.fail("Invalid format")
             urlCall = Request.Builder().url(url).get().call()

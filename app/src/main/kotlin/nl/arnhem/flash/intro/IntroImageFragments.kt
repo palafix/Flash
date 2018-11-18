@@ -15,12 +15,12 @@ import nl.arnhem.flash.utils.launchTabCustomizerActivity
  * Created by Allan Wang on 2017-07-28.
  */
 abstract class BaseImageIntroFragment(
-        val titleRes: Int,
-        val imageRes: Int,
+        private val titleRes: Int,
+        private val imageRes: Int,
         val descRes: Int
 ) : BaseIntroFragment(R.layout.intro_image) {
 
-    val imageDrawable: LayerDrawable by lazyResettableRegistered { image.drawable as LayerDrawable }
+    private val imageDrawable: LayerDrawable by lazyResettableRegistered { image.drawable as LayerDrawable }
     val phone: Drawable by lazyResettableRegistered { imageDrawable.findDrawableByLayerId(R.id.intro_phone) }
     val screen: Drawable by lazyResettableRegistered { imageDrawable.findDrawableByLayerId(R.id.intro_phone_screen) }
     val icon: ImageView by bindViewResettable(R.id.intro_button)
@@ -90,7 +90,7 @@ class IntroTabTouchFragment : BaseImageIntroFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        icon.visible().setIcon(GoogleMaterial.Icon.gmd_edit, 24)
+        icon.visible().setIcon(GoogleMaterial.Icon.gmd_edit, 24, Prefs.iconColor)
         icon.setOnClickListener {
             activity?.launchTabCustomizerActivity()
         }
@@ -98,9 +98,10 @@ class IntroTabTouchFragment : BaseImageIntroFragment(
 
     override fun themeFragmentImpl() {
         super.themeFragmentImpl()
-        themeImageComponent(Prefs.iconColor, R.id.intro_phone_icon_1, R.id.intro_phone_icon_2, R.id.intro_phone_icon_3, R.id.intro_phone_icon_4)
+        themeImageComponent(Prefs.iconColor, R.id.intro_phone_icon_1, R.id.intro_phone_icon_2, R.id.intro_phone_icon_3, R.id.intro_phone_icon_4, R.id.intro_phone_icon_5)
         themeImageComponent(Prefs.headerColor, R.id.intro_phone_tab)
         themeImageComponent(Prefs.textColor.withAlpha(80), R.id.intro_phone_icon_ripple)
+        themeImageComponent(Prefs.bgColor.colorToForeground(0.1f), R.id.intro_phone_background)
     }
 }
 

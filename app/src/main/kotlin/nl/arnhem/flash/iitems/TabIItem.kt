@@ -12,6 +12,7 @@ import nl.arnhem.flash.R
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.utils.Prefs
 
+@Suppress("DEPRECATION")
 /**
  * Created by Allan Wang on 26/11/17.
  **/

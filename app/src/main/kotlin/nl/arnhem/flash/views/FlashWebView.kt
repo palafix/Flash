@@ -11,6 +11,7 @@ import ca.allanwang.kau.utils.AnimHolder
 import nl.arnhem.flash.contracts.FlashContentContainer
 import nl.arnhem.flash.contracts.FlashContentCore
 import nl.arnhem.flash.contracts.FlashContentParent
+import nl.arnhem.flash.facebook.FB_BACK
 import nl.arnhem.flash.facebook.USER_AGENT_BASIC
 import nl.arnhem.flash.fragments.WebFragment
 import nl.arnhem.flash.utils.Prefs
@@ -35,6 +36,7 @@ class FlashWebView @JvmOverloads constructor(
 
     override val currentUrl: String
         get() = url ?: ""
+
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun bind(container: FlashContentContainer): View {
@@ -94,10 +96,25 @@ class FlashWebView @JvmOverloads constructor(
 
     override fun reloadBase(animate: Boolean) {
         loadUrl(parent.baseUrl, animate)
+
     }
 
     override fun onBackPressed(): Boolean {
-        if (canGoBack()) {
+        if (Prefs.backToTop) {
+            if (scrollY > 5) {
+                scrollToTop()
+                return true
+            }
+        }
+        if (canGoBackOrForward(-2)) {
+            goBack()
+            return true
+        }
+        val list = copyBackForwardList()
+        if (list.currentIndex == 1 && list.getItemAtIndex(0).url == FB_BACK) {
+            return false
+        }
+        if (list.currentIndex > 0) {
             goBack()
             return true
         }

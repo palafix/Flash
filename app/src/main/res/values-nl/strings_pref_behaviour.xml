@@ -10,7 +10,7 @@
     <string name = "open_links_in_default">Koppelingen openen in de standaardtoepassing</string>
     <string name = "open_links_in_default_desc">Open indien mogelijk koppelingen in de standaardapp in plaats van via de weboverlay</string>
     <string name = "viewpager_swipe">Viewpager Swipe</string>
-    <string name = "viewpager_swipe_desc">Vegen tussen de pagina\'s in de hoofdweergave toestaan ​​om van tab te wisselen. Standaard wordt het vegen automatisch gestopt wanneer u lang op een item drukt, zoals de soortgelijke knop. Als u dit uitschakelt, wordt het vegen van pagina's helemaal voorkomen.</string>
+    <string name = "viewpager_swipe_desc">Vegen tussen de pagina\'s in de hoofdweergave toestaan om van tab te wisselen. Standaard wordt het vegen automatisch gestopt wanneer u lang op een item drukt, zoals de soortgelijke knop. Als u dit uitschakelt, wordt het vegen van pagina\'s helemaal voorkomen.</string>
     <string name = "search_bar">Zoekbalk</string>
     <string name = "search_bar_desc">Activeer de zoekbalk in plaats van een zoek-overlay</string>
     <string name = "force_message_bottom">Forceer bericht onderaan</string>
@@ -21,5 +21,11 @@
     <string name = "exit_confirmation_desc">Bevestigingsvenster weergeven voordat de app wordt afgesloten</string>
     <string name = "analytics">Analytics</string>
     <string name = "analytics_desc">Anonieme analyses inschakelen om de app te helpen verbeteren. Er wordt nooit persoonlijke informatie getoond.</string>
+
+    <string name="image_loader">Afbeeldingen openen als je er op klikt.</string>
+    <string name="image_loader_desc">Inschakelen om afbeeldingen automatisch te open nadat de pagina is geladen of uitschakelen om de pagina alleen te laden.</string>
+
+    <string name="back_to_top">Terug naar boven</string>
+    <string name="back_to_top_desc">Indien ingeschakeld - Druk op de knop Terug om terug te keren naar boven en daarna terug te gaan naar de vorige pagina.</string>
 
 </resources>

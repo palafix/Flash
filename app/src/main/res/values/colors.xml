@@ -6,4 +6,7 @@
     <color name="flash_notification_accent">@color/facebook_blue</color>
     <color name="flash_notification_icon">#03a9f4</color>
     <color name="flash_notification_text">#03a9f4</color>
+
+    <color name="flash_color">#2196f3</color>
+
 </resources>

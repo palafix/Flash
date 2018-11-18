@@ -1,15 +1,17 @@
 package nl.arnhem.flash.facebook.requests
 
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import nl.arnhem.flash.BuildConfig
 import nl.arnhem.flash.facebook.*
 import nl.arnhem.flash.rx.RxFlyweight
 import nl.arnhem.flash.utils.L
-import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import org.apache.commons.text.StringEscapeUtils
-import java.util.concurrent.TimeUnit
 
 /**
  * Created by Allan Wang on 21/12/17.
@@ -22,6 +24,7 @@ private class RxAuth : RxFlyweight<String, Long, RequestAuth>() {
             System.currentTimeMillis() - cond < 3600000 // valid for an hour
 
     override fun cache(input: String) = System.currentTimeMillis()
+
 }
 
 private val auth = RxAuth()
@@ -69,7 +72,7 @@ internal inline fun <T : Any?> RequestAuth.flashRequest(
     return FlashRequest(request.call(), invoke)
 }
 
-private val client: OkHttpClient by lazy {
+val httpClient: OkHttpClient by lazy {
     val builder = OkHttpClient.Builder()
     if (BuildConfig.DEBUG)
         builder.addInterceptor(HttpLoggingInterceptor()
@@ -92,12 +95,16 @@ internal fun List<Pair<String, Any?>>.withEmptyData(vararg key: String): List<Pa
     return newList
 }
 
-private fun String.requestBuilder() = Request.Builder()
-        .header("Cookie", this)
-        .header("User-Agent", USER_AGENT_BASIC)
-        .cacheControl(CacheControl.FORCE_NETWORK)
+internal fun String?.requestBuilder(): Request.Builder {
+    val builder = Request.Builder()
+            .header("User-Agent", USER_AGENT_BASIC)
+    if (this != null)
+        builder.header("Cookie", this)
+//        .cacheControl(CacheControl.FORCE_NETWORK)
+    return builder
+}
 
-fun Request.Builder.call() = client.newCall(build())!!
+fun Request.Builder.call(): Call = httpClient.newCall(build())
 
 fun String.getAuth(): RequestAuth {
     L.v { "Getting auth for ${hashCode()}" }
@@ -108,8 +115,8 @@ fun String.getAuth(): RequestAuth {
             .url(FB_URL_BASE)
             .get()
             .call()
-    call.execute().body()?.charStream()?.useLines {
-        it.forEach {
+    call.execute().body()?.charStream()?.useLines { lines ->
+        lines.forEach {
             val text = StringEscapeUtils.unescapeEcmaScript(it)
             val fb_dtsg = FB_DTSG_MATCHER.find(text)[1]
             if (fb_dtsg != null) {
@@ -130,8 +137,10 @@ fun String.getAuth(): RequestAuth {
 
 inline fun <T, reified R : Any, O> Array<T>.zip(crossinline mapper: (List<R>) -> O,
                                                 crossinline caller: (T) -> R): Single<O> {
+    if (isEmpty())
+        return Single.just(mapper(emptyList()))
     val singles = map { Single.fromCallable { caller(it) }.subscribeOn(Schedulers.io()) }
-    return Single.zip(singles) {
+    return Single.zip(singles) { it ->
         val results = it.mapNotNull { it as? R }
         mapper(results)
     }
@@ -144,8 +153,8 @@ inline fun <T, reified R : Any, O> Array<T>.zip(crossinline mapper: (List<R>) ->
 fun executeForNoError(call: Call): Boolean {
     val body = call.execute().body() ?: return false
     var empty = true
-    body.charStream().useLines {
-        it.forEach {
+    body.charStream().useLines { lines ->
+        lines.forEach {
             if (it.contains("error")) return false
             if (empty && it.isNotEmpty()) empty = false
         }

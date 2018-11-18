@@ -8,7 +8,8 @@
     <item text="Unlocks - Disable hide people you may know in the feed." />
 	<item text="Unlocks - Disable facebook ads." />
 	<item text="Unlocks - Disable Suggested Groups in the feed." />
-	
+    <item text="And more." />
+
 	<version title="Dutch." />
     <version title="Dit is wat je krijgt in Flash Pro." />
     <item text="Ontgrendeld - Custom thema" />
@@ -16,5 +17,6 @@
     <item text="Ontgrendeld - Deactiveer verbergen mensen die u misschien kent in de nieuwsoverzicht." />
 	<item text="Ontgrendeld - Deactiveer Facebook-advertenties." />
 	<item text="Ontgrendeld - Deactiveer voorgestelde groepen in de nieuwsoverzicht." />
+    <item text="En meer." />
 	
 </resources>

@@ -16,4 +16,10 @@
     <dimen name="favorites_text">6dp</dimen>
     <dimen name="favorites_add">15dp</dimen>
 
+    <bool name="isTablet">false</bool>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="flash_activity_horizontal_margin">16dp</dimen>
+    <dimen name="flash_activity_vertical_margin">16dp</dimen>
+
 </resources>

@@ -1,12 +1,12 @@
 package nl.arnhem.flash.internal
 
+import io.reactivex.Completable
 import nl.arnhem.flash.facebook.FB_USER_MATCHER
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.facebook.get
 import nl.arnhem.flash.facebook.requests.RequestAuth
 import nl.arnhem.flash.facebook.requests.getAuth
 import nl.arnhem.flash.utils.flashJsoup
-import io.reactivex.Completable
 import org.junit.Assume
 import org.junit.Test
 import java.io.File
@@ -24,11 +24,13 @@ import kotlin.test.fail
 
 private const val FILE = "priv.properties"
 
+private val propPaths = arrayOf(FILE, "../$FILE")
+
 val PROPS: Properties by lazy {
     val props = Properties()
-    val file = File(FILE)
-    if (!file.exists()) {
-        println("$FILE not found")
+    val file = propPaths.map(::File).firstOrNull { it.isFile }
+    if (file == null) {
+        println("$FILE not found at ${File(".").absolutePath}")
         return@lazy props
     }
     println("Found properties at ${file.absolutePath}")

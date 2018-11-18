@@ -1,0 +1,41 @@
+#contentArea, ._59s7 {
+    /* margin-left: auto !important; */
+    margin-right: 900px !important;
+    margin-left: -750px !important;
+    /* outline: none !important; */
+    padding-left: 480px !important;
+    padding-right: 480px !important;
+    word-wrap: break-word !important;
+    position: fixed !important;
+    /* margin: auto !important; */
+    width: 100% !important;
+	z-index: 100 !important;
+}
+
+html ._5vb_._5vb_.hasLeftCol div#contentArea {
+    /* padding-left: 0; */
+    /* padding-right: 10px; */
+    /* width: 786px; */
+}
+
+._2yq #contentArea {
+    margin-right: 999px;
+    padding: 10 !important;
+    padding-left: 70px;
+}
+
+#pagelet_bluebar, #leftCol, li._1tm3:nth-child(2), #rightCol, ._5pcb, ._4-u2.mvm._495i._4-u8 { 
+display: none !important; 
+}
+
+li._1tm3:nth-child(2), ._5pcb, ._4-u2.mvm._495i._4-u8 { 
+display: none !important; 
+}
+
+#contentCol { margin: auto !important;
+}
+
+#globalContainer { 
+width: auto !important;
+}
+                       

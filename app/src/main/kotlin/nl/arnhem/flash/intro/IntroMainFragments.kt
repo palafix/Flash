@@ -28,14 +28,14 @@ import org.jetbrains.anko.childrenSequence
 /**
  * The core intro fragment for all other fragments
  */
-abstract class BaseIntroFragment(val layoutRes: Int) : Fragment() {
+abstract class BaseIntroFragment(private val layoutRes: Int) : Fragment() {
 
-    val screenWidth
+    private val screenWidth
         get() = resources.displayMetrics.widthPixels
 
-    val lazyRegistry = LazyResettableRegistry()
+    private val lazyRegistry = LazyResettableRegistry()
 
-    protected fun translate(offset: Float, views: Array<Array<out View>>) {
+    private fun translate(offset: Float, views: Array<Array<out View>>) {
         val maxTranslation = offset * screenWidth
         val increment = maxTranslation / views.size
         views.forEachIndexed { i, group ->
@@ -82,7 +82,7 @@ abstract class BaseIntroFragment(val layoutRes: Int) : Fragment() {
         view?.childrenSequence()?.forEach { (it as? TextView)?.setTextColor(Prefs.textColor) }
     }
 
-    protected val viewArray: Array<Array<out View>> by lazyResettableRegistered { viewArray() }
+    private val viewArray: Array<Array<out View>> by lazyResettableRegistered { viewArray() }
 
     protected abstract fun viewArray(): Array<Array<out View>>
 

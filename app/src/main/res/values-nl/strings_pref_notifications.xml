@@ -36,4 +36,6 @@
 
     <string name="no_new_notifications">Geen nieuwe meldingen gevonden</string>
 
+    <string name="download_notification_description">Dit is alleen om de stijl van downloadmeldingen te beheren.</string>
+
 </resources>

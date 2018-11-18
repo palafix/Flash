@@ -1,21 +1,14 @@
 package nl.arnhem.flash.activities
 
-import android.app.DownloadManager
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.support.design.widget.FloatingActionButton
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.webkit.URLUtil
-import android.widget.ProgressBar
-import android.widget.TextView
 import ca.allanwang.kau.internal.KauBaseActivity
 import ca.allanwang.kau.logging.KauLoggerExtension
 import ca.allanwang.kau.mediapicker.scanMedia
@@ -27,40 +20,39 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import com.mikepenz.iconics.typeface.IIcon
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import kotlinx.android.synthetic.main.activity_image.*
 import nl.arnhem.flash.R
-import nl.arnhem.flash.facebook.FB_IMAGE_ID_MATCHER
-import nl.arnhem.flash.facebook.get
+import nl.arnhem.flash.facebook.*
 import nl.arnhem.flash.facebook.requests.call
+import nl.arnhem.flash.facebook.requests.getFullSizedImageUrl
+import nl.arnhem.flash.facebook.requests.requestBuilder
 import nl.arnhem.flash.utils.*
-import okhttp3.Request
+import okhttp3.Response
 import org.jetbrains.anko.activityUiThreadWithContext
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Created by Allan Wang on 2017-07-15.
  **/
+
 class ImageActivity : KauBaseActivity() {
 
-    val progress: ProgressBar by bindView(R.id.image_progress)
-    val container: ViewGroup by bindView(R.id.image_container)
-    val panel: SlidingUpPanelLayout? by bindOptionalView(R.id.image_panel)
-    val photo: SubsamplingScaleImageView by bindView(R.id.image_photo)
-    val caption: TextView? by bindOptionalView(R.id.image_text)
-    val fab: FloatingActionButton by bindView(R.id.image_fab)
-    var errorRef: Throwable? = null
+    internal var errorRef: Throwable? = null
 
-    private val tempDir: File by lazy { File(cacheDir, IMAGE_FOLDER) }
+    private lateinit var tempDir: File
 
     /**
      * Reference to the temporary file path
      * Should be nonnull if the image is successfully loaded
      * As this is temporary, the image is deleted upon exit
      */
-    internal var tempFile: File? = null
+    private lateinit var tempFile: File
     /**
      * Reference to path for downloaded image
      * Nonnull once the image is downloaded by the user
@@ -74,7 +66,7 @@ class ImageActivity : KauBaseActivity() {
         set(value) {
             if (field == value) return
             field = value
-            runOnUiThread { value.update(fab) }
+            runOnUiThread { value.update(image_fab)}
         }
 
     companion object {
@@ -85,19 +77,30 @@ class ImageActivity : KauBaseActivity() {
         private const val IMAGE_FOLDER = "images"
         const val TIME_FORMAT = "yyyyMMdd_HHmmss"
         const val IMG_TAG = "Flash"
-        const val IMG_TAG2 = "Flash Images"
+        const val IMG_TAG2 = "Flash_Images"
         private const val IMG_EXTENSION = ".png"
         private const val PURGE_TIME: Long = 10 * 60 * 1000 // 10 min block
-        private val L = KauLoggerExtension("Image", nl.arnhem.flash.utils.L)
+        val L = KauLoggerExtension("Image", nl.arnhem.flash.utils.L)
     }
 
     val imageUrl: String by lazy { intent.getStringExtra(ARG_IMAGE_URL).trim('"') }
+
+    private val cookie: String? by lazy { intent.getStringExtra(ARG_COOKIE) }
+
+    private val trueImageUrl: String by lazy {
+        val result = if (!imageUrl.isIndirectImageUrl) imageUrl
+        else cookie?.getFullSizedImageUrl(imageUrl)?.blockingGet() ?: imageUrl
+        if (result != imageUrl)
+            L.v { "Launching with true url $result" }
+        result
+    }
 
     private val imageText: String? by lazy { intent.getStringExtra(ARG_TEXT) }
 
     // a unique image identifier based on the id (if it exists), and its hash
     private val imageHash: String by lazy {
-        "${Math.abs(FB_IMAGE_ID_MATCHER.find(imageUrl)[1]?.hashCode() ?: 0)}_${Math.abs(imageUrl.hashCode())}"
+        "${Math.abs(FB_IMAGE_ID_MATCHER.find(imageUrl)[1]?.hashCode()
+                ?: 0)}_${Math.abs(imageUrl.hashCode())}"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,52 +111,52 @@ class ImageActivity : KauBaseActivity() {
         L.v { "Displaying image $imageUrl" }
         val layout = if (!imageText.isNullOrBlank()) R.layout.activity_image else R.layout.activity_image_textless
         setContentView(layout)
-        container.setBackgroundColor(if (Prefs.blackMediaBg) Color.BLACK
+        image_container.setBackgroundColor(if (Prefs.blackMediaBg) Color.BLACK
         else Prefs.bgColor.withMinAlpha(222))
-        caption?.setTextColor(if (Prefs.blackMediaBg) Color.WHITE else Prefs.textColor)
-        caption?.setBackgroundColor((if (Prefs.blackMediaBg) Color.BLACK else Prefs.bgColor)
+        image_text?.setTextColor(if (Prefs.blackMediaBg) Color.WHITE else Prefs.textColor)
+        image_text?.setBackgroundColor((if (Prefs.blackMediaBg) Color.BLACK else Prefs.bgColor)
                 .colorToForeground(0.2f).withAlpha(255))
-        caption?.text = imageText
-        progress.tint(if (Prefs.blackMediaBg) Color.WHITE else Prefs.accentColor)
-        panel?.addPanelSlideListener(object : SlidingUpPanelLayout.SimplePanelSlideListener() {
+        image_text?.text = imageText
+        image_progress.tint(if (Prefs.blackMediaBg) Color.WHITE else Prefs.accentColor)
+        image_panel?.addPanelSlideListener(object : SlidingUpPanelLayout.SimplePanelSlideListener() {
             override fun onPanelSlide(panel: View, slideOffset: Float) {
-                if (slideOffset == 0f && !fab.isShown) fab.show()
-                else if (slideOffset != 0f && fab.isShown) fab.hide()
-                caption?.alpha = slideOffset / 2 + 0.5f
+                if (slideOffset == 0f && !image_fab.isShown) image_fab.show()
+                else if (slideOffset != 0f && image_fab.isShown) image_fab.hide()
+                image_text?.alpha = slideOffset / 2 + 0.5f
             }
         })
-        fab.setOnClickListener { fabAction.onClick(this) }
-        photo.setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+        image_fab.setOnClickListener { fabAction.onClick(this) }
+        image_photo.setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
             override fun onImageLoadError(e: Exception?) {
                 errorRef = e
                 e.logFlashAnswers("Image load error")
                 L.e { "Failed to load image $imageUrl" }
-                tempFile?.delete()
+                tempFile.delete()
                 fabAction = FabStates.ERROR
             }
         })
+
         setFlashColors {
             themeWindow = false
         }
+        tempDir = File(cacheDir, IMAGE_FOLDER)
+        tempFile = File(tempDir, imageHash)
         doAsync({
             L.e(it) { "Failed to load image $imageHash" }
             errorRef = it
-            runOnUiThread { progress.fadeOut() }
-            tempFile?.delete()
+            runOnUiThread { image_progress.fadeOut()}
+            tempFile.delete()
             fabAction = FabStates.ERROR
         }) {
-            loadImage { file ->
-                uiThread { progress.fadeOut() }
-                if (file == null) {
+            val loaded = loadImage(tempFile)
+            uiThread {
+                image_progress.fadeOut()
+                if (!loaded) {
                     fabAction = FabStates.ERROR
-                    return@loadImage
-                }
-                tempFile = file
-                L.d { "Temp image path ${file.absolutePath}" }
-                uiThread {
-                    photo.setImage(ImageSource.uri(flashUriFromFile(file)))
+                } else {
+                    image_photo.setImage(ImageSource.uri(flashUriFromFile(tempFile)))
                     fabAction = FabStates.DOWNLOAD
-                    photo.animate().alpha(1f).scaleXY(1f).start()
+                    image_photo.animate().alpha(1f).scaleXY(1f).start()
                 }
             }
         }
@@ -162,30 +165,29 @@ class ImageActivity : KauBaseActivity() {
     /**
      * Returns a file pointing to the image, or null if something goes wrong
      */
-    private inline fun loadImage(callback: (file: File?) -> Unit) {
-        val local = File(tempDir, imageHash)
-        if (local.exists() && local.length() > 1) {
-            local.setLastModified(System.currentTimeMillis())
-            L.d { "Loading from local cache ${local.absolutePath}" }
-            return callback(local)
+    private fun loadImage(file: File): Boolean {
+        if (file.exists() && file.length() > 1) {
+            file.setLastModified(System.currentTimeMillis())
+            L.d { "Loading from local cache ${file.absolutePath}" }
+            return true
         }
         val response = getImageResponse()
 
         if (!response.isSuccessful) {
             L.e { "Unsuccessful response for image" }
             errorRef = Throwable("Unsuccessful response for image")
-            return callback(null)
+            return false
         }
 
-        if (!local.createFreshFile()) {
+        if (!file.createFreshFile()) {
             L.e { "Could not create temp file" }
-            return callback(null)
+            return false
         }
 
         var valid = false
 
         response.body()?.byteStream()?.use { input ->
-            local.outputStream().use { output ->
+            file.outputStream().use { output ->
                 input.copyTo(output)
                 valid = true
             }
@@ -193,32 +195,32 @@ class ImageActivity : KauBaseActivity() {
 
         if (!valid) {
             L.e { "Failed to copy file" }
-            local.delete()
-            return callback(null)
+            file.delete()
+            return false
         }
 
-        callback(local)
+        return true
     }
 
     @Throws(IOException::class)
-    private fun createPublicMediaFile(url: String, contentDisposition: String? = null, mimeType: String? = null): File {
-        val filename = URLUtil.guessFileName(url, contentDisposition, mimeType)
-        val imageFileName = "${IMG_TAG}_${filename}_"
+    private fun createPublicMediaFile(): File {
+        val timeStamp = SimpleDateFormat(TIME_FORMAT, Locale.getDefault()).format(Date())
+        val filename = "${IMG_TAG}_${timeStamp}_"
         val storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + IMG_TAG + File.separator)
         val flashDir = File(storageDir, IMG_TAG2)
         if (!flashDir.exists()) flashDir.mkdirs()
-        val request = DownloadManager.Request(Uri.parse(imageUrl))
-        request.setDescription(string(R.string.flash_name))
-        request.setTitle(imageFileName)
-        request.allowScanningByMediaScanner()
-        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        dm.enqueue(request)
-        registerReceiver(onComplete(imageFileName), IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-        return File.createTempFile(imageFileName, IMG_EXTENSION, flashDir)
+        //val request = DownloadManager.Request(Uri.parse(imageUrl))
+        //request.setDescription(string(R.string.flash_name))
+        //request.setTitle(filename)
+        //request.allowScanningByMediaScanner()
+        //val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        //dm.enqueue(request)
+        //registerReceiver(onComplete(filename), IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        return File.createTempFile(filename, IMG_EXTENSION, flashDir)
     }
 
-    private fun getImageResponse() = Request.Builder()
-            .url(imageUrl)
+    private fun getImageResponse(): Response = cookie.requestBuilder()
+            .url(trueImageUrl)
             .get()
             .call()
             .execute()
@@ -239,10 +241,14 @@ class ImageActivity : KauBaseActivity() {
             L.d { "Download image callback granted: $granted" }
             if (granted) {
                 doAsync {
-                    val destination = createPublicMediaFile(imageUrl)
+                    val destination = createPublicMediaFile()
                     var success = true
                     try {
-                        downloadImageTo(destination)
+                        val temp = tempFile
+                        if (success)
+                            temp.copyTo(destination, true)
+                        else
+                            downloadImageTo(destination)
                     } catch (e: Exception) {
                         errorRef = e
                         success = false
@@ -257,10 +263,17 @@ class ImageActivity : KauBaseActivity() {
                             } catch (ignore: Exception) {
                             }
                         }
-                        activityUiThreadWithContext {
-                            val text = if (success) R.string.image_download_success else R.string.image_download_fail
-                            flashSnackbar(getString(text))
-                            if (success) fabAction = FabStates.SHARE
+                        activityUiThreadWithContext { _ ->
+                            if (success) {
+                                val text = if (success) R.string.image_download_success else R.string.image_download_fail
+                                flashSnackbar(getString(text))
+                                image_fab.hide()
+                                if (success) fabAction = FabStates.SHARE
+                                val handler = Handler()
+                                handler.postDelayed({
+                                    image_fab.show()
+                                }, 3000) //3 Seconds
+                            }
                         }
                     }
                 }
@@ -270,14 +283,44 @@ class ImageActivity : KauBaseActivity() {
 
     override fun onDestroy() {
         val purge = System.currentTimeMillis() - PURGE_TIME
-        tempDir.listFiles(FileFilter { it.isFile && it.lastModified() < purge }).forEach {
+        tempDir.listFiles(FileFilter { it.isFile && it.lastModified() < purge })?.forEach {
             it.delete()
+        }
+        try {
+            savedFile!!.delete()
+        } catch (ignore: Exception) {
         }
         super.onDestroy()
     }
 }
 
 internal enum class FabStates(val iicon: IIcon, val iconColor: Int = Prefs.iconColor, val backgroundTint: Int = Int.MAX_VALUE) {
+    NOTHING(GoogleMaterial.Icon.gmd_adjust, Prefs.iconColor) {
+        override fun onClick(activity: ImageActivity) {}
+    },
+    DOWNLOAD(GoogleMaterial.Icon.gmd_file_download, Prefs.iconColor) {
+        override fun onClick(activity: ImageActivity) {
+            activity.saveImage()
+            activity.flashContextDownload(activity.imageUrl)
+        }
+    },
+    SHARE(GoogleMaterial.Icon.gmd_share, Prefs.iconColor) {
+        override fun onClick(activity: ImageActivity) {
+            try {
+                val photoURI = activity.flashUriFromFile(activity.savedFile!!)
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    putExtra(Intent.EXTRA_STREAM, photoURI)
+                    type = "image/png"
+                }
+                activity.startActivity(intent)
+            } catch (e: Exception) {
+                activity.errorRef = e
+                e.logFlashAnswers("Image share failed")
+                activity.flashSnackbar(R.string.image_share_failed)
+            }
+        }
+    },
     ERROR(GoogleMaterial.Icon.gmd_error, Color.WHITE, Color.RED) {
         override fun onClick(activity: ImageActivity) {
             activity.materialDialogThemed {
@@ -295,29 +338,6 @@ internal enum class FabStates(val iicon: IIcon, val iconColor: Int = Prefs.iconC
                 negativeText(R.string.kau_no)
             }
         }
-    },
-    NOTHING(GoogleMaterial.Icon.gmd_adjust) {
-        override fun onClick(activity: ImageActivity) {}
-    },
-    DOWNLOAD(GoogleMaterial.Icon.gmd_file_download) {
-        override fun onClick(activity: ImageActivity) = activity.saveImage()
-    },
-    SHARE(GoogleMaterial.Icon.gmd_share) {
-        override fun onClick(activity: ImageActivity) {
-            try {
-                val photoURI = activity.flashUriFromFile(activity.savedFile!!)
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    putExtra(Intent.EXTRA_STREAM, photoURI)
-                    type = "image/png"
-                }
-                activity.startActivity(intent)
-            } catch (e: Exception) {
-                activity.errorRef = e
-                e.logFlashAnswers("Image share failed")
-                activity.flashSnackbar(R.string.image_share_failed)
-            }
-        }
     };
 
     /**
@@ -327,12 +347,12 @@ internal enum class FabStates(val iicon: IIcon, val iconColor: Int = Prefs.iconC
     fun update(fab: FloatingActionButton) {
         val tint = if (backgroundTint != Int.MAX_VALUE) backgroundTint else Prefs.accentColor
         if (fab.isHidden) {
-            fab.setIcon(iicon, color = iconColor)
+            fab.setIcon(iicon,16, color = iconColor)
             fab.backgroundTintList = ColorStateList.valueOf(tint)
             fab.show()
         } else {
             fab.fadeScaleTransition {
-                setIcon(iicon, color = iconColor)
+                setIcon(iicon, 16, color = iconColor)
                 backgroundTintList = ColorStateList.valueOf(tint)
             }
         }

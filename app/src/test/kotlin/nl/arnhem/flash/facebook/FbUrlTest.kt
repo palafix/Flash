@@ -1,6 +1,7 @@
 package nl.arnhem.flash.facebook
 
 import nl.arnhem.flash.utils.isImageUrl
+import nl.arnhem.flash.utils.isIndirectImageUrl
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -43,15 +44,32 @@ class FbUrlTest {
      */
     @Test
     fun queryConversion() {
-        val url = "https://m.facebook.com/l.php?u=https%3A%2F%2Fgoogle.ca&h=hi"
+        val url = "${FB_URL_BASE}l.php?u=https%3A%2F%2Fgoogle.ca&h=hi"
         val expected = "https://google.ca?h=hi"
         assertFbFormat(expected, url)
+    }
+
+    @Test
+    fun ampersand() {
+        val url = "https://scontent-yyz1-1.xx.fbcdn.net/v/t31.0-8/fr/cp0/e15/q65/123.jpg?_nc_cat=0&amp;efg=asdf"
+        val formattedUrl = "https://scontent-yyz1-1.xx.fbcdn.net/v/t31.0-8/fr/cp0/e15/q65/123.jpg?_nc_cat=0&efg=asdf"
+        assertFbFormat(formattedUrl, url)
     }
 
     @Test
     fun doubleDash() {
         assertFbFormat("${FB_URL_BASE}relative", "$FB_URL_BASE/relative")
     }
+
+    @Test
+    fun indirectImage() {
+        arrayOf(
+                "#!/photo/view_full_size/?fbid=107368839645039"
+        ).forEach {
+            assertTrue(it.isIndirectImageUrl, "Failed to match indirect image for $it")
+        }
+    }
+
 
     @Test
     fun video() {
@@ -61,6 +79,11 @@ class FbUrlTest {
         assertFbFormat(expected, url)
     }
 
+    //    @Test
+//    fun viewFullImageIndirect() {
+//        val urlBase = "photo/view_full_size/?fbid=1234&ref_component=mbasic_photo_permalink&ref_page=%2Fwap%2Fphoto.php&refid=13&_ft_=qid.1234%3Amf_story_key.1234%3Atop_level_post_id"
+//        assertFbFormat("$FB_URL_BASE$urlBase", "#!/$urlBase")
+//    }
 
     @Test
     fun image() {

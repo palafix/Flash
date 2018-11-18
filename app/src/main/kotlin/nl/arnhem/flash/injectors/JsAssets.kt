@@ -3,6 +3,7 @@ package nl.arnhem.flash.injectors
 import android.webkit.WebView
 import ca.allanwang.kau.kotlin.lazyContext
 import nl.arnhem.flash.utils.L
+import java.io.BufferedReader
 import java.io.FileNotFoundException
 import java.util.*
 
@@ -16,9 +17,9 @@ enum class JsAssets : InjectorContract {
     DOCUMENT_WATCHER;
 
     var file = "${name.toLowerCase(Locale.CANADA)}.js"
-    var injector = lazyContext {
+    var injector = lazyContext { it ->
         try {
-            val content = it.assets.open("js/$file").bufferedReader().use { it.readText() }
+            val content = it.assets.open("js/$file").bufferedReader().use(BufferedReader::readText)
             JsBuilder().js(content).single(name).build()
         } catch (e: FileNotFoundException) {
             L.e(e) { "JsAssets file not found" }

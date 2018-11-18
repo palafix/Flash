@@ -22,6 +22,8 @@ object FlashGlide {
         get() = RoundCornerTransformation()
     val circleCrop
         get() = CircleCrop()
+    val customRoundCorner
+        get() = RoundCornerTransformationCustomTabs()
 }
 
 fun <T> RequestBuilder<T>.transform(vararg transformation: BitmapTransformation): RequestBuilder<T> =

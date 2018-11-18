@@ -2,11 +2,14 @@ package nl.arnhem.flash.web
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.support.v4.view.NestedScrollingChild
 import android.support.v4.view.NestedScrollingChildHelper
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.webkit.ValueCallback
 import android.webkit.WebView
 
 
@@ -106,4 +109,11 @@ open class NestedWebView @JvmOverloads constructor(
     final override fun dispatchNestedFling(velocityX: Float, velocityY: Float, consumed: Boolean) = childHelper.dispatchNestedFling(velocityX, velocityY, consumed)
 
     final override fun dispatchNestedPreFling(velocityX: Float, velocityY: Float) = childHelper.dispatchNestedPreFling(velocityX, velocityY)
+
+    open fun openFileChooser(filePathCallback: ValueCallback<Array<Uri>?>?, fileChooserParams: ValueCallback<Array<Uri?>>, b: Boolean) {}
+
+    open fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean {
+        if (onActivityResult(requestCode, resultCode, intent)) return true
+        return true
+    }
 }

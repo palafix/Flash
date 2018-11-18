@@ -19,18 +19,17 @@ import ca.allanwang.kau.utils.lighten
 import ca.allanwang.kau.utils.withMinAlpha
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.GravityEnum
-import com.afollestad.materialdialogs.MaterialDialog
 import nl.arnhem.flash.R
 import nl.arnhem.flash.utils.Prefs
+import nl.arnhem.flash.utils.materialDialogThemed
 
 
 @Suppress("OverridingDeprecatedMember")
-open class CustomChromeClient protected constructor(private val activity: Activity) : WebChromeClient(), MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
+open class CustomChromeClient constructor(private val activity: Activity) : WebChromeClient(), MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     private var isVideoFullscreen: Boolean = false
     private var videoViewContainer: FrameLayout? = null
     private var videoViewCallback: WebChromeClient.CustomViewCallback? = null
-
     private var customViewDialog: AlertDialog? = null
 
     init {
@@ -115,76 +114,78 @@ open class CustomChromeClient protected constructor(private val activity: Activi
 
     override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
         val dimmerTextColor = Prefs.textColor.adjustAlpha(0.8f)
-        MaterialDialog.Builder(activity)
-                .title(R.string.flash_name)
-                .titleColor(Prefs.textColor)
-                .backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
-                .dividerColor(Prefs.notiColor)
-                .iconRes(R.drawable.flash_f_256)
-                .content(message)
-                .contentColor(dimmerTextColor)
-                .widgetColor(dimmerTextColor)
-                .positiveText(R.string.kau_ok)
-                .positiveColor(Prefs.textColor)
-                .btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
-                .buttonRippleColor(Prefs.iconColor)
-                .buttonsGravity(GravityEnum.CENTER)
-                .onPositive { _, _ -> result.confirm() }
-                .dismissListener { result.cancel() }
-                .show()
+        activity.materialDialogThemed {
+            title(url)
+            titleColor(Prefs.textColor)
+            backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
+            dividerColor(Prefs.notiColor)
+            //iconRes(R.drawable.flash_f_256)
+            content(message)
+            contentColor(dimmerTextColor)
+            widgetColor(dimmerTextColor)
+            positiveText(R.string.kau_ok)
+            positiveColor(Prefs.textColor)
+            btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
+            buttonRippleColor(Prefs.iconColor)
+            buttonsGravity(GravityEnum.CENTER)
+            onPositive { _, _ -> result.confirm() }
+            dismissListener { result.cancel() }
+        }
         return true
     }
 
 
     override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
         val dimmerTextColor = Prefs.textColor.adjustAlpha(0.8f)
-        MaterialDialog.Builder(activity)
-                .title(R.string.flash_name)
-                .titleColor(Prefs.textColor)
-                .backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
-                .dividerColor(Prefs.notiColor)
-                .iconRes(R.drawable.flash_f_256)
-                .content(message)
-                .contentColor(dimmerTextColor)
-                .widgetColor(dimmerTextColor)
-                .positiveText(R.string.kau_ok)
-                .positiveColor(Prefs.textColor)
-                .negativeText(R.string.kau_cancel)
-                .negativeColor(Prefs.textColor)
-                .btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
-                .buttonRippleColor(Prefs.iconColor)
-                .buttonsGravity(GravityEnum.CENTER)
-                .onPositive { _, _ -> result.confirm() }
-                .onNegative { _, _ -> result.cancel() }
-                .dismissListener { result.cancel() }
-                .show()
+        activity.materialDialogThemed {
+            title(url)
+            titleColor(Prefs.textColor)
+            backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
+            dividerColor(Prefs.notiColor)
+            //iconRes(R.drawable.flash_f_256)
+            content(message)
+            contentColor(dimmerTextColor)
+            widgetColor(dimmerTextColor)
+            positiveText(R.string.kau_ok)
+            positiveColor(Prefs.textColor)
+            negativeText(R.string.kau_cancel)
+            negativeColor(Prefs.textColor)
+            btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
+            buttonRippleColor(Prefs.iconColor)
+            buttonsGravity(GravityEnum.CENTER)
+            onPositive { _, _ -> result.confirm() }
+            onNegative { _, _ -> result.cancel() }
+            dismissListener { result.cancel() }
+            show()
+        }
         return true
     }
 
     override fun onJsPrompt(view: WebView, url: String, message: String, defaultValue: String, result: JsPromptResult): Boolean {
         val dimmerTextColor = Prefs.textColor.adjustAlpha(0.8f)
-        MaterialDialog.Builder(activity)
-                .title(R.string.flash_name)
-                .titleColor(Prefs.textColor)
-                .backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
-                .dividerColor(Prefs.notiColor)
-                .iconRes(R.drawable.flash_f_256)
-                .content(message)
-                .contentColor(dimmerTextColor)
-                .widgetColor(dimmerTextColor)
-                .inputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
-                .input(R.string.abc_search_hint, 0) { _, _ ->
-                    defaultValue.toInt()// Do something
-                }
-                .negativeText(R.string.kau_cancel)
-                .negativeColor(Prefs.textColor)
-                .btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
-                .buttonRippleColor(Prefs.iconColor)
-                .buttonsGravity(GravityEnum.CENTER)
-                .onPositive { _, _ -> result.confirm() }
-                .onNegative { _, _ -> result.cancel() }
-                .dismissListener { result.cancel() }
-                .show()
+        activity.materialDialogThemed {
+            title(url)
+            titleColor(Prefs.textColor)
+            backgroundColor(Prefs.bgColor.lighten(0.1f).withMinAlpha(200))
+            dividerColor(Prefs.notiColor)
+            //iconRes(R.drawable.flash_f_256)
+            content(message)
+            contentColor(dimmerTextColor)
+            widgetColor(dimmerTextColor)
+            inputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD)
+            input(R.string.kau_search, 0) { _, _ ->
+                defaultValue.toInt()// Do something
+            }
+            negativeText(R.string.kau_cancel)
+            negativeColor(Prefs.textColor)
+            btnSelector(R.drawable.md_btn_selector_custom, DialogAction.POSITIVE)
+            buttonRippleColor(Prefs.iconColor)
+            buttonsGravity(GravityEnum.CENTER)
+            onPositive { _, _ -> result.confirm() }
+            onNegative { _, _ -> result.cancel() }
+            dismissListener { result.cancel() }
+            show()
+        }
         return true
     }
 }
