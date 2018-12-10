@@ -52,6 +52,7 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         if (url == null) return
+        //if (url.contains("messages")) web.settings.userAgentString = USER_AGENT_MESSENGER
         v { "loading $url" }
         refresh.onNext(true)
     }
@@ -98,7 +99,8 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
                     JsAssets.CONTEXT_A,
                     JsActions.AUDIO_OFF.maybe(Prefs.DisableAudio),
                     CssAssets.MATERIAL_AMOLED.maybe(Prefs.DayNight && isNightTime(Activity())),
-                    JsAssets.MEDIA)
+                    JsAssets.MEDIA,
+                    JsAssets.LIKE_COLOR)
         } else
             refresh.onNext(false)
     }
@@ -174,7 +176,7 @@ open class FlashWebViewClient(val web: FlashWebView) : BaseWebViewClient() {
     private fun launchImage(url: String, text: String? = null, title: String? = null, cookie: String? = null): Boolean {
         v { "Launching image: $url" }
         web.context.launchImageActivity(url, text, title, cookie)
-        if (web.canGoBack()) web.goBack()
+        //if (web.canGoBack()) web.goBack()
         return true
     }
 

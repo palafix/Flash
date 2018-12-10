@@ -1,8 +1,5 @@
 package nl.arnhem.flash.iitems
 
-import android.app.Activity
-import android.content.Context
-import android.graphics.Color
 import android.support.v7.widget.CardView
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +18,6 @@ import nl.arnhem.flash.glide.GlideApp
 import nl.arnhem.flash.parsers.FlashNotif
 import nl.arnhem.flash.services.FlashRunnable
 import nl.arnhem.flash.utils.Prefs
-import nl.arnhem.flash.utils.isNightTime
 import nl.arnhem.flash.utils.launchWebOverlay
 
 /**
@@ -78,18 +74,10 @@ class NotificationIItem(val notification: FlashNotif, val cookie: String) : KauI
 
         override fun bindView(item: NotificationIItem, payloads: MutableList<Any>) {
             val notif = item.notification
-            if (Prefs.DayNight && isNightTime(Activity())) {
-                frame.background = createSimpleRippleDrawable(Color.DKGRAY,
-                        Prefs.nativeDayNightBgColor(notif.unread))
-                content.setTextColor(Color.WHITE)
-                date.setTextColor(Color.WHITE.withAlpha(150))
-            } else {
                 frame.background = createSimpleRippleDrawable(Prefs.textColor,
                         Prefs.nativeBgColor(notif.unread))
                 content.setTextColor(Prefs.textColor)
                 date.setTextColor(Prefs.textColor.withAlpha(150))
-
-            }
 
             content.textSize = Prefs.webTextScaling.div(6).toFloat()
             date.textSize = Prefs.webTextScaling.div(8).toFloat()

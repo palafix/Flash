@@ -14,7 +14,7 @@ import java.util.*
  */
 enum class JsAssets : InjectorContract {
     MENU, MENU_DEBUG, CLICK_A, CONTEXT_A, MEDIA, HEADER_BADGES, HEADER_HIDER, TEXTAREA_LISTENER, NOTIF_MSG,
-    DOCUMENT_WATCHER;
+    DOCUMENT_WATCHER, LIKE_COLOR;
 
     var file = "${name.toLowerCase(Locale.CANADA)}.js"
     var injector = lazyContext { it ->

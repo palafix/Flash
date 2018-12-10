@@ -120,22 +120,12 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
         realm = Realm.getDefaultInstance()
         val start = System.currentTimeMillis()
         setFrameContentView(Prefs.mainActivityLayout.layoutRes)
-        if (Prefs.DayNight && isNightTime(Activity())) {
-            setFlashDayNightColors {
-                toolbar(toolbar)
-                themeWindow = false
-                header(appBar)
-                background(viewPager)
-            }
-        } else {
             setFlashColors {
                 toolbar(toolbar)
                 themeWindow = false
                 header(appBar)
                 background(viewPager)
             }
-        }
-
         setSupportActionBar(toolbar)
 
         val params = toolbar.layoutParams as AppBarLayout.LayoutParams
@@ -254,11 +244,11 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
 
     @SuppressLint("PrivateResource")
     private fun setupDrawer(savedInstanceState: Bundle?) {
-        val navBg = if (Prefs.DayNight && isNightTime(Activity())) Color.BLACK.withAlpha(255).darken().toLong() else Prefs.bgColor.withAlpha(255).darken().toLong()
-        val accent = if (Prefs.DayNight && isNightTime(Activity())) Color.LTGRAY.withAlpha(255).darken().toLong() else Prefs.accentColor.toLong()
-        val text = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE.withAlpha(255).darken().toLong() else Prefs.textColor.toLong()
-        val icon = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE.withAlpha(255).darken().toLong() else Prefs.iconColor.toLong()
-        val noti = if (Prefs.DayNight && isNightTime(Activity())) Color.GRAY.withAlpha(255).darken().toLong() else Prefs.notiColor.toLong()
+        val navBg = Prefs.bgColor.withAlpha(255).darken().toLong()
+        val accent = Prefs.accentColor.toLong()
+        val text = Prefs.textColor.toLong()
+        val icon = Prefs.iconColor.toLong()
+        val noti = Prefs.notiColor.toLong()
         drawer = drawer {
             toolbar = this@BaseMainActivity.toolbar
             savedInstance = savedInstanceState
@@ -433,7 +423,7 @@ abstract class BaseMainActivity : BaseActivity(), MainActivityContract,
     }
 
     private fun Builder.primaryFlashItem(item: FbItem) = this.primaryItem(item.titleId) {
-        val text = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE.withAlpha(255).darken().toLong() else Prefs.textColor.toLong()
+        val text = Prefs.textColor.toLong()
         iicon = item.icon
         iconColor = text
         textColor = text

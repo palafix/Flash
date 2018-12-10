@@ -116,18 +116,14 @@ class WebViewFlash : NestedWebView {
 
     @SuppressLint("NewApi")
     override fun onResume() {
-        if (Build.VERSION.SDK_INT >= 11) {
             super.onResume()
-        }
         resumeTimers()
     }
 
     @SuppressLint("NewApi")
     override fun onPause() {
         pauseTimers()
-        if (Build.VERSION.SDK_INT >= 11) {
             super.onPause()
-        }
     }
 
     /**

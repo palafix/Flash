@@ -1,5 +1,6 @@
 package nl.arnhem.flash.utils
 
+import android.app.Activity
 import android.graphics.Color
 import ca.allanwang.kau.kotlin.lazyResettable
 import ca.allanwang.kau.kpref.KPref
@@ -71,30 +72,23 @@ object Prefs : KPref() {
             .colorToForeground(if (unread) 0.9f else 0.0f)
             .withAlpha(30)
 
-    fun nativeDayNightBgColor(unread: Boolean) = Color.BLACK
-            .colorToForeground(if (unread) 0.3f else 0.0f)
-            .withAlpha(255).darken()
-
-    inline val nativeDayNightBgColor: Int
-        get() = Color.BLACK
-
     val textColor: Int
-        get() = t.textColor
+        get() = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE else t.textColor
 
     val accentColor: Int
-        get() = t.accentColor
+        get() = if (Prefs.DayNight && isNightTime(Activity())) Color.LTGRAY else t.accentColor
 
     val bgColor: Int
-        get() = t.bgColor
+        get() = if (Prefs.DayNight && isNightTime(Activity())) Color.BLACK else t.bgColor
 
     val headerColor: Int
-        get() = t.headerColor
+        get() = if (Prefs.DayNight && isNightTime(Activity())) Color.BLACK else t.headerColor
 
     val iconColor: Int
-        get() = t.iconColor
+        get() = if (Prefs.DayNight && isNightTime(Activity())) Color.WHITE else t.iconColor
 
     val notiColor: Int
-        get() = t.notiColor
+        get() = if (Prefs.DayNight && isNightTime(Activity())) Color.GRAY else t.notiColor
 
     val themeInjector: InjectorContract
         get() = t.injector

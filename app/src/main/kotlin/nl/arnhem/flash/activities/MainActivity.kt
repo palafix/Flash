@@ -1,5 +1,7 @@
 package nl.arnhem.flash.activities
 
+import android.app.ActivityOptions
+import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.view.ViewPager
@@ -8,12 +10,11 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import io.realm.Realm
 import me.leolin.shortcutbadger.ShortcutBadger
+import nl.arnhem.flash.R
 import nl.arnhem.flash.facebook.FbItem
 import nl.arnhem.flash.views.BadgedIcon
 import org.jsoup.Jsoup
 import java.util.concurrent.TimeUnit
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 
 
 
@@ -24,6 +25,7 @@ class MainActivity : BaseMainActivity() {
     val headerBadgeObservable = PublishSubject.create<String>()
 
     override fun onNestedCreate(savedInstanceState: Bundle?) {
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         Realm.init(this)
         setupViewPager()
         setupTabs()
@@ -102,5 +104,3 @@ class MainActivity : BaseMainActivity() {
         }
     }
 }
-
-

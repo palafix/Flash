@@ -136,8 +136,5 @@ class FlashApp : Application() {
                     L.e(it) { "RxJava error" }
             }
         }
-
     }
-
-
 }

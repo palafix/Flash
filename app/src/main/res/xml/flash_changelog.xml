@@ -6,6 +6,17 @@
     -->
     <version title="ToDo"/>
     <item text="File picker in external site\'s not working properly."/>
+    <item text="The like button is not change color when click on it."/>
+
+    <version title="v1.2.2"/>
+    <item text="Added some Theme/app style."/>
+    <item text="Added new links to block ads"/>
+    <item text="Clean up Night Theme and some fixes."/>
+
+    <version title="v1.2.1"/>
+    <item text="Added some Theme/app style."/>
+    <item text="Fixed some button click."/>
+    <item text="Changed UserAgent."/>
 
     <version title="v1.2.0"/>
     <item text="Added some Theme/app style."/>

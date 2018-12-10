@@ -13,6 +13,7 @@ import nl.arnhem.flash.contracts.FlashContentCore
 import nl.arnhem.flash.contracts.FlashContentParent
 import nl.arnhem.flash.facebook.FB_BACK
 import nl.arnhem.flash.facebook.USER_AGENT_BASIC
+import nl.arnhem.flash.facebook.USER_AGENT_MESSENGER
 import nl.arnhem.flash.fragments.WebFragment
 import nl.arnhem.flash.utils.Prefs
 import nl.arnhem.flash.utils.flashDownload
@@ -42,6 +43,8 @@ class FlashWebView @JvmOverloads constructor(
     override fun bind(container: FlashContentContainer): View {
         if (parent.baseEnum != null || parent.baseUrl.shouldUseBasicAgent)
             userAgentString = USER_AGENT_BASIC // go through our own agent ref
+        if (parent.baseUrl.contains("messages"))
+            userAgentString = USER_AGENT_MESSENGER
         with(settings) {
             javaScriptEnabled = true
             mediaPlaybackRequiresUserGesture = false
@@ -132,7 +135,7 @@ class FlashWebView @JvmOverloads constructor(
 
     private fun scrollToTop() {
         flingScroll(0, 0) // stop fling
-        if (scrollY > 10000)
+        if (scrollY > 10000000)
             scrollTo(0, 0)
         else
             smoothScrollTo(0)

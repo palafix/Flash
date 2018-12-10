@@ -1,10 +1,9 @@
-@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 
 package nl.arnhem.flash.activities
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -51,6 +50,7 @@ import nl.arnhem.flash.contracts.*
 import nl.arnhem.flash.enums.OverlayContext
 import nl.arnhem.flash.facebook.CHROMEWEB_LOAD_DELAY
 import nl.arnhem.flash.facebook.FbItem
+import nl.arnhem.flash.facebook.USER_AGENT_BASIC
 import nl.arnhem.flash.glide.FlashGlide
 import nl.arnhem.flash.injectors.*
 import nl.arnhem.flash.model.BookmarkModel
@@ -164,23 +164,15 @@ class CustomTabs : BaseActivity(),
         appDirectoryName2 = getString(R.string.flash_name_image).replace(" ", " ")
         appDirectoryName3 = getString(R.string.flash_name_docu).replace(" ", " ")
         appDirectoryName4 = getString(R.string.flash_name_video).replace(" ", " ")
-        if (Prefs.DayNight && isNightTime(Activity())) {
-            setFlashDayNightColors {
-                toolbar(toolbar)
-                header(appBar)
-                themeWindow = false
-            }
-        } else {
             setFlashColors {
                 toolbar(toolbar)
                 header(appBar)
                 themeWindow = false
             }
-        }
         if (Showcase.firstWebOverlay) {
             coordinator.flashSnackbar(getString(R.string.web_overlay_swipe_hint)) {
                 duration = Snackbar.LENGTH_INDEFINITE
-                setAction(R.string.got_it) { _ -> this.dismiss() }
+                setAction(R.string.got_it) { this.dismiss() }
             }
         }
         kauSwipeOnCreate {
@@ -196,9 +188,9 @@ class CustomTabs : BaseActivity(),
         val ri = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
         val pn = ri.loadLabel(packageManager).toString()
         if (pn.contains("Android")) {
-            open.text = resources.getString(R.string.open_link) + "..."
+            open.text = resources.getString(R.string.open_link) + " " + "in" + " " + "..."
         } else {
-            open.text = resources.getString(R.string.open_link) + " " + pn
+            open.text = resources.getString(R.string.open_link) + " " + "in" + " " + pn
         }
 
         AdRemoval.init(this@CustomTabs)
@@ -222,6 +214,7 @@ class CustomTabs : BaseActivity(),
 
         with(webView.settings) {
             javaScriptEnabled = true
+            userAgentString = USER_AGENT_BASIC
             textZoom = Prefs.webTextScaling
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             javaScriptCanOpenWindowsAutomatically = true
@@ -516,7 +509,7 @@ class CustomTabs : BaseActivity(),
 
         var download: InputStream? = null
         try {
-            download = URL("http://google.com/complete/search?q=" + query + "&output=toolbar&hl=en").openStream()
+            download = URL("http://google.com/complete/search?q=$query&output=toolbar&hl=en").openStream()
             if (mFactory == null) {
                 mFactory = XmlPullParserFactory.newInstance()
                 mFactory!!.isNamespaceAware = true
@@ -609,7 +602,7 @@ class CustomTabs : BaseActivity(),
                 }
                 shouldClearOnClose = true
                 withDivider = true
-                closeListener = { _ -> searchViewCache.clear() }
+                closeListener = { searchViewCache.clear() }
                 foregroundColor = Prefs.textColor
                 backgroundColor = Prefs.bgColor.withMinAlpha(200)
                 onItemClick = { _, key, _, _ ->
@@ -744,7 +737,7 @@ class CustomTabs : BaseActivity(),
 
     private fun scrollToTop() {
         webView.flingScroll(0, 0) // stop fling
-        if (webView.scrollY > 10000)
+        if (webView.scrollY > 1000000)
             webView.scrollTo(0, 0)
         else
             smoothScrollTo(0)
@@ -790,6 +783,9 @@ class CustomTabs : BaseActivity(),
             if (type == WebView.HitTestResult.IMAGE_TYPE || type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
                 showLongPressedImageMenu(result.extra)
             }
+            if (type == WebView.HitTestResult.EDIT_TEXT_TYPE || type == WebView.HitTestResult.SRC_ANCHOR_TYPE) {
+                showLongPressedNewPageMenu(result.extra)
+            }
         }
     }
 
@@ -816,6 +812,13 @@ class CustomTabs : BaseActivity(),
                     copyToClipboard(webView.url)
                     flashSnackbar(R.string.copy_link)
                 }
+
+                R.id.ID_CONTEXT_MENU_OPEN_PAGE -> {
+                    if (URLUtil.isValidUrl(result)) {
+                        launchWebOverlayBasic(webView.url)
+                    }
+                }
+
             }
         return super.onContextItemSelected(item)
     }
@@ -872,6 +875,37 @@ class CustomTabs : BaseActivity(),
         imageMENUCopy.setOnClickListener {
             copyToClipboard(webView.url, "",  false)
             flashSnackbar(R.string.copy_link)
+            mBottomSheetDialog.dismiss()
+        }
+        mBottomSheetDialog.show()
+        mBottomSheetDialog.setOnCancelListener{
+            mBottomSheetDialog.dismiss()
+        }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showLongPressedNewPageMenu(url: String) {
+        val result = webView.hitTestResult.extra
+        val view = layoutInflater.inflate(R.layout.textview_newpagecontext_menu, null)
+        val content = view.findViewById(R.id.context_window) as RelativeLayout
+        val openNewPage = view.findViewById(R.id.ID_CONTEXT_MENU_OPEN_PAGE) as TextView
+        val openNewPageimage = view.findViewById(R.id.ID_CONTEXT_OPEN_PAGE) as ImageView
+        val mBottomSheetDialog = Dialog(this, R.style.MaterialDialogSheet)
+
+        content.setBackgroundColor(Prefs.bgColor)
+
+        openNewPage.setTextColor(Prefs.textColor.withAlpha(200).lighten())
+
+        openNewPageimage.setIcon(GoogleMaterial.Icon.gmd_open_in_new, 16, Prefs.accentColor)
+
+        mBottomSheetDialog.setContentView(view)
+        mBottomSheetDialog.window.setLayout(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        mBottomSheetDialog.window.setGravity(Gravity.BOTTOM)
+
+        openNewPage.setOnClickListener {
+            if (URLUtil.isValidUrl(result)) {
+                launchWebOverlayBasicFlash(url)
+            }
             mBottomSheetDialog.dismiss()
         }
         mBottomSheetDialog.show()

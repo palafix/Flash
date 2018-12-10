@@ -41,7 +41,7 @@ android {
         minSdkVersion kau.minSdk
         targetSdkVersion kau.targetSdk
         versionCode Integer.parseInt(project.VERSION_CODE)
-        versionName "1.2.0"
+        versionName "1.2.1"
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -57,8 +57,8 @@ android {
     }
 
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {
@@ -261,4 +261,21 @@ dependencies {
     implementation "me.leolin:ShortcutBadger:${SHORTCUTBADGER}@aar"
 
     //implementation "com.klinkerapps:sliding-activity:1.5.2"
+}
+
+def kotlinResolutions = ['kotlin-reflect',
+                         'kotlin-stdlib',
+                         'kotlin-stdlib-jdk7',
+                         'kotlin-stdlib-jdk8',
+                         'kotlin-test',
+                         'kotlin-test-junit4',
+                         'kotlin-test-junit5']
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'org.jetbrains.kotlin' && requested.name in kotlinResolutions) {
+            details.useVersion KOTLIN
+        }
+    }
 }

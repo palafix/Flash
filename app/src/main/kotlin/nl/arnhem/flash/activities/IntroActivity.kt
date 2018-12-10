@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.arnhem.flash.activities
 
 import android.animation.ValueAnimator
@@ -37,7 +39,7 @@ class IntroActivity : KauBaseActivity(), ViewPager.PageTransformer, ViewPager.On
     val ripple: RippleCanvas by bindView(R.id.intro_ripple)
     val viewpager: ViewPager by bindView(R.id.intro_viewpager)
     lateinit var adapter: IntroPageAdapter
-    val indicator: InkPageIndicator by bindView(R.id.intro_indicator)
+    private val indicator: InkPageIndicator by bindView(R.id.intro_indicator)
     val skip: Button by bindView(R.id.intro_skip)
     val next: ImageButton by bindView(R.id.intro_next)
     private var barHasNext = true

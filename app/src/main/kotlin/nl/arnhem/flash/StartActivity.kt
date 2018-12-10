@@ -1,17 +1,12 @@
 package nl.arnhem.flash
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import ca.allanwang.kau.internal.KauBaseActivity
-import ca.allanwang.kau.utils.buildIsLollipopAndUp
-import ca.allanwang.kau.utils.setIcon
-import ca.allanwang.kau.utils.startActivity
-import ca.allanwang.kau.utils.string
+import ca.allanwang.kau.utils.*
 import com.mikepenz.google_material_typeface_library.GoogleMaterial
 import nl.arnhem.flash.activities.LoginActivity
 import nl.arnhem.flash.activities.MainActivity
@@ -20,12 +15,14 @@ import nl.arnhem.flash.dbflow.loadFbCookiesAsync
 import nl.arnhem.flash.facebook.FbCookie
 import nl.arnhem.flash.utils.*
 import java.util.*
-
+import android.os.Handler
 
 /**
  * Created by Allan Wang on 2017-05-28.
  */
 class StartActivity : KauBaseActivity() {
+
+    private val TIME_OUT = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,12 +39,16 @@ class StartActivity : KauBaseActivity() {
                     L.i { "Cookies loaded at time ${System.currentTimeMillis()}" }
                     L._d { "Cookies: ${cookies.joinToString("\t")}" }
                     if (cookies.isNotEmpty()) {
-                        if (Prefs.userId != -1L)
-                            startActivity<MainActivity>(intentBuilder = {
-                                putExtras(fadeBundle())
-                                putParcelableArrayListExtra(EXTRA_COOKIES, cookies)
-                            })
-                        else
+                        if (Prefs.userId != -1L) {
+
+                            Handler().postDelayed({
+                                startActivity<MainActivity>(intentBuilder = {
+                                    putParcelableArrayListExtra(EXTRA_COOKIES, cookies)
+                                })
+
+                            }, TIME_OUT.toLong())
+
+                        } else
                             launchNewTask<SelectorActivity>(cookies)
                     } else
                         launchNewTask<LoginActivity>()

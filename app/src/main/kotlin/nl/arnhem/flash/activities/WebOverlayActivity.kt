@@ -35,6 +35,7 @@ import nl.arnhem.flash.utils.*
 import nl.arnhem.flash.views.FlashContentWeb
 import nl.arnhem.flash.views.FlashVideoViewer
 import nl.arnhem.flash.views.FlashWebView
+import nl.arnhem.flash.web.shouldUseMessageAgent
 import okhttp3.HttpUrl
 
 /**
@@ -107,7 +108,7 @@ class WebOverlayBasicFlashActivity : WebOverlayActivityBase(false, false)
 /**
  * Internal overlay for the app; this is tied with the main task and is singleTop as opposed to singleInstance
  */
-class WebOverlayActivity : WebOverlayActivityBase(false, false)
+class WebOverlayActivity : WebOverlayActivityBase(false, true)
 
 
 /**
@@ -163,19 +164,11 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean, private 
         toolbar.setTitleTextColor(Prefs.iconColor)
         toolbar.navigationIcon = GoogleMaterial.Icon.gmd_close.toDrawable(this, 16, Prefs.iconColor)
         toolbar.setNavigationOnClickListener { finishSlideOut() }
-        if (Prefs.DayNight && isNightTime(Activity())) {
-            setFlashDayNightColors {
-                toolbar(toolbar)
-                header(appBar)
-                themeWindow = false
-            }
-        } else {
             setFlashColors {
                 toolbar(toolbar)
                 header(appBar)
                 themeWindow = false
             }
-        }
         content.bind(this)
         content.titleObservable
                 .observeOn(AndroidSchedulers.mainThread())
@@ -186,6 +179,8 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean, private 
                 userAgentString = USER_AGENT_VIDEO_SETTINGS
             if (forceAgent) //todo check; the webview already adds it dynamically
                 userAgentString = USER_AGENT_BASIC
+            if (baseUrl.contains("messages"))
+                userAgentString = USER_AGENT_MESSENGER
             Prefs.prevId = Prefs.userId
             if (userId != Prefs.userId) FbCookie.switchUser(userId) { reloadBase(true) }
             else reloadBase(true)
@@ -259,7 +254,7 @@ open class WebOverlayActivityBase(private val forceBasicAgent: Boolean, private 
 
     private fun scrollToTop() {
         web.flingScroll(0, 0) // stop fling
-        if (web.scrollY > 10000)
+        if (web.scrollY > 1000000)
             web.scrollTo(0, 0)
         else
             smoothScrollTo(0)

@@ -2,7 +2,6 @@
 
 package nl.arnhem.flash.activities
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Point
 import android.os.Bundle
@@ -13,7 +12,6 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
-import android.widget.TextView
 import ca.allanwang.kau.swipe.kauSwipeOnCreate
 import ca.allanwang.kau.swipe.kauSwipeOnDestroy
 import ca.allanwang.kau.utils.*
@@ -65,18 +63,10 @@ class BookMarkActivity : AppCompatActivity(), BookmarkAdapter.OnItemClicked {
         supportActionBar?.title = string(R.string.bookmarks)
         toolbar.setTitleTextColor(Prefs.iconColor)
         coordinator.setBackgroundColor(Prefs.bgColor)
-        if (Prefs.DayNight && isNightTime(Activity())) {
-            setFlashDayNightColors {
-                toolbar(toolbar)
-                themeWindow = false
-            }
-        } else {
             setFlashColors {
                 toolbar(toolbar)
                 themeWindow = false
             }
-        }
-
         kauSwipeOnCreate {
             if (!Prefs.overlayFullScreenSwipe)
                 edgeSize = 20.dpToPx

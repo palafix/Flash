@@ -2,8 +2,6 @@
 
 package nl.arnhem.flash.iitems
 
-import android.app.Activity
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.support.v7.widget.CardView
 import android.view.View
@@ -21,7 +19,6 @@ import nl.arnhem.flash.facebook.requests.MenuItem
 import nl.arnhem.flash.glide.FlashGlide
 import nl.arnhem.flash.glide.GlideApp
 import nl.arnhem.flash.utils.Prefs
-import nl.arnhem.flash.utils.isNightTime
 
 
 /**
@@ -43,15 +40,6 @@ class MenuContentIItem(val data: MenuItem)
         private val card: CardView by bindView(R.id.badgecard)
 
         override fun bindView(item: MenuContentIItem, payloads: MutableList<Any>) {
-            if (Prefs.DayNight && isNightTime(Activity())) {
-                frame.background = createSimpleRippleDrawable(Color.WHITE, Prefs.nativeDayNightBgColor)
-                content.setTextColor(Color.WHITE)
-                badge.setTextColor(Color.WHITE)
-                val badgeColor = Color.BLUE.withAlpha(255).colorToForeground(0.2f)
-                val badgeBackground = GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(badgeColor, badgeColor))
-                badgeBackground.cornerRadius = 13.dpToPx.toFloat()
-                card.background = badgeBackground
-            } else {
                 frame.background = createSimpleRippleDrawable(Prefs.textColor, Prefs.nativeBgColor)
                 content.setTextColor(Prefs.textColor)
                 badge.setTextColor(Prefs.textColor)
@@ -59,7 +47,7 @@ class MenuContentIItem(val data: MenuItem)
                 val badgeBackground = GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(badgeColor, badgeColor))
                 badgeBackground.cornerRadius = 13.dpToPx.toFloat()
                 card.background = badgeBackground
-            }
+
             content.textSize = Prefs.webTextScaling.div(6).toFloat()
             badge.textSize = Prefs.webTextScaling.div(8).toFloat()
             val iconUrl = item.data.pic

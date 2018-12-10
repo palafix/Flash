@@ -2,9 +2,7 @@
 
 package nl.arnhem.flash.iitems
 
-import android.app.Activity
 import android.content.Context
-import android.graphics.Color
 import android.view.View
 import android.widget.TextView
 import ca.allanwang.kau.iitems.KauIItem
@@ -15,7 +13,6 @@ import com.mikepenz.fastadapter.IAdapter
 import com.mikepenz.fastadapter.IItem
 import nl.arnhem.flash.R
 import nl.arnhem.flash.utils.Prefs
-import nl.arnhem.flash.utils.isNightTime
 import nl.arnhem.flash.utils.launchWebOverlay
 
 /**
@@ -62,17 +59,10 @@ open class HeaderIItem(val text: String?,
         val text: TextView by bindView(R.id.item_header_text)
 
         override fun bindView(item: HeaderIItem, payloads: MutableList<Any>) {
-            if (Prefs.DayNight && isNightTime(Activity())) {
-                text.setTextColor(Color.BLUE)
-                text.text = item.text
-                text.setBackgroundColor(Prefs.nativeDayNightBgColor)
-            } else {
                 text.setTextColor(Prefs.accentColor)
                 text.text = item.text
                 text.setBackgroundColor(Prefs.nativeBgColor)
-
-            }
-            text.textSize = Prefs.webTextScaling.div(6).toFloat()
+                text.textSize = Prefs.webTextScaling.div(6).toFloat()
         }
 
         override fun unbindView(item: HeaderIItem) {
@@ -97,21 +87,14 @@ open class TextIItem(val text: String?,
         val text: TextView by bindView(R.id.item_text_view)
 
         override fun bindView(item: TextIItem, payloads: MutableList<Any>) {
-            if (Prefs.DayNight && isNightTime(Activity())) {
-                text.setTextColor(Color.WHITE)
-                text.text = item.text
-                text.background = createSimpleRippleDrawable(Color.DKGRAY, Prefs.nativeDayNightBgColor)
-            } else {
                 text.setTextColor(Prefs.textColor)
                 text.text = item.text
                 text.background = createSimpleRippleDrawable(Prefs.bgColor, Prefs.nativeBgColor)
-            }
-            text.textSize = Prefs.webTextScaling.div(6).toFloat()
+                text.textSize = Prefs.webTextScaling.div(6).toFloat()
         }
 
         override fun unbindView(item: TextIItem) {
             text.text = null
         }
     }
-
 }

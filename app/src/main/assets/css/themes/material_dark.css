@@ -1,4 +1,70 @@
 /*Flash for Facebook*/
+
+/* Verhalen */
+._68g3 {
+    background-color: #303030 !important;
+}
+
+._3-ca ._3-ce {
+    color: #ffffff !important;
+}
+
+._4vtp, ._4vtl {
+    color:  #ffffff !important;
+}
+
+/* Verhalen Badge */
+._46z0.rectangular {
+    color: #ffffff !important;
+}
+
+._6m44 {
+    color: #ffffff !important;
+}
+
+._6pdq {
+    background-image: url("data:image/svg+xml;charset=utf8,%3C?xml version='1.0' encoding='iso-8859-1'?%3E%3C!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' fill='#ffffff' width='12' height='12' viewBox='0 0 455 455' style='enable-background:new 0 0 455 455;' xml:space='preserve'%3E%3Cpolygon points='455,212.5 242.5,212.5 242.5,0 212.5,0 212.5,212.5 0,212.5 0,242.5 212.5,242.5 212.5,455 242.5,455 242.5,242.5 455,242.5 '/%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3C/svg%3E") !important;
+    width: 12px !important;
+    height: 12px !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+	background-size: 120% !important;
+	}
+	
+._6pdp {
+    background-color: #303030 !important;
+	color: #ffffff !important;
+}
+
+._6m3_.profilePic ._6pdp ._6m3n {
+    background-color: #303030 !important;
+	color: #ffffff !important;
+}
+
+._6m3_.fbLite ._6pdp {
+    top: 4px !important;
+    height: 24px !important;
+    right: 4px !important;
+	left: 58px !important;
+    position: absolute !important;
+    width: 24px !important;
+}
+
+._6m46 {
+    align-items: center !important;
+    background-color: #303030 !important;
+    border-radius: 40px !important;
+    display: flex !important;
+    font-size: 12px !important;
+    height: 16px !important;
+    justify-content: center !important;
+    min-width: 16px !important;
+    padding: 4px !important;
+    position: absolute !important;
+    right: 4px !important;
+    top: 4px !important;
+}
+
 /* 3 stippen */
 a.sec {
 	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' fill='#ffffff' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z' /%3E%3C/svg%3E") !important;

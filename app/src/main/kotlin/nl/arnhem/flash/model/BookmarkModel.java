@@ -1,8 +1,5 @@
 package nl.arnhem.flash.model;
 
-import android.graphics.drawable.Icon;
-import android.media.Image;
-
 import io.realm.RealmObject;
 
 /**

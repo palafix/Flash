@@ -8,7 +8,7 @@
     <answer><![CDATA[I&apos;m always opened to suggestions,
         and if a feature will enhance your experience, I&apos;d like to hear it.
         However, please consider taking a look at my
-        <a href="https://github.com/Palafix/Flash/issues">issue tracker</a> first to avoid duplicate requests.]]></answer>
+        <a href="https://github.com/palafix/Flash/issues">issue tracker</a> first to avoid duplicate requests.]]></answer>
 
     <question><![CDATA[I can&apos;t scroll horizontally in the webviews.]]></question>
     <answer><![CDATA[This is known since the viewpager takes priority for horizontal scrolling.
@@ -20,8 +20,8 @@
     This is also why I don&apos;t require the wakelock permission]]></answer>
 
     <question><![CDATA[Can I disable auto play for videos?]]></question>
-        <answer><![CDATA[Flash already has a switch. <br/> Go to drawer menu &rarr; scroll down to Facebook settings
-            &rarr; Video settings <br/> and change it from there.]]></answer>
+        <answer><![CDATA[Flash already has a switch. <br/> Go to Settings &rarr; Facebook Video &amp; Sound
+        &rarr; Video settings <br/> and change it from there.]]></answer>
 
     <question><![CDATA[The overlay is not loading!]]></question>
     <answer><![CDATA[This usually happens if you try sharing something to Facebook from your browser, which is logged into a different account.

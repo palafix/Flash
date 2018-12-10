@@ -43,13 +43,10 @@ import nl.arnhem.flash.dbflow.CookieModel
 import nl.arnhem.flash.facebook.*
 import nl.arnhem.flash.facebook.FbUrlFormatter.Companion.VIDEO_REDIRECT
 import nl.arnhem.flash.facebook.FbUrlFormatter.Companion.WWW_VIDEO_REDIRECT
-import nl.arnhem.flash.glide.FlashGlide
-import nl.arnhem.flash.glide.GlideApp
 import nl.arnhem.flash.services.NOTIF_CHANNEL_DOWNLOADS
 import nl.arnhem.flash.services.setFlashAlert
 import nl.arnhem.flash.utils.iab.IS_Flash_PRO
 import org.apache.commons.text.StringEscapeUtils
-import org.jetbrains.anko.runOnUiThread
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.io.File
@@ -113,7 +110,7 @@ fun Context.launchWebOverlayBasic(url: String) = launchWebOverlayImpl<WebOverlay
 fun Context.launchWebOverlayBasicFlash(url: String) = launchWebOverlayImpl<WebOverlayBasicFlashActivity>(url)
 
 fun Context.fadeBundle() = ActivityOptions.makeCustomAnimation(this,
-        android.R.anim.fade_in, android.R.anim.fade_out).toBundle()
+        android.R.anim.fade_in, android.R.anim.fade_out).toBundle()!!
 
 fun Context.launchImageActivity(imageUrl: String, text: String? = null, title: String? = null, cookie: String? = null) {
     startActivity<ImageActivity>(intentBuilder = {
@@ -159,7 +156,7 @@ fun Context.launchSettingsActivity() {
  * @param url Url.
  * @return Mime Type for the given url.
  */
-private val DP = 40.dpToPx
+
 fun Context.onComplete(url: String): BroadcastReceiver? {
     val onComplete: BroadcastReceiver
     onComplete = object : BroadcastReceiver() {
@@ -324,20 +321,6 @@ class ActivityThemeUtils {
             backgrounds.forEach { it.setBackgroundColor(Prefs.bgColor) }
         }
     }
-
-    fun daynighttheme(activity: Activity) {
-        with(activity) {
-            statusBarColor = Color.BLACK
-            if (Prefs.tintNavBar) navigationBarColor = Color.BLACK
-            if (themeWindow) window.setBackgroundDrawable(ColorDrawable(Color.BLACK))
-            toolbar?.setBackgroundColor(Color.BLACK)
-            toolbar?.setTitleTextColor(Color.WHITE)
-            toolbar?.overflowIcon?.setTint(Color.WHITE)
-            texts.forEach { it.setTextColor(Color.WHITE) }
-            headers.forEach { it.setBackgroundColor(Color.BLACK) }
-            backgrounds.forEach { it.setBackgroundColor(Color.BLACK) }
-        }
-    }
 }
 
 @SuppressLint("WrongConstant")
@@ -399,12 +382,6 @@ fun Throwable?.logFlashEvent(text: String) {
     val msg = if (this == null) text else "$text: $message"
     L.e { msg }
     flashEvent("Errors", "text" to text, "message" to (this?.message ?: "NA"))
-}
-
-inline fun Activity.setFlashDayNightColors(builder: ActivityThemeUtils.() -> Unit) {
-    val themer = ActivityThemeUtils()
-    themer.builder()
-    themer.daynighttheme(this)
 }
 
 fun flashAnswers(action: Answers.() -> Unit) {
@@ -589,7 +566,7 @@ fun EmailBuilder.addFlashDetails() {
 
 fun flashJsoup(url: String) = flashJsoup(FbCookie.webCookie, url)
 
-fun flashJsoup(cookie: String?, url: String) = Jsoup.connect(url).cookie(FACEBOOK_COM, cookie).userAgent(USER_AGENT_BASIC).get()!!
+fun flashJsoup(cookie: String?, url: String) = Jsoup.connect(url).cookie(FACEBOOK_COM, cookie).userAgent(USER_AGENT_BASIC_JSOUP).get()!!
 
 fun Element.first(vararg select: String): Element? {
     select.forEach {

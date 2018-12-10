@@ -2,6 +2,17 @@
 
 ## ToDo
 * File picker in external site\'s not working properly.
+* The like button is not change color when click on it.
+
+## v1.2.2
+* Added some Theme/app style.
+* Added new links to block ads
+* Clean up Night Theme and some fixes.
+
+## v1.2.1
+* Added some Theme/app style.
+* Fixed some button click.
+* Changed UserAgent.
 
 ## v1.2.0
 * Added some Theme/app style.
